@@ -105,29 +105,37 @@ export function hasExcessivePhraseRepetition(chunks: PhraseChunk[], threshold = 
   return false;
 }
 
+export const MIN_PHRASE_NOTES_FOR_DEVELOPMENT = 2;
+
+function hasPhraseDensity(chunk: PhraseChunk | undefined): chunk is PhraseChunk {
+  return chunk !== undefined && chunk.notes.length >= MIN_PHRASE_NOTES_FOR_DEVELOPMENT;
+}
+
 /**
  * Hook-oriented development score: rewards A → A' → B → A'' style arcs.
  * Future Hook Score / Singability / Drama layers can extend this module.
  */
 export function scoreMotifDevelopment(chunks: PhraseChunk[]): number {
-  const populated = chunks.filter((chunk) => chunk.notes.length > 0);
-  if (populated.length < 2) return 0;
+  const anchor = chunks[0];
+  if (!hasPhraseDensity(anchor)) return 0;
 
   let bonus = 0;
-  const anchor = populated[0];
-  const aaPrime = phraseSignatureSimilarity(populated[1], anchor);
 
-  // Cohesive hook statement with variation, not a carbon copy.
-  if (aaPrime >= 0.5 && aaPrime < 0.95) bonus += 10;
+  const aPrime = chunks[1];
+  if (hasPhraseDensity(aPrime)) {
+    const aaPrime = phraseSignatureSimilarity(aPrime, anchor);
+    // Cohesive hook statement with variation, not a carbon copy.
+    if (aaPrime >= 0.5 && aaPrime < 0.95) bonus += 10;
+  }
 
-  if (populated.length >= 3) {
-    const contrastPhrase = populated[2];
+  const contrastPhrase = chunks[2];
+  if (hasPhraseDensity(contrastPhrase)) {
     const contrast = 1 - phraseSignatureSimilarity(contrastPhrase, anchor);
     if (contrast >= 0.12) bonus += 8;
   }
 
-  if (populated.length >= 4) {
-    const hookReturn = populated[3];
+  const hookReturn = chunks[3];
+  if (hasPhraseDensity(hookReturn)) {
     const returnSimilarity = phraseSignatureSimilarity(hookReturn, anchor);
     if (returnSimilarity >= 0.45 && returnSimilarity < 0.95) bonus += 6;
   }

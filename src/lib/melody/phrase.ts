@@ -3,6 +3,7 @@ import type { SeededRandom } from '../utils/seededRandom';
 import { getScaleDegree, getScalePitches } from '../music/scales';
 import { chooseNextPitch, chooseStartingPitch, makeNote } from '../music/theory';
 import { noteToMidi } from '../music/notes';
+import { getMotifBars } from './phraseAnalysis';
 import { generateRhythmEvents } from './rhythm';
 
 export type MotifContext = {
@@ -11,7 +12,7 @@ export type MotifContext = {
 };
 
 export function createMotif(settings: MelodySettings, rng: SeededRandom): { motif: MelodyNote[]; motifBars: number; context: MotifContext } {
-  const motifBars = settings.bars >= 4 ? 2 : 1;
+  const motifBars = getMotifBars(settings.bars);
   const scalePitches = getScalePitches(settings.key, settings.scale, settings.octave, settings.range);
   const root = noteToMidi(settings.key, settings.octave);
   const targetCenter = root + Math.min(settings.range, 12) / 2;
