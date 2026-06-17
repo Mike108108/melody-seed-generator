@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { GeneratedMelody } from '../lib/types';
+import { downloadWav } from '../lib/audio/exportWav';
 import { downloadMidi, downloadProvenance } from '../lib/midi/exportMidi';
 import { playMelody, stopPlayback } from '../lib/audio/playback';
 
@@ -11,17 +12,18 @@ type MelodyTransportProps = {
 
 const DOWNLOAD_OPTIONS: { value: DownloadFormat; label: string; disabled?: boolean }[] = [
   { value: 'midi', label: 'MIDI' },
+  { value: 'wav', label: 'WAV' },
   { value: 'provenance', label: 'Provenance JSON' },
-  { value: 'wav', label: 'WAV (coming soon)', disabled: true },
   { value: 'mp3', label: 'MP3 (coming soon)', disabled: true }
 ];
 
 export function MelodyTransport({ melody }: MelodyTransportProps) {
   const [downloadFormat, setDownloadFormat] = useState<DownloadFormat>('midi');
+  const [exporting, setExporting] = useState(false);
   const disabled = melody === null;
 
-  const handleDownload = () => {
-    if (!melody) return;
+  const handleDownload = async () => {
+    if (!melody || exporting) return;
 
     if (downloadFormat === 'midi') {
       downloadMidi(melody);
@@ -30,6 +32,16 @@ export function MelodyTransport({ melody }: MelodyTransportProps) {
 
     if (downloadFormat === 'provenance') {
       downloadProvenance(melody);
+      return;
+    }
+
+    if (downloadFormat === 'wav') {
+      setExporting(true);
+      try {
+        await downloadWav(melody);
+      } finally {
+        setExporting(false);
+      }
     }
   };
 
@@ -59,10 +71,10 @@ export function MelodyTransport({ melody }: MelodyTransportProps) {
         <button
           type="button"
           className="icon-button"
-          disabled={disabled || downloadFormat === 'wav' || downloadFormat === 'mp3'}
-          onClick={handleDownload}
-          aria-label="Download melody"
-          title="Download melody"
+          disabled={disabled || exporting || downloadFormat === 'mp3'}
+          onClick={() => void handleDownload()}
+          aria-label={exporting ? 'Rendering WAV audio' : 'Download melody'}
+          title={exporting ? 'Rendering WAV audio…' : 'Download melody'}
         >
           ⬇
         </button>
@@ -84,7 +96,9 @@ export function MelodyTransport({ melody }: MelodyTransportProps) {
           </select>
         </label>
       </div>
-      <p className="hint melody-transport-hint">Preview with Tone.js, then download MIDI for local rendering.</p>
+      <p className="hint melody-transport-hint">
+        Preview with Tone.js, then download MIDI or WAV.
+      </p>
     </div>
   );
 }
