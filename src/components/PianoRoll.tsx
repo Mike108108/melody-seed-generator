@@ -1,10 +1,17 @@
 import type { GeneratedMelody } from '../lib/types';
+import { MelodyTransport } from './MelodyTransport';
 
 export function PianoRoll({ melody }: { melody: GeneratedMelody | null }) {
   if (!melody || melody.notes.length === 0) {
     return (
-      <section className="panel piano-panel">
-        <p className="eyebrow">Piano roll</p>
+      <section className="panel piano-panel melody-panel">
+        <div className="panel-header slim">
+          <div>
+            <p className="eyebrow">Melody</p>
+            <h2>Piano roll</h2>
+          </div>
+        </div>
+        <MelodyTransport melody={melody} />
         <div className="empty-state">Generate a melody to see the piano roll.</div>
       </section>
     );
@@ -17,13 +24,15 @@ export function PianoRoll({ melody }: { melody: GeneratedMelody | null }) {
   const beatLines = Array.from({ length: totalBeats + 1 }, (_, index) => index);
 
   return (
-    <section className="panel piano-panel">
+    <section className="panel piano-panel melody-panel">
       <div className="panel-header slim">
         <div>
-          <p className="eyebrow">Piano roll</p>
+          <p className="eyebrow">Melody</p>
           <h2>{melody.settings.bars} bars / monophonic lead</h2>
         </div>
       </div>
+
+      <MelodyTransport melody={melody} />
 
       <div className="piano-roll" style={{ height: Math.max(220, pitchSpan * 22) }}>
         {beatLines.map((beat) => (

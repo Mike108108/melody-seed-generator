@@ -4,7 +4,6 @@ import { IntentControls } from './components/IntentControls';
 import { MelodyStats } from './components/MelodyStats';
 import { PianoRoll } from './components/PianoRoll';
 import { SeedBox } from './components/SeedBox';
-import { Transport } from './components/Transport';
 import { DEFAULT_SETTINGS, generateMelody } from './lib/melody/generateMelody';
 import {
   DEFAULT_INTENT,
@@ -54,15 +53,13 @@ export default function App() {
   };
 
   const handleGenerateNew = () => {
-    const nextSettings = applyIntentToSettings({ ...settings, seed: makeRandomSeed('suno-idea') }, intent);
+    const nextSettings = { ...settings, seed: makeRandomSeed('suno-idea') };
     setSettings(nextSettings);
     generateFromSettings(nextSettings, intent);
   };
 
   const handleRegenerateCurrent = () => {
-    const nextSettings = applyIntentToSettings(settings, intent);
-    setSettings(nextSettings);
-    generateFromSettings(nextSettings, intent);
+    generateFromSettings(settings, intent);
   };
 
   return (
@@ -88,7 +85,6 @@ export default function App() {
           <SeedBox settings={settings} onChange={setSettings} onRegenerate={handleRegenerateCurrent} />
           <IntentControls intent={intent} onChange={handleIntentChange} onGenerate={handleGenerateNew} />
           <Controls settings={settings} onChange={setSettings} />
-          <Transport melody={melody} />
         </div>
 
         <div className="right-column">

@@ -202,8 +202,8 @@ export function applyIntentToSettings(settings: MelodySettings, intent: MelodyIn
     density: profile.density,
     restChance: profile.restChance,
     variation: profile.variation,
-    randomness: profile.randomness,
-    commercialSaferMode: profile.commercialSaferMode
+    randomness: profile.randomness
+    // commercialSaferMode: preserved from settings — user toggles in Advanced Controls only
   };
 }
 
@@ -296,7 +296,7 @@ function applyHookiness(profile: ProfileDraft, hookiness: MelodyHookiness): void
       profile.commercialSaferMode = true;
       break;
     case 'bold':
-      profile.commercialSaferMode = false;
+      profile.commercialSaferMode = true;
       profile.randomness += 0.15;
       profile.variation += 0.1;
       profile.density += 0.04;
