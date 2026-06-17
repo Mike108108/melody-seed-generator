@@ -58,7 +58,7 @@ export async function renderMelodyToAudioBuffer(melody: GeneratedMelody): Promis
   return audioBuffer;
 }
 
-export function audioBufferToWavBytes(buffer: AudioBuffer): Uint8Array {
+export function audioBufferToWavBytes(buffer: AudioBuffer): ArrayBuffer {
   const numChannels = buffer.numberOfChannels;
   const sampleRate = buffer.sampleRate;
   const bitDepth = 16;
@@ -102,7 +102,7 @@ export function audioBufferToWavBytes(buffer: AudioBuffer): Uint8Array {
     }
   }
 
-  return new Uint8Array(arrayBuffer);
+  return arrayBuffer;
 }
 
 function baseFileName(melody: GeneratedMelody): string {
@@ -121,7 +121,7 @@ function downloadBlob(blob: Blob, filename: string): void {
 
 export async function downloadWav(melody: GeneratedMelody): Promise<void> {
   const audioBuffer = await renderMelodyToAudioBuffer(melody);
-  const wavBytes = audioBufferToWavBytes(audioBuffer);
-  const blob = new Blob([wavBytes], { type: 'audio/wav' });
+  const wavArrayBuffer = audioBufferToWavBytes(audioBuffer);
+  const blob = new Blob([wavArrayBuffer], { type: 'audio/wav' });
   downloadBlob(blob, `${baseFileName(melody)}.wav`);
 }
