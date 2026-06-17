@@ -181,6 +181,17 @@ input[type='range'] {
   margin-bottom: 0.7rem;
 }
 
+.intent-copy {
+  margin: -0.35rem 0 1rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.intent-summary {
+  margin: 0.85rem 0 0;
+}
+
 .control-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

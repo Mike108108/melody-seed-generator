@@ -26,7 +26,7 @@ export function exportMelodyToMidiBytes(melody: GeneratedMelody): Uint8Array {
 export function createProvenanceJson(melody: GeneratedMelody): ProvenanceJson {
   return {
     createdBy: 'Melody Seed Generator',
-    generatorVersion: '0.1.0',
+    generatorVersion: '0.2.0',
     createdAt: new Date().toISOString(),
     seed: melody.settings.seed,
     key: melody.settings.key,
@@ -34,6 +34,8 @@ export function createProvenanceJson(melody: GeneratedMelody): ProvenanceJson {
     bpm: melody.settings.bpm,
     bars: melody.settings.bars,
     mode: melody.settings.commercialSaferMode ? 'commercial-safer' : 'standard',
+    intent: melody.intent,
+    generationProfile: melody.generationProfile,
     usesSamples: false,
     usesAudioLoops: false,
     usesTrainingData: false,

@@ -5,24 +5,20 @@ import { SCALE_OPTIONS } from '../lib/music/scales';
 type ControlsProps = {
   settings: MelodySettings;
   onChange: (nextSettings: MelodySettings) => void;
-  onGenerate: () => void;
 };
 
-export function Controls({ settings, onChange, onGenerate }: ControlsProps) {
+export function Controls({ settings, onChange }: ControlsProps) {
   const patch = <K extends keyof MelodySettings>(key: K, value: MelodySettings[K]) => {
     onChange({ ...settings, [key]: value });
   };
 
   return (
-    <section className="panel controls-panel" aria-label="Melody controls">
+    <section className="panel controls-panel" aria-label="Advanced melody controls">
       <div className="panel-header">
         <div>
-          <p className="eyebrow">MVP v0.1</p>
-          <h2>Generate Melody</h2>
+          <p className="eyebrow">Advanced controls</p>
+          <h2>Technical Settings</h2>
         </div>
-        <button className="primary" onClick={onGenerate} type="button">
-          Generate Melody
-        </button>
       </div>
 
       <div className="control-grid">

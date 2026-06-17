@@ -56,6 +56,8 @@ export type GeneratedMelody = {
   qualityScore: number;
   similarityRiskScore: number;
   warnings: string[];
+  intent?: import('./melody/intent').MelodyIntent;
+  generationProfile?: import('./melody/intent').GenerationProfile;
 };
 
 export type ProvenanceJson = {
@@ -68,6 +70,8 @@ export type ProvenanceJson = {
   bpm: number;
   bars: number;
   mode: 'commercial-safer' | 'standard';
+  intent?: import('./melody/intent').MelodyIntent;
+  generationProfile?: import('./melody/intent').GenerationProfile;
   usesSamples: false;
   usesAudioLoops: false;
   usesTrainingData: false;
