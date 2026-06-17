@@ -1,11 +1,19 @@
-import type { MelodyFingerprint } from '../types';
+import type { MelodyFingerprint, MelodyNote } from '../types';
+import { phraseAwareSelfSimilarityRisk, splitIntoPhraseChunks } from './phraseAnalysis';
 
-export function estimateSimilarityRisk(fingerprint: MelodyFingerprint, previousFingerprints: MelodyFingerprint[] = []): number {
+export function estimateSimilarityRisk(
+  fingerprint: MelodyFingerprint,
+  previousFingerprints: MelodyFingerprint[] = [],
+  notes: MelodyNote[] = [],
+  bars = 8
+): number {
   const internalRisk = previousFingerprints.reduce((maxRisk, previous) => {
     return Math.max(maxRisk, fingerprintSimilarity(fingerprint, previous));
   }, 0);
 
-  const selfRisk = repetitiveSelfSimilarity(fingerprint);
+  const phraseChunks = notes.length > 0 ? splitIntoPhraseChunks(notes, bars) : [];
+  const selfRisk = phraseChunks.length > 0 ? phraseAwareSelfSimilarityRisk(phraseChunks) : legacyGlobalSelfSimilarity(fingerprint);
+
   return Math.round(Math.max(internalRisk, selfRisk) * 100);
 }
 
@@ -18,12 +26,16 @@ export function fingerprintSimilarity(a: MelodyFingerprint, b: MelodyFingerprint
   return clamp01(intervalScore * 0.38 + pitchScore * 0.22 + contourScore * 0.2 + rhythmScore * 0.2);
 }
 
-function repetitiveSelfSimilarity(fingerprint: MelodyFingerprint): number {
+/** Fallback when phrase metadata is unavailable. Kept conservative for hook-friendly repetition. */
+function legacyGlobalSelfSimilarity(fingerprint: MelodyFingerprint): number {
   const uniqueIntervals = new Set(fingerprint.intervals).size;
   const uniqueRhythms = new Set(fingerprint.rhythm.map(durationOnly)).size;
-  const intervalPenalty = fingerprint.intervals.length > 0 ? 1 - uniqueIntervals / Math.max(1, fingerprint.intervals.length) : 0;
-  const rhythmPenalty = fingerprint.rhythm.length > 0 ? 1 - uniqueRhythms / Math.max(1, fingerprint.rhythm.length) : 0;
-  return clamp01(intervalPenalty * 0.5 + rhythmPenalty * 0.3);
+  const intervalPenalty =
+    fingerprint.intervals.length > 0 ? 1 - uniqueIntervals / Math.max(1, fingerprint.intervals.length) : 0;
+  const rhythmPenalty =
+    fingerprint.rhythm.length > 0 ? 1 - uniqueRhythms / Math.max(1, fingerprint.rhythm.length) : 0;
+
+  return clamp01(Math.max(0, intervalPenalty - 0.25) * 0.35 + Math.max(0, rhythmPenalty - 0.35) * 0.25);
 }
 
 function jaccard<T>(a: Set<T>, b: Set<T>): number {

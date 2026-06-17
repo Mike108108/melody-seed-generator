@@ -2,6 +2,7 @@ import type { MelodyFingerprint, MelodyNote, MelodyScore, MelodySettings } from 
 import { averageAbsoluteInterval, melodicRange } from '../music/intervals';
 import { isStableDegree } from '../music/scales';
 import { detectCliches } from './blacklist';
+import { scoreMotifDevelopment, splitIntoPhraseChunks } from './phraseAnalysis';
 import { estimateSimilarityRisk } from './similarity';
 
 export function scoreMelody(params: {
@@ -11,7 +12,8 @@ export function scoreMelody(params: {
   previousFingerprints?: MelodyFingerprint[];
 }): MelodyScore {
   const { notes, settings, fingerprint, previousFingerprints = [] } = params;
-  const warnings = detectCliches(notes, fingerprint);
+  const warnings = detectCliches(notes, fingerprint, settings.bars);
+  const phraseChunks = splitIntoPhraseChunks(notes, settings.bars);
   const pitches = notes.map((note) => note.midi);
   const range = melodicRange(pitches);
   const avgInterval = averageAbsoluteInterval(pitches);
@@ -28,12 +30,18 @@ export function scoreMelody(params: {
   quality += notes.length >= settings.bars * 2 ? 10 : -10;
   quality -= warnings.length * 12;
 
+  // Hook-first foundation: reward coherent A → A' → B → A'' development.
+  // Future: Hook Score, Singability, Drama intent layers can plug in here.
+  quality += scoreMotifDevelopment(phraseChunks);
+
   if (settings.commercialSaferMode) {
     quality += notes.length >= 10 ? 6 : -12;
     quality += uniquePitches >= 5 ? 7 : -10;
   }
 
-  const similarityRiskScore = estimateSimilarityRisk(fingerprint, previousFingerprints) + warnings.length * 8;
+  const baseSimilarityRisk = estimateSimilarityRisk(fingerprint, previousFingerprints, notes, settings.bars);
+  // Only escalate similarity risk when warnings indicate excessive copy-paste, not normal hook repetition.
+  const similarityRiskScore = baseSimilarityRisk + warnings.length * 8;
 
   return {
     qualityScore: Math.round(clamp(quality, 0, 100)),

@@ -1,4 +1,5 @@
 import type { MelodyFingerprint, MelodyNote } from '../types';
+import { hasExcessivePhraseRepetition, splitIntoPhraseChunks } from './phraseAnalysis';
 
 const CLICHE_PITCH_CLASS_PATTERNS = [
   '0,0,7,7,9,9,7',
@@ -9,27 +10,32 @@ const CLICHE_PITCH_CLASS_PATTERNS = [
   '0,3,5,7,10,7,5,3'
 ];
 
-export function detectCliches(notes: MelodyNote[], fingerprint: MelodyFingerprint): string[] {
+export function detectCliches(notes: MelodyNote[], fingerprint: MelodyFingerprint, bars: number): string[] {
   const warnings: string[] = [];
   const normalized = normalizePitchClasses(fingerprint.pitchClasses).join(',');
+  const phraseChunks = splitIntoPhraseChunks(notes, bars);
 
   if (fingerprint.intervals.length >= 5 && fingerprint.intervals.every((interval) => interval === 0)) {
     warnings.push('Too many repeated identical pitches.');
+  }
+
+  if (notes.length > 0 && new Set(fingerprint.pitchClasses).size < 3) {
+    warnings.push('Melody uses too few distinct pitch classes.');
   }
 
   if (isMostlyStepwiseScaleRun(fingerprint.intervals)) {
     warnings.push('Looks like a plain scale run.');
   }
 
-  if (hasLongRepeatedRhythm(notes)) {
-    warnings.push('Rhythm is overly repetitive.');
+  if (hasExcessivePhraseRhythmRepetition(phraseChunks)) {
+    warnings.push('Rhythm is overly repetitive across phrases.');
   }
 
   if (CLICHE_PITCH_CLASS_PATTERNS.some((pattern) => normalized.includes(pattern))) {
     warnings.push('Contains a known cliche-like pitch-class pattern.');
   }
 
-  if (fingerprint.contour.length >= 6 && new Set(fingerprint.contour.slice(0, 6)).size === 1) {
+  if (hasOneDirectionalOpeningContour(phraseChunks)) {
     warnings.push('Contour is too one-directional.');
   }
 
@@ -49,11 +55,49 @@ function isMostlyStepwiseScaleRun(intervals: number[]): boolean {
   return sameDirection && smallSteps / intervals.length > 0.8;
 }
 
-function hasLongRepeatedRhythm(notes: MelodyNote[]): boolean {
-  if (notes.length < 8) return false;
-  const durations = notes.map((note) => note.durationBeats.toFixed(2));
-  const firstFour = durations.slice(0, 4).join(',');
-  const secondFour = durations.slice(4, 8).join(',');
-  const thirdFour = durations.slice(8, 12).join(',');
-  return firstFour === secondFour && (thirdFour.length === 0 || firstFour === thirdFour);
+/** Allows A / A' motif repetition; warns only when 3+ phrase chunks are nearly identical. */
+function hasExcessivePhraseRhythmRepetition(chunks: ReturnType<typeof splitIntoPhraseChunks>): boolean {
+  if (chunks.length < 3) return false;
+
+  const rhythmChunks = chunks.map((chunk) => ({
+    ...chunk,
+    signature: chunk.durations.join(',')
+  }));
+
+  const populated = rhythmChunks.filter((chunk) => chunk.notes.length > 0);
+  if (populated.length < 3) return false;
+
+  let matchAnchor = 1;
+  for (let i = 1; i < populated.length; i += 1) {
+    if (populated[i].signature === populated[0].signature) {
+      matchAnchor += 1;
+    }
+  }
+  if (matchAnchor >= 3) return true;
+
+  for (let i = 0; i < populated.length - 2; i += 1) {
+    const a = populated[i].signature;
+    const b = populated[i + 1].signature;
+    const c = populated[i + 2].signature;
+    if (a === b && b === c) return true;
+  }
+
+  return hasExcessivePhraseRepetition(
+    populated.map(({ phraseIndex, notes, durations, pitchClasses, intervals, contour }) => ({
+      phraseIndex,
+      notes,
+      durations,
+      pitchClasses,
+      intervals,
+      contour
+    })),
+    0.92
+  );
+}
+
+/** Check contour monotony per phrase opening, not across intentional hook returns. */
+function hasOneDirectionalOpeningContour(chunks: ReturnType<typeof splitIntoPhraseChunks>): boolean {
+  const firstPhrase = chunks[0];
+  if (!firstPhrase || firstPhrase.contour.length < 6) return false;
+  return new Set(firstPhrase.contour.slice(0, 6)).size === 1;
 }
