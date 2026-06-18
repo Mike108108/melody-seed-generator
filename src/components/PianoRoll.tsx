@@ -3,6 +3,7 @@ import type { GeneratedMelody } from '../lib/types';
 import { DRAMA_OPTIONS, GENRE_OPTIONS, ROLE_OPTIONS } from '../lib/melody/intent';
 import { MelodyStatsCompact } from './MelodyStats';
 import { MelodyTransport } from './MelodyTransport';
+import { SeedIdChip } from './SeedIdChip';
 
 const PIANO_ROLL_HEIGHT = 280;
 const FIXED_PITCH_SPAN = 24;
@@ -73,7 +74,10 @@ export function PianoRoll({ melody }: PianoRollProps) {
 
       {melody ? (
         <footer className="melody-meta-row">
-          <span>Type: Monophonic Lead</span>
+          <div className="melody-meta-primary">
+            <span>Type: Monophonic Lead</span>
+            <SeedIdChip seed={melody.settings.seed} />
+          </div>
           {melody.warnings.length > 0 ? (
             <span className="melody-meta-warning" title={melody.warnings.join(' · ')}>
               {melody.warnings.length} warning{melody.warnings.length === 1 ? '' : 's'}

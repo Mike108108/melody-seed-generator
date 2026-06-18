@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Controls } from './components/Controls';
 import { IntentControls } from './components/IntentControls';
 import { PianoRoll } from './components/PianoRoll';
-import { SeedBox } from './components/SeedBox';
 import { DEFAULT_SETTINGS, generateMelody } from './lib/melody/generateMelody';
 import {
   DEFAULT_INTENT,
@@ -44,8 +43,10 @@ export default function App() {
     setSettings((current) => applyIntentToSettings(current, nextIntent));
   };
 
-  const handleRegenerateCurrent = () => {
-    generateFromSettings(settings, intent);
+  const handleGenerateMelody = () => {
+    const nextSettings = { ...settings, seed: makeRandomSeed('suno-idea') };
+    setSettings(nextSettings);
+    generateFromSettings(nextSettings, intent);
   };
 
   return (
@@ -61,9 +62,8 @@ export default function App() {
 
       <div className="layout-grid">
         <div className="left-column">
-          <SeedBox settings={settings} onChange={setSettings} onRegenerate={handleRegenerateCurrent} />
           <IntentControls intent={intent} onChange={handleIntentChange} />
-          <Controls settings={settings} onChange={setSettings} onGenerate={handleRegenerateCurrent} />
+          <Controls settings={settings} onChange={setSettings} onGenerate={handleGenerateMelody} />
         </div>
 
         <div className="right-column">
