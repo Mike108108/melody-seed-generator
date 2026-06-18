@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Controls } from './components/Controls';
-import { IntentControls } from './components/IntentControls';
+import { CreateMelody } from './components/CreateMelody';
 import { PianoRoll } from './components/PianoRoll';
 import { DEFAULT_SETTINGS, generateMelody } from './lib/melody/generateMelody';
 import {
@@ -62,8 +61,13 @@ export default function App() {
 
       <div className="layout-grid">
         <div className="left-column">
-          <IntentControls intent={intent} onChange={handleIntentChange} />
-          <Controls settings={settings} onChange={setSettings} onGenerate={handleGenerateMelody} />
+          <CreateMelody
+            intent={intent}
+            settings={settings}
+            onIntentChange={handleIntentChange}
+            onSettingsChange={setSettings}
+            onGenerate={handleGenerateMelody}
+          />
         </div>
 
         <div className="right-column">

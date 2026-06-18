@@ -16,7 +16,7 @@ export function PianoRoll({ melody }: PianoRollProps) {
   const displayRange = useMemo(() => getDisplayRange(melody), [melody]);
   const totalBeats = melody ? melody.settings.bars * 4 : 32;
   const beatLines = Array.from({ length: totalBeats + 1 }, (_, index) => index);
-  const statusTags = melody ? buildStatusTags(melody) : null;
+  const statusTags = buildStatusTags(melody);
 
   return (
     <section className="panel current-melody-panel melody-panel">
@@ -24,17 +24,22 @@ export function PianoRoll({ melody }: PianoRollProps) {
         <div className="current-melody-title">
           <p className="eyebrow">Output</p>
           <h2>Current Melody</h2>
-          {statusTags ? (
+          {statusTags.length > 0 ? (
             <div className="status-tags" aria-label="Melody status">
               {statusTags.map((tag) => (
-                <span key={tag} className="status-tag">
+                <span
+                  key={tag}
+                  className="status-tag"
+                  title={tag === 'Similarity Guard: On' ? 'Designed to reduce similarity risk, not to guarantee legal clearance.' : undefined}
+                >
                   {tag}
                 </span>
               ))}
             </div>
-          ) : (
+          ) : null}
+          {!melody ? (
             <p className="hint current-melody-empty">Generate a melody to preview playback and export.</p>
-          )}
+          ) : null}
         </div>
         <MelodyStatsCompact melody={melody} />
       </div>
@@ -101,9 +106,17 @@ function getDisplayRange(melody: GeneratedMelody | null) {
   return { minMidi, maxMidi: minMidi + FIXED_PITCH_SPAN - 1, span: FIXED_PITCH_SPAN };
 }
 
-function buildStatusTags(melody: GeneratedMelody): string[] {
+function buildStatusTags(melody: GeneratedMelody | null): string[] {
+  const saferMode = melody?.settings.commercialSaferMode ?? true;
+  const tags: string[] = saferMode ? ['Similarity Guard: On'] : [];
+
+  if (!melody) {
+    return tags;
+  }
+
   const intent = melody.intent;
-  const tags = [
+  return [
+    ...tags,
     labelFor(GENRE_OPTIONS, intent?.genre),
     labelFor(ROLE_OPTIONS, intent?.role),
     labelFor(DRAMA_OPTIONS, intent?.drama),
@@ -112,8 +125,6 @@ function buildStatusTags(melody: GeneratedMelody): string[] {
     `${melody.settings.bars} bars`,
     'Active'
   ].filter(Boolean) as string[];
-
-  return tags;
 }
 
 function labelFor<T extends string>(

@@ -19,7 +19,7 @@ Positioning:
 - Seed-based reproducible generation
 - BPM, key, scale/mode, bars, octave, range, density, rest chance, variation, randomness
 - Simple piano roll visualization
-- Commercial Safer Mode toggle
+- Commercial Safer Mode (enabled by default)
 - Quality score and simplified similarity-risk score
 - Download provenance JSON
 
@@ -68,11 +68,11 @@ Push to GitHub, import the repo in Netlify, and use the default Vite build setti
 ```txt
 src/
   components/
-    Controls.tsx
-    Transport.tsx
+    CreateMelody.tsx
+    MelodyTransport.tsx
     PianoRoll.tsx
     MelodyStats.tsx
-    SeedBox.tsx
+    SeedIdChip.tsx
 
   lib/
     melody/

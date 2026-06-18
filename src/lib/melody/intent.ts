@@ -203,7 +203,7 @@ export function applyIntentToSettings(settings: MelodySettings, intent: MelodyIn
     restChance: profile.restChance,
     variation: profile.variation,
     randomness: profile.randomness
-    // commercialSaferMode: preserved from settings — user toggles in Advanced Controls only
+    // commercialSaferMode: preserved from settings — always enabled by default
   };
 }
 

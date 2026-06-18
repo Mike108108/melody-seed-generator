@@ -241,9 +241,74 @@ input[type='range'] {
   font-size: 0.82rem;
 }
 
+.create-melody-panel {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.create-melody-section {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.create-melody-section + .create-melody-section {
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.section-title {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(244, 240, 255, 0.72);
+  letter-spacing: 0.01em;
+}
+
+.control-grid.compact {
+  gap: 0.5rem;
+}
+
+.control-grid.compact label {
+  gap: 0.28rem;
+  font-size: 0.8rem;
+}
+
+.advanced-tuning {
+  margin-top: 0.1rem;
+}
+
+.advanced-tuning-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-control);
+  padding: 0.48rem 0.62rem;
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(244, 240, 255, 0.68);
+  font-size: 0.78rem;
+  font-weight: 550;
+}
+
+.advanced-tuning-toggle:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(244, 240, 255, 0.88);
+}
+
+.advanced-tuning-caret {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.advanced-tuning-body {
+  margin-top: 0.45rem;
+}
+
 .generate-button {
   width: 100%;
-  margin-top: 0.72rem;
+  margin-top: 0.35rem;
   padding: 0.72rem 1rem;
   border-radius: 999px;
   font-weight: 650;
