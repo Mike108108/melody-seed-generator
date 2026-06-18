@@ -5,36 +5,26 @@ import { SCALE_OPTIONS } from '../lib/music/scales';
 type ControlsProps = {
   settings: MelodySettings;
   onChange: (nextSettings: MelodySettings) => void;
+  onGenerate: () => void;
 };
 
-export function Controls({ settings, onChange }: ControlsProps) {
+export function Controls({ settings, onChange, onGenerate }: ControlsProps) {
   const patch = <K extends keyof MelodySettings>(key: K, value: MelodySettings[K]) => {
     onChange({ ...settings, [key]: value });
   };
 
   return (
-    <section className="panel controls-panel" aria-label="Advanced melody controls">
-      <div className="panel-header">
+    <section className="panel controls-panel" aria-label="Melody settings">
+      <div className="panel-header slim">
         <div>
-          <p className="eyebrow">Advanced controls</p>
-          <h2>Technical Settings</h2>
+          <p className="eyebrow">Settings</p>
+          <h2>Melody Settings</h2>
         </div>
       </div>
 
       <div className="control-grid">
         <label>
-          BPM
-          <input
-            type="number"
-            min={60}
-            max={190}
-            value={settings.bpm}
-            onChange={(event) => patch('bpm', Number(event.target.value))}
-          />
-        </label>
-
-        <label>
-          Key
+          Key / Tonic
           <select value={settings.key} onChange={(event) => patch('key', event.target.value)}>
             {KEYS.map((key) => (
               <option key={key} value={key}>
@@ -45,7 +35,7 @@ export function Controls({ settings, onChange }: ControlsProps) {
         </label>
 
         <label>
-          Scale / Mode
+          Scale Mode
           <select value={settings.scale} onChange={(event) => patch('scale', event.target.value as ScaleName)}>
             {SCALE_OPTIONS.map((scale) => (
               <option key={scale} value={scale}>
@@ -68,6 +58,17 @@ export function Controls({ settings, onChange }: ControlsProps) {
         </label>
 
         <label>
+          Tempo
+          <input
+            type="number"
+            min={60}
+            max={190}
+            value={settings.bpm}
+            onChange={(event) => patch('bpm', Number(event.target.value))}
+          />
+        </label>
+
+        <label>
           Octave
           <input
             type="number"
@@ -80,7 +81,7 @@ export function Controls({ settings, onChange }: ControlsProps) {
         </label>
 
         <label>
-          Range, semitones
+          Octave Range
           <input
             type="number"
             min={7}
@@ -91,26 +92,10 @@ export function Controls({ settings, onChange }: ControlsProps) {
           />
         </label>
 
-        <Slider
-          label="Note density"
-          value={settings.density}
-          onChange={(value) => patch('density', value)}
-        />
-        <Slider
-          label="Rest chance"
-          value={settings.restChance}
-          onChange={(value) => patch('restChance', value)}
-        />
-        <Slider
-          label="Variation amount"
-          value={settings.variation}
-          onChange={(value) => patch('variation', value)}
-        />
-        <Slider
-          label="Randomness"
-          value={settings.randomness}
-          onChange={(value) => patch('randomness', value)}
-        />
+        <Slider label="Note density" value={settings.density} onChange={(value) => patch('density', value)} />
+        <Slider label="Rest chance" value={settings.restChance} onChange={(value) => patch('restChance', value)} />
+        <Slider label="Variation amount" value={settings.variation} onChange={(value) => patch('variation', value)} />
+        <Slider label="Randomness" value={settings.randomness} onChange={(value) => patch('randomness', value)} />
       </div>
 
       <label className="toggle-row">
@@ -124,6 +109,10 @@ export function Controls({ settings, onChange }: ControlsProps) {
           <small>Stricter motif length, cliche checks, local similarity scoring, provenance metadata.</small>
         </span>
       </label>
+
+      <button className="primary generate-button" onClick={onGenerate} type="button">
+        Generate Melody
+      </button>
     </section>
   );
 }

@@ -4,39 +4,27 @@ import {
   DRAMA_OPTIONS,
   GENRE_OPTIONS,
   HOOKINESS_OPTIONS,
-  ROLE_OPTIONS,
-  createGenerationProfile
+  ROLE_OPTIONS
 } from '../lib/melody/intent';
 
 type IntentControlsProps = {
   intent: MelodyIntent;
   onChange: (nextIntent: MelodyIntent) => void;
-  onGenerate: () => void;
 };
 
-export function IntentControls({ intent, onChange, onGenerate }: IntentControlsProps) {
-  const profile = createGenerationProfile(intent);
-
+export function IntentControls({ intent, onChange }: IntentControlsProps) {
   const patch = <K extends keyof MelodyIntent>(key: K, value: MelodyIntent[K]) => {
     onChange({ ...intent, [key]: value });
   };
 
   return (
     <section className="panel intent-panel" aria-label="Hook intent controls">
-      <div className="panel-header">
+      <div className="panel-header slim">
         <div>
-          <p className="eyebrow">v0.2 Hook Intent</p>
-          <h2>Musical Intent</h2>
+          <p className="eyebrow">Intent</p>
+          <h2>Hook Intent</h2>
         </div>
-        <button className="primary" onClick={onGenerate} type="button">
-          Generate Melody
-        </button>
       </div>
-
-      <p className="intent-copy">
-        Hook-oriented, hit-informed controls for catchy structured melody seeds. Designed to reduce similarity risk, not
-        to guarantee legal clearance.
-      </p>
 
       <div className="control-grid">
         <label>
@@ -86,7 +74,7 @@ export function IntentControls({ intent, onChange, onGenerate }: IntentControlsP
           </select>
         </label>
 
-        <label>
+        <label className="control-grid-span">
           Hookiness
           <select
             value={intent.hookiness}
@@ -100,10 +88,6 @@ export function IntentControls({ intent, onChange, onGenerate }: IntentControlsP
           </select>
         </label>
       </div>
-
-      <p className="hint intent-summary">
-        Resolved profile: {profile.summary} · {profile.bpm} BPM · {profile.scale} · {profile.bars} bars
-      </p>
     </section>
   );
 }

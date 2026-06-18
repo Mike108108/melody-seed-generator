@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { GeneratedMelody } from '../lib/types';
 import { downloadWav } from '../lib/audio/exportWav';
 import { downloadMidi, downloadProvenance } from '../lib/midi/exportMidi';
@@ -13,14 +13,42 @@ type MelodyTransportProps = {
 const DOWNLOAD_OPTIONS: { value: DownloadFormat; label: string; disabled?: boolean }[] = [
   { value: 'midi', label: 'MIDI' },
   { value: 'wav', label: 'WAV' },
-  { value: 'provenance', label: 'Provenance JSON' },
-  { value: 'mp3', label: 'MP3 (coming soon)', disabled: true }
+  { value: 'provenance', label: 'JSON' },
+  { value: 'mp3', label: 'MP3', disabled: true }
 ];
 
 export function MelodyTransport({ melody }: MelodyTransportProps) {
   const [downloadFormat, setDownloadFormat] = useState<DownloadFormat>('midi');
   const [exporting, setExporting] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const disabled = melody === null;
+
+  useEffect(() => {
+    setIsPlaying(false);
+  }, [melody]);
+
+  useEffect(() => {
+    return () => {
+      stopPlayback();
+    };
+  }, []);
+
+  const selectedOption = DOWNLOAD_OPTIONS.find((option) => option.value === downloadFormat) ?? DOWNLOAD_OPTIONS[0];
+
+  const handlePlay = async () => {
+    if (!melody) return;
+    setIsPlaying(true);
+    try {
+      await playMelody(melody);
+    } finally {
+      setIsPlaying(false);
+    }
+  };
+
+  const handleStop = () => {
+    stopPlayback();
+    setIsPlaying(false);
+  };
 
   const handleDownload = async () => {
     if (!melody || exporting) return;
@@ -48,57 +76,64 @@ export function MelodyTransport({ melody }: MelodyTransportProps) {
   return (
     <div className="melody-transport" aria-label="Melody playback and export">
       <div className="melody-transport-controls">
-        <button
-          type="button"
-          className="icon-button"
-          disabled={disabled}
-          onClick={() => melody && void playMelody(melody)}
-          aria-label="Play melody"
-          title="Play melody"
-        >
-          ▶
-        </button>
-        <button
-          type="button"
-          className="icon-button"
-          disabled={disabled}
-          onClick={stopPlayback}
-          aria-label="Stop playback"
-          title="Stop playback"
-        >
-          ■
-        </button>
-        <button
-          type="button"
-          className="icon-button"
-          disabled={disabled || exporting || downloadFormat === 'mp3'}
-          onClick={() => void handleDownload()}
-          aria-label={exporting ? 'Rendering WAV audio' : 'Download melody'}
-          title={exporting ? 'Rendering WAV audio…' : 'Download melody'}
-        >
-          ⬇
-        </button>
-        <label className="download-format-label">
-          <span className="sr-only">Download format</span>
-          <select
-            className="download-format-select"
-            value={downloadFormat}
+        <div className="segmented-control playback-control" role="group" aria-label="Playback">
+          <button
+            type="button"
+            className={isPlaying ? '' : 'is-active'}
             disabled={disabled}
-            onChange={(event) => setDownloadFormat(event.target.value as DownloadFormat)}
-            aria-label="Download format"
-            title="Download format"
+            onClick={() => void handlePlay()}
+            aria-label="Play melody"
+            title="Play melody"
           >
-            {DOWNLOAD_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value} disabled={option.disabled}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
+            ▶ Play
+          </button>
+          <button
+            type="button"
+            className={isPlaying ? 'is-active' : ''}
+            disabled={disabled}
+            onClick={handleStop}
+            aria-label="Stop playback"
+            title="Stop playback"
+          >
+            ■ Stop
+          </button>
+        </div>
+
+        <div className="download-control">
+          <button
+            type="button"
+            className="download-control-action"
+            disabled={disabled || exporting || downloadFormat === 'mp3'}
+            onClick={() => void handleDownload()}
+            aria-label={exporting ? 'Rendering WAV audio' : `Download ${selectedOption.label}`}
+            title={exporting ? 'Rendering WAV audio…' : `Download ${selectedOption.label}`}
+          >
+            <span className="download-control-icon" aria-hidden="true">
+              ⬇
+            </span>
+            <span>{exporting ? 'Rendering…' : selectedOption.label}</span>
+          </button>
+          <label className="download-control-picker">
+            <span className="sr-only">Download format</span>
+            <select
+              value={downloadFormat}
+              disabled={disabled}
+              onChange={(event) => setDownloadFormat(event.target.value as DownloadFormat)}
+              aria-label="Download format"
+              title="Download format"
+            >
+              {DOWNLOAD_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value} disabled={option.disabled}>
+                  {option.disabled ? `${option.label} (soon)` : option.label}
+                </option>
+              ))}
+            </select>
+            <span className="download-control-caret" aria-hidden="true">
+              ▾
+            </span>
+          </label>
+        </div>
       </div>
-      <p className="hint melody-transport-hint">
-        Preview with Tone.js, then download MIDI or WAV.
-      </p>
     </div>
   );
 }

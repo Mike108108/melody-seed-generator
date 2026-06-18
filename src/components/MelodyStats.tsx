@@ -1,76 +1,66 @@
 import type { GeneratedMelody } from '../lib/types';
 
-export function MelodyStats({ melody }: { melody: GeneratedMelody | null }) {
+type MelodyStatsProps = {
+  melody: GeneratedMelody | null;
+};
+
+export function MelodyStatsCompact({ melody }: MelodyStatsProps) {
   if (!melody) {
     return (
-      <section className="panel stats-panel">
-        <p className="eyebrow">Stats</p>
-        <div className="empty-state">No melody yet.</div>
-      </section>
+      <div className="melody-stats-compact melody-stats-compact--empty" aria-label="Melody quality scores">
+        <MiniStat label="Quality" value="—" status="neutral" suffix="/ 100" />
+        <MiniStat label="Similarity risk" value="—" status="neutral" suffix="/ 100" />
+      </div>
     );
   }
 
-  const range = Math.max(...melody.notes.map((note) => note.midi)) - Math.min(...melody.notes.map((note) => note.midi));
-  const uniquePitches = new Set(melody.notes.map((note) => note.midi)).size;
-
   return (
-    <section className="panel stats-panel">
-      <div>
-        <p className="eyebrow">Quality / Risk</p>
-        <h2>Melody Stats</h2>
-      </div>
-
-      <div className="score-grid">
-        <Score label="Quality score" value={melody.qualityScore} goodHigh />
-        <Score label="Similarity risk" value={melody.similarityRiskScore} goodHigh={false} />
-      </div>
-
-      <dl className="stats-list">
-        <div>
-          <dt>Seed</dt>
-          <dd>{melody.settings.seed}</dd>
-        </div>
-        <div>
-          <dt>Fingerprint</dt>
-          <dd>{melody.fingerprint.hash}</dd>
-        </div>
-        <div>
-          <dt>Notes</dt>
-          <dd>{melody.notes.length}</dd>
-        </div>
-        <div>
-          <dt>Unique pitches</dt>
-          <dd>{uniquePitches}</dd>
-        </div>
-        <div>
-          <dt>Range</dt>
-          <dd>{range} semitones</dd>
-        </div>
-      </dl>
-
-      {melody.warnings.length > 0 ? (
-        <div className="warnings">
-          <strong>Warnings</strong>
-          <ul>
-            {melody.warnings.map((warning) => (
-              <li key={warning}>{warning}</li>
-            ))}
-          </ul>
-        </div>
-      ) : (
-        <p className="hint success">No local cliche warnings for this melody.</p>
-      )}
-    </section>
+    <div className="melody-stats-compact" aria-label="Melody quality scores">
+      <MiniStat
+        label="Quality score"
+        value={melody.qualityScore}
+        status={scoreStatus(melody.qualityScore, true)}
+        suffix="/ 100"
+      />
+      <MiniStat
+        label="Similarity risk"
+        value={melody.similarityRiskScore}
+        status={scoreStatus(melody.similarityRiskScore, false)}
+        suffix="/ 100"
+      />
+    </div>
   );
 }
 
-function Score({ label, value, goodHigh }: { label: string; value: number; goodHigh: boolean }) {
-  const status = goodHigh ? (value >= 70 ? 'good' : value >= 45 ? 'mid' : 'bad') : value <= 35 ? 'good' : value <= 60 ? 'mid' : 'bad';
-
+function MiniStat({
+  label,
+  value,
+  status,
+  suffix
+}: {
+  label: string;
+  value: number | string;
+  status: 'good' | 'mid' | 'bad' | 'neutral';
+  suffix?: string;
+}) {
   return (
-    <div className={`score-card ${status}`}>
-      <span>{label}</span>
-      <strong>{value}</strong>
+    <div className={`mini-stat mini-stat--${status}`}>
+      <span className="mini-stat-label">{label}</span>
+      <strong className="mini-stat-value">
+        {value}
+        {suffix ? <small>{suffix}</small> : null}
+      </strong>
     </div>
   );
+}
+
+function scoreStatus(value: number, goodHigh: boolean): 'good' | 'mid' | 'bad' {
+  if (goodHigh) {
+    if (value >= 70) return 'good';
+    if (value >= 45) return 'mid';
+    return 'bad';
+  }
+  if (value <= 35) return 'good';
+  if (value <= 60) return 'mid';
+  return 'bad';
 }
