@@ -3,7 +3,6 @@ import type { GeneratedMelody, LayeredSeed, MelodyNote } from '../lib/types';
 import { midiToNoteName } from '../lib/music/notes';
 import { MelodyStatsCompact } from './MelodyStats';
 import { MelodyTransport } from './MelodyTransport';
-import { SeedIdChip } from './SeedIdChip';
 
 export const BAR_WIDTH_PX = 200;
 export const PITCH_ROW_HEIGHT_PX = 18;
@@ -290,11 +289,7 @@ export function PianoRoll({
   return (
     <section className="panel current-melody-panel melody-panel">
       <div className="current-melody-header">
-        <div className="current-melody-title">
-          <div className="current-melody-title-row">
-            <h2>Current Melody</h2>
-            {melody ? <SeedIdChip seed={melody.settings.seed} /> : null}
-          </div>
+        <div className="current-melody-meta">
           {outputMeta ? (
             <p
               className="output-meta-line"
@@ -319,6 +314,10 @@ export function PianoRoll({
 
       <div className="piano-roll-stack">
         <div className="piano-roll-lane-wrap piano-roll-lane-wrap--melody">
+          <div className="piano-roll-lane-header piano-roll-lane-header--melody">
+            <h2 className="piano-roll-lane-label">Current Melody</h2>
+          </div>
+
           {melody ? (
             <button
               type="button"
@@ -355,17 +354,20 @@ export function PianoRoll({
           <div
             className={`piano-roll-lane-wrap piano-roll-lane-wrap--chord${isChordLayerEnabled ? '' : ' is-layer-disabled'}`}
           >
-            <div className="piano-roll-lane-header">
-              <div className="piano-roll-lane-label">Chord Layer</div>
+            <div className="piano-roll-lane-header piano-roll-lane-header--chord">
+              <h3 className="piano-roll-lane-label">Chord Layer</h3>
               <button
                 type="button"
-                className={`layer-toggle${isChordLayerEnabled ? ' is-enabled' : ''}`}
+                role="switch"
+                className={`layer-switch${isChordLayerEnabled ? ' is-on' : ''}`}
                 onClick={onToggleChordLayerEnabled}
                 aria-label={isChordLayerEnabled ? 'Disable chord layer' : 'Enable chord layer'}
-                aria-pressed={isChordLayerEnabled}
+                aria-checked={isChordLayerEnabled}
                 title={isChordLayerEnabled ? 'Disable chord layer' : 'Enable chord layer'}
               >
-                {isChordLayerEnabled ? 'On' : 'Off'}
+                <span className="layer-switch__track" aria-hidden="true">
+                  <span className="layer-switch__thumb" />
+                </span>
               </button>
             </div>
             <div className="piano-roll-shell piano-roll-shell--chord piano-roll-fixed" style={chordRollStyle}>
