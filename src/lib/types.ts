@@ -49,6 +49,32 @@ export type MelodyScore = {
   warnings: string[];
 };
 
+export type TrackRole = 'melody' | 'chords' | 'bass' | 'support' | 'drone';
+
+export type GeneratedTrack = {
+  id: string;
+  role: TrackRole;
+  name: string;
+  channel: number;
+  notes: MelodyNote[];
+};
+
+export type LayeredSeed = {
+  schemaVersion: 1;
+  id: string;
+  primaryTrackId: string;
+  tracks: GeneratedTrack[];
+};
+
+export type ProvenanceLayer = {
+  id: string;
+  role: TrackRole;
+  name: string;
+  channel: number;
+  noteCount: number;
+  primary: boolean;
+};
+
 export type GeneratedMelody = {
   notes: MelodyNote[];
   settings: MelodySettings;
@@ -61,6 +87,7 @@ export type GeneratedMelody = {
   generationProfile?: import('./melody/intent').GenerationSettingsProfile;
   intentPresetProfile?: import('./melody/intent').IntentPresetProfile;
   phraseRolePlan?: import('./melody/phraseRolePlan').PhraseRolePlan;
+  layeredSeed?: LayeredSeed;
 };
 
 export type ProvenanceJson = {
@@ -78,6 +105,8 @@ export type ProvenanceJson = {
   generationProfile?: import('./melody/intent').GenerationSettingsProfile;
   intentPresetProfile?: import('./melody/intent').IntentPresetProfile;
   phraseRolePlan?: import('./melody/phraseRolePlan').PhraseRolePlan;
+  layeredSeedVersion?: 1;
+  layers?: ProvenanceLayer[];
   usesSamples: false;
   usesAudioLoops: false;
   usesTrainingData: false;

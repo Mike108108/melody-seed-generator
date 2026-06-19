@@ -1,4 +1,5 @@
 import { Midi } from '@tonejs/midi';
+import { createProvenanceLayers } from '../seed/layeredSeed';
 import type { GeneratedMelody, ProvenanceJson } from '../types';
 import { slugifyFilePart } from '../utils/hash';
 
@@ -39,6 +40,8 @@ export function createProvenanceJson(melody: GeneratedMelody): ProvenanceJson {
     generationProfile: melody.generationProfile,
     intentPresetProfile: melody.intentPresetProfile,
     phraseRolePlan: melody.phraseRolePlan,
+    layeredSeedVersion: melody.layeredSeed?.schemaVersion,
+    layers: melody.layeredSeed ? createProvenanceLayers(melody.layeredSeed) : undefined,
     usesSamples: false,
     usesAudioLoops: false,
     usesTrainingData: false,
