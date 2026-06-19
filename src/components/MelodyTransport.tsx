@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { GeneratedMelody } from '../lib/types';
+import type { GeneratedMelody, MelodyNote } from '../lib/types';
 import { downloadWav } from '../lib/audio/exportWav';
 import { downloadMidi, downloadProvenance } from '../lib/midi/exportMidi';
 import { playMelody, stopPlayback } from '../lib/audio/playback';
@@ -8,6 +8,7 @@ export type DownloadFormat = 'midi' | 'provenance' | 'wav' | 'mp3';
 
 type MelodyTransportProps = {
   melody: GeneratedMelody | null;
+  chordNotes?: MelodyNote[] | null;
 };
 
 const DOWNLOAD_OPTIONS: { value: DownloadFormat; label: string; disabled?: boolean }[] = [
@@ -17,15 +18,16 @@ const DOWNLOAD_OPTIONS: { value: DownloadFormat; label: string; disabled?: boole
   { value: 'mp3', label: 'MP3', disabled: true }
 ];
 
-export function MelodyTransport({ melody }: MelodyTransportProps) {
+export function MelodyTransport({ melody, chordNotes = null }: MelodyTransportProps) {
   const [downloadFormat, setDownloadFormat] = useState<DownloadFormat>('midi');
   const [exporting, setExporting] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const disabled = melody === null;
 
   useEffect(() => {
+    stopPlayback();
     setIsPlaying(false);
-  }, [melody]);
+  }, [melody, chordNotes]);
 
   useEffect(() => {
     return () => {
@@ -39,7 +41,7 @@ export function MelodyTransport({ melody }: MelodyTransportProps) {
     if (!melody) return;
     setIsPlaying(true);
     try {
-      await playMelody(melody);
+      await playMelody(melody, chordNotes);
     } finally {
       setIsPlaying(false);
     }

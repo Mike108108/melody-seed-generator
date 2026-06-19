@@ -13,7 +13,7 @@ import {
 import { createPhraseRolePlan } from './lib/melody/phraseRolePlan';
 import { createLayeredSeedWithChordTrack } from './lib/seed/layeredChordSeed';
 import { createMelodyOnlyLayeredSeed } from './lib/seed/layeredSeed';
-import type { GeneratedMelody, LayeredSeed, MelodyFingerprint, MelodySettings } from './lib/types';
+import type { GeneratedMelody, LayeredSeed, MelodyFingerprint, MelodyNote, MelodySettings } from './lib/types';
 import { makeRandomSeed } from './lib/utils/seededRandom';
 import './styles.css';
 
@@ -36,6 +36,10 @@ export default function App() {
   const hasChordLayerReady =
     layeredSeedWithChords?.tracks.some((track) => track.role === 'chords' && track.notes.length > 0) ??
     false;
+
+  const chordNotesForPlayback: MelodyNote[] | null = hasChordLayerReady
+    ? (layeredSeedWithChords?.tracks.find((track) => track.role === 'chords')?.notes ?? null)
+    : null;
 
   const generateFromSettings = (nextSettings: MelodySettings, nextIntent: MelodyIntent) => {
     const phraseRolePlan = createPhraseRolePlan(nextIntent, nextSettings);
@@ -114,6 +118,7 @@ export default function App() {
             isMelodyLocked={isMelodyLocked}
             hasChordLayerReady={hasChordLayerReady}
             chordLayerAttempted={layeredSeedWithChords !== null}
+            chordNotesForPlayback={chordNotesForPlayback}
             onLockMelody={handleLockMelody}
             onUnlockMelody={handleUnlockMelody}
             onAddChords={handleAddChords}

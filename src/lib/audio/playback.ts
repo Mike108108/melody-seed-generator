@@ -1,13 +1,17 @@
 import * as Tone from 'tone';
-import type { GeneratedMelody } from '../types';
+import type { GeneratedMelody, MelodyNote } from '../types';
 
-let synth: Tone.PolySynth | null = null;
+let melodySynth: Tone.PolySynth | null = null;
+let chordSynth: Tone.PolySynth | null = null;
 
-export async function playMelody(melody: GeneratedMelody): Promise<void> {
+export async function playMelody(
+  melody: GeneratedMelody,
+  chordNotes: MelodyNote[] | null = null
+): Promise<void> {
   await Tone.start();
   stopPlayback();
 
-  synth = new Tone.PolySynth(Tone.Synth, {
+  melodySynth = new Tone.PolySynth(Tone.Synth, {
     oscillator: { type: 'triangle' },
     envelope: {
       attack: 0.01,
@@ -17,19 +21,37 @@ export async function playMelody(melody: GeneratedMelody): Promise<void> {
     }
   }).toDestination();
 
-  Tone.Transport.bpm.value = melody.settings.bpm;
+  const hasChords = chordNotes !== null && chordNotes.length > 0;
+
+  if (hasChords) {
+    chordSynth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'sine' },
+      envelope: {
+        attack: 0.02,
+        decay: 0.12,
+        sustain: 0.55,
+        release: 0.25
+      }
+    }).toDestination();
+    chordSynth.volume.value = -12;
+  }
+
+  const bpm = melody.settings.bpm;
+  Tone.Transport.bpm.value = bpm;
   Tone.Transport.cancel(0);
   Tone.Transport.position = 0;
 
   melody.notes.forEach((note) => {
-    const startSeconds = beatsToSeconds(note.startBeats, melody.settings.bpm);
-    const durationSeconds = beatsToSeconds(note.durationBeats * 0.92, melody.settings.bpm);
-    Tone.Transport.scheduleOnce((time) => {
-      synth?.triggerAttackRelease(note.noteName, durationSeconds, time, note.velocity);
-    }, startSeconds);
+    scheduleNote(melodySynth!, note, bpm);
   });
 
-  const endSeconds = beatsToSeconds(melody.settings.bars * 4 + 0.25, melody.settings.bpm);
+  if (hasChords) {
+    chordNotes!.forEach((note) => {
+      scheduleNote(chordSynth!, note, bpm);
+    });
+  }
+
+  const endSeconds = beatsToSeconds(melody.settings.bars * 4 + 0.25, bpm);
   Tone.Transport.scheduleOnce(() => stopPlayback(), endSeconds);
   Tone.Transport.start('+0.05', 0);
 }
@@ -37,11 +59,24 @@ export async function playMelody(melody: GeneratedMelody): Promise<void> {
 export function stopPlayback(): void {
   Tone.Transport.stop();
   Tone.Transport.cancel(0);
-  if (synth) {
-    synth.releaseAll();
-    synth.dispose();
-    synth = null;
+  if (melodySynth) {
+    melodySynth.releaseAll();
+    melodySynth.dispose();
+    melodySynth = null;
   }
+  if (chordSynth) {
+    chordSynth.releaseAll();
+    chordSynth.dispose();
+    chordSynth = null;
+  }
+}
+
+function scheduleNote(synth: Tone.PolySynth, note: MelodyNote, bpm: number): void {
+  const startSeconds = beatsToSeconds(note.startBeats, bpm);
+  const durationSeconds = beatsToSeconds(note.durationBeats * 0.92, bpm);
+  Tone.Transport.scheduleOnce((time) => {
+    synth.triggerAttackRelease(note.noteName, durationSeconds, time, note.velocity);
+  }, startSeconds);
 }
 
 function beatsToSeconds(beats: number, bpm: number): number {

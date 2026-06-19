@@ -1,5 +1,5 @@
 import { useMemo, type CSSProperties } from 'react';
-import type { GeneratedMelody } from '../lib/types';
+import type { GeneratedMelody, MelodyNote } from '../lib/types';
 import { midiToNoteName } from '../lib/music/notes';
 import { MelodyStatsCompact } from './MelodyStats';
 import { MelodyTransport } from './MelodyTransport';
@@ -19,6 +19,7 @@ type PianoRollProps = {
   isMelodyLocked: boolean;
   hasChordLayerReady: boolean;
   chordLayerAttempted: boolean;
+  chordNotesForPlayback: MelodyNote[] | null;
   onLockMelody: () => void;
   onUnlockMelody: () => void;
   onAddChords: () => void;
@@ -29,6 +30,7 @@ export function PianoRoll({
   isMelodyLocked,
   hasChordLayerReady,
   chordLayerAttempted,
+  chordNotesForPlayback,
   onLockMelody,
   onUnlockMelody,
   onAddChords
@@ -66,7 +68,7 @@ export function PianoRoll({
         <MelodyStatsCompact melody={melody} />
       </div>
 
-      <MelodyTransport melody={melody} />
+      <MelodyTransport melody={melody} chordNotes={chordNotesForPlayback} />
 
       <div className="piano-roll-shell piano-roll-fixed" style={pianoRollStyle}>
         <div className="piano-roll-keys" style={{ width: PITCH_KEY_WIDTH }} aria-hidden="true">
@@ -148,7 +150,7 @@ export function PianoRoll({
                   <span className="melody-chord-ready-chip" aria-label="Chord layer ready">
                     Chord Layer Ready
                   </span>
-                  <span className="hint melody-chord-hint">Melody-only playback/export for now</span>
+                  <span className="hint melody-chord-hint">Playback includes chords · downloads remain melody-only</span>
                 </>
               ) : chordLayerAttempted ? (
                 <span className="hint melody-chord-hint">No chord layer generated for this melody</span>
