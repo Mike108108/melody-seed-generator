@@ -8,6 +8,7 @@ import {
   createGenerationProfile,
   type MelodyIntent
 } from './lib/melody/intent';
+import { createPhraseRolePlan } from './lib/melody/phraseRolePlan';
 import type { GeneratedMelody, MelodyFingerprint, MelodySettings } from './lib/types';
 import { makeRandomSeed } from './lib/utils/seededRandom';
 import './styles.css';
@@ -28,11 +29,13 @@ export default function App() {
 
   const generateFromSettings = (nextSettings: MelodySettings, nextIntent: MelodyIntent) => {
     const profile = createGenerationProfile(nextIntent);
-    const generated = generateMelody(nextSettings, fingerprintHistory.slice(-50));
+    const phraseRolePlan = createPhraseRolePlan(nextIntent, nextSettings);
+    const generated = generateMelody(nextSettings, fingerprintHistory.slice(-50), { phraseRolePlan });
     setMelody({
       ...generated,
       intent: nextIntent,
-      generationProfile: profile
+      generationProfile: profile,
+      phraseRolePlan
     });
     setFingerprintHistory((history) => [...history, generated.fingerprint].slice(-100));
   };

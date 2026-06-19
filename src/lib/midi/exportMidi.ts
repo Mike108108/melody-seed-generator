@@ -36,6 +36,7 @@ export function createProvenanceJson(melody: GeneratedMelody): ProvenanceJson {
     mode: melody.settings.commercialSaferMode ? 'commercial-safer' : 'standard',
     intent: melody.intent,
     generationProfile: melody.generationProfile,
+    phraseRolePlan: melody.phraseRolePlan,
     usesSamples: false,
     usesAudioLoops: false,
     usesTrainingData: false,

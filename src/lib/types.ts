@@ -58,6 +58,7 @@ export type GeneratedMelody = {
   warnings: string[];
   intent?: import('./melody/intent').MelodyIntent;
   generationProfile?: import('./melody/intent').GenerationProfile;
+  phraseRolePlan?: import('./melody/phraseRolePlan').PhraseRolePlan;
 };
 
 export type ProvenanceJson = {
@@ -72,6 +73,7 @@ export type ProvenanceJson = {
   mode: 'commercial-safer' | 'standard';
   intent?: import('./melody/intent').MelodyIntent;
   generationProfile?: import('./melody/intent').GenerationProfile;
+  phraseRolePlan?: import('./melody/phraseRolePlan').PhraseRolePlan;
   usesSamples: false;
   usesAudioLoops: false;
   usesTrainingData: false;
