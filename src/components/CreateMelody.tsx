@@ -14,6 +14,7 @@ import type { MelodySettings, ScaleName } from '../lib/types';
 type CreateMelodyProps = {
   intent: MelodyIntent;
   settings: MelodySettings;
+  isMelodyLocked: boolean;
   onIntentChange: (nextIntent: MelodyIntent) => void;
   onSettingsChange: (nextSettings: MelodySettings) => void;
   onGenerate: () => void;
@@ -22,6 +23,7 @@ type CreateMelodyProps = {
 export function CreateMelody({
   intent,
   settings,
+  isMelodyLocked,
   onIntentChange,
   onSettingsChange,
   onGenerate
@@ -229,9 +231,17 @@ export function CreateMelody({
         ) : null}
       </div>
 
-      <button className="primary generate-button" onClick={onGenerate} type="button">
+      <button
+        className="primary generate-button"
+        onClick={onGenerate}
+        type="button"
+        disabled={isMelodyLocked}
+      >
         Generate Melody
       </button>
+      {isMelodyLocked ? (
+        <p className="generate-locked-hint">Unlock to generate a new melody</p>
+      ) : null}
     </section>
   );
 }

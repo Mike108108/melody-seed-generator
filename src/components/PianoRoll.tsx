@@ -16,9 +16,12 @@ const DEFAULT_PREVIEW_BARS = 8;
 
 type PianoRollProps = {
   melody: GeneratedMelody | null;
+  isMelodyLocked: boolean;
+  onLockMelody: () => void;
+  onUnlockMelody: () => void;
 };
 
-export function PianoRoll({ melody }: PianoRollProps) {
+export function PianoRoll({ melody, isMelodyLocked, onLockMelody, onUnlockMelody }: PianoRollProps) {
   const bars = melody?.settings.bars ?? DEFAULT_PREVIEW_BARS;
   const displayRange = useMemo(() => getDisplayRange(melody), [melody]);
   const pitchLabels = useMemo(() => buildPitchLabels(displayRange), [displayRange]);
@@ -104,6 +107,22 @@ export function PianoRoll({ melody }: PianoRollProps) {
       {melody ? (
         <footer className="melody-meta-row">
           <SeedIdChip seed={melody.settings.seed} />
+          <div className="melody-lock-controls">
+            {isMelodyLocked ? (
+              <>
+                <span className="melody-lock-chip" aria-label="Melody locked">
+                  Locked
+                </span>
+                <button type="button" className="melody-lock-button" onClick={onUnlockMelody}>
+                  Unlock
+                </button>
+              </>
+            ) : (
+              <button type="button" className="melody-lock-button" onClick={onLockMelody}>
+                Lock Melody
+              </button>
+            )}
+          </div>
         </footer>
       ) : null}
     </section>

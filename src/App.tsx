@@ -29,6 +29,7 @@ export default function App() {
   );
   const [melody, setMelody] = useState<GeneratedMelody | null>(null);
   const [fingerprintHistory, setFingerprintHistory] = useState<MelodyFingerprint[]>([]);
+  const [isMelodyLocked, setIsMelodyLocked] = useState(false);
 
   const generateFromSettings = (nextSettings: MelodySettings, nextIntent: MelodyIntent) => {
     const phraseRolePlan = createPhraseRolePlan(nextIntent, nextSettings);
@@ -55,9 +56,20 @@ export default function App() {
   };
 
   const handleGenerateMelody = () => {
+    if (isMelodyLocked) return;
+
     const nextSettings = { ...settings, seed: makeRandomSeed('suno-idea') };
     setSettings(nextSettings);
     generateFromSettings(nextSettings, intent);
+  };
+
+  const handleLockMelody = () => {
+    if (!melody) return;
+    setIsMelodyLocked(true);
+  };
+
+  const handleUnlockMelody = () => {
+    setIsMelodyLocked(false);
   };
 
   return (
@@ -76,6 +88,7 @@ export default function App() {
           <CreateMelody
             intent={intent}
             settings={settings}
+            isMelodyLocked={isMelodyLocked}
             onIntentChange={handleIntentChange}
             onSettingsChange={setSettings}
             onGenerate={handleGenerateMelody}
@@ -83,7 +96,12 @@ export default function App() {
         </div>
 
         <div className="right-column">
-          <PianoRoll melody={melody} />
+          <PianoRoll
+            melody={melody}
+            isMelodyLocked={isMelodyLocked}
+            onLockMelody={handleLockMelody}
+            onUnlockMelody={handleUnlockMelody}
+          />
         </div>
       </div>
     </main>
