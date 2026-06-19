@@ -388,12 +388,7 @@ input[type='range'] {
   justify-content: space-between;
   gap: 1rem;
   align-items: flex-start;
-}
-
-.current-melody-meta {
-  min-width: 0;
-  display: grid;
-  gap: 0.35rem;
+  flex-wrap: wrap;
 }
 
 .current-melody-empty {
@@ -594,7 +589,7 @@ input[type='range'] {
 }
 
 .piano-roll-lane-wrap {
-  position: relative;
+  position: static;
 }
 
 .piano-roll-lane-label {
@@ -608,16 +603,26 @@ input[type='range'] {
 
 .piano-roll-lane-header {
   display: flex;
-  align-items: center;
-  gap: 0.45rem;
+  align-items: baseline;
+  gap: 0.45rem 0.65rem;
   margin-bottom: 0.28rem;
 }
 
 .piano-roll-lane-header--melody {
+  flex-wrap: wrap;
   justify-content: flex-start;
 }
 
+.piano-roll-lane-meta {
+  min-width: 0;
+  text-transform: none;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.35;
+}
+
 .piano-roll-lane-header--chord {
+  align-items: center;
   justify-content: flex-start;
 }
 
@@ -638,11 +643,10 @@ input[type='range'] {
 .layer-switch__track {
   position: relative;
   display: block;
-  width: 2rem;
-  height: 1.1rem;
+  width: 2.75rem;
+  height: 1.375rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.14);
   transition: background 0.18s ease;
 }
 
@@ -650,21 +654,20 @@ input[type='range'] {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: calc(1.1rem - 4px);
-  height: calc(1.1rem - 4px);
+  width: 1.125rem;
+  height: 1.125rem;
   border-radius: 50%;
-  background: rgba(244, 240, 255, 0.92);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
-  transition: transform 0.18s ease;
+  background: rgba(244, 240, 255, 0.72);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+  transition: transform 0.18s ease, background 0.18s ease;
 }
 
 .layer-switch.is-on .layer-switch__track {
-  background: rgba(45, 212, 191, 0.82);
-  box-shadow: inset 0 0 0 1px rgba(45, 212, 191, 0.42);
+  background: rgba(45, 212, 191, 0.88);
 }
 
 .layer-switch.is-on .layer-switch__thumb {
-  transform: translateX(calc(2rem - 1.1rem));
+  transform: translateX(calc(2.75rem - 1.125rem - 4px));
   background: #fff;
 }
 
@@ -802,6 +805,7 @@ input[type='range'] {
 }
 
 .piano-roll-shell {
+  position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   overflow: hidden;

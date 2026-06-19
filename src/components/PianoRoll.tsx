@@ -289,48 +289,46 @@ export function PianoRoll({
   return (
     <section className="panel current-melody-panel melody-panel">
       <div className="current-melody-header">
-        <div className="current-melody-meta">
-          {outputMeta ? (
-            <p
-              className="output-meta-line"
-              title={outputMeta.includes('Similarity Guard') ? 'Designed to reduce similarity risk, not to guarantee legal clearance.' : undefined}
-            >
-              {outputMeta}
-            </p>
-          ) : null}
-          {!melody ? (
-            <p className="hint current-melody-empty">Generate a melody to preview playback and export.</p>
-          ) : null}
-        </div>
+        <MelodyTransport
+          melody={melody}
+          chordNotes={chordNotesForPlayback}
+          layeredSeedWithChords={layeredSeedWithChords}
+          isChordLayerEnabled={isChordLayerEnabled}
+        />
         <MelodyStatsCompact melody={melody} />
       </div>
 
-      <MelodyTransport
-        melody={melody}
-        chordNotes={chordNotesForPlayback}
-        layeredSeedWithChords={layeredSeedWithChords}
-        isChordLayerEnabled={isChordLayerEnabled}
-      />
+      {!melody ? (
+        <p className="hint current-melody-empty">Generate a melody to preview playback and export.</p>
+      ) : null}
 
       <div className="piano-roll-stack">
         <div className="piano-roll-lane-wrap piano-roll-lane-wrap--melody">
           <div className="piano-roll-lane-header piano-roll-lane-header--melody">
             <h2 className="piano-roll-lane-label">Current Melody</h2>
+            {outputMeta ? (
+              <p
+                className="output-meta-line piano-roll-lane-meta"
+                title={outputMeta.includes('Similarity Guard') ? 'Designed to reduce similarity risk, not to guarantee legal clearance.' : undefined}
+              >
+                {outputMeta}
+              </p>
+            ) : null}
           </div>
 
-          {melody ? (
-            <button
-              type="button"
-              className={`icon-circle-button melody-lock-icon-button${isMelodyLocked ? ' is-locked' : ''}`}
-              onClick={handleLockToggle}
-              aria-label={isMelodyLocked ? 'Unlock melody' : 'Lock melody'}
-              title={isMelodyLocked ? 'Unlock melody' : 'Lock melody'}
-            >
-              {isMelodyLocked ? <LockedIcon /> : <UnlockedIcon />}
-            </button>
-          ) : null}
+          <div className="piano-roll-shell piano-roll-shell--melody piano-roll-fixed" style={pianoRollStyle}>
+            {melody ? (
+              <button
+                type="button"
+                className={`icon-circle-button melody-lock-icon-button${isMelodyLocked ? ' is-locked' : ''}`}
+                onClick={handleLockToggle}
+                aria-label={isMelodyLocked ? 'Unlock melody' : 'Lock melody'}
+                title={isMelodyLocked ? 'Unlock melody' : 'Lock melody'}
+              >
+                {isMelodyLocked ? <LockedIcon /> : <UnlockedIcon />}
+              </button>
+            ) : null}
 
-          <div className="piano-roll-shell piano-roll-fixed" style={pianoRollStyle}>
             <PianoRollKeys displayRange={melodyDisplayRange} height={PIANO_ROLL_HEIGHT} />
 
             <div
