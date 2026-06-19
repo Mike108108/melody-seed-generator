@@ -39,6 +39,21 @@ export type GenerationProfile = {
   summary: string;
 };
 
+/** Intent-derived preset before manual tuning; not the final generation settings. */
+export type IntentPresetProfile = GenerationProfile;
+
+/** Human-readable Hook Intent labels for provenance. */
+export type IntentLabels = {
+  melodicLanguage: string;
+  songPart: string;
+  phraseShape: string;
+  detail: string;
+  hookStrength: string;
+};
+
+/** Final settings used to generate the melody (includes manual overrides). */
+export type GenerationSettingsProfile = MelodySettings;
+
 export const GENRE_OPTIONS: { value: MelodyGenre; label: string }[] = [
   { value: 'pop-hook', label: 'Pop Diatonic' },
   { value: 'dark-trap', label: 'Dark Minor' },
@@ -187,6 +202,24 @@ export function createGenerationProfile(intent: MelodyIntent): GenerationProfile
     ...profile,
     summary
   };
+}
+
+export function createIntentPresetProfile(intent: MelodyIntent): IntentPresetProfile {
+  return createGenerationProfile(intent);
+}
+
+export function createIntentLabels(intent: MelodyIntent): IntentLabels {
+  return {
+    melodicLanguage: labelFor(GENRE_OPTIONS, intent.genre),
+    songPart: labelFor(ROLE_OPTIONS, intent.role),
+    phraseShape: labelFor(DRAMA_OPTIONS, intent.drama),
+    detail: labelFor(COMPLEXITY_OPTIONS, intent.complexity),
+    hookStrength: labelFor(HOOKINESS_OPTIONS, intent.hookiness)
+  };
+}
+
+export function createGenerationSettingsProfile(settings: MelodySettings): GenerationSettingsProfile {
+  return { ...settings };
 }
 
 export function applyIntentToSettings(settings: MelodySettings, intent: MelodyIntent): MelodySettings {

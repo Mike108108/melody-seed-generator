@@ -57,7 +57,9 @@ export type GeneratedMelody = {
   similarityRiskScore: number;
   warnings: string[];
   intent?: import('./melody/intent').MelodyIntent;
-  generationProfile?: import('./melody/intent').GenerationProfile;
+  intentLabels?: import('./melody/intent').IntentLabels;
+  generationProfile?: import('./melody/intent').GenerationSettingsProfile;
+  intentPresetProfile?: import('./melody/intent').IntentPresetProfile;
   phraseRolePlan?: import('./melody/phraseRolePlan').PhraseRolePlan;
 };
 
@@ -72,7 +74,9 @@ export type ProvenanceJson = {
   bars: number;
   mode: 'commercial-safer' | 'standard';
   intent?: import('./melody/intent').MelodyIntent;
-  generationProfile?: import('./melody/intent').GenerationProfile;
+  intentLabels?: import('./melody/intent').IntentLabels;
+  generationProfile?: import('./melody/intent').GenerationSettingsProfile;
+  intentPresetProfile?: import('./melody/intent').IntentPresetProfile;
   phraseRolePlan?: import('./melody/phraseRolePlan').PhraseRolePlan;
   usesSamples: false;
   usesAudioLoops: false;

@@ -5,7 +5,9 @@ import { DEFAULT_SETTINGS, generateMelody } from './lib/melody/generateMelody';
 import {
   DEFAULT_INTENT,
   applyIntentToSettings,
-  createGenerationProfile,
+  createGenerationSettingsProfile,
+  createIntentLabels,
+  createIntentPresetProfile,
   type MelodyIntent
 } from './lib/melody/intent';
 import { createPhraseRolePlan } from './lib/melody/phraseRolePlan';
@@ -28,14 +30,16 @@ export default function App() {
   const [fingerprintHistory, setFingerprintHistory] = useState<MelodyFingerprint[]>([]);
 
   const generateFromSettings = (nextSettings: MelodySettings, nextIntent: MelodyIntent) => {
-    const profile = createGenerationProfile(nextIntent);
     const phraseRolePlan = createPhraseRolePlan(nextIntent, nextSettings);
     const generated = generateMelody(nextSettings, fingerprintHistory.slice(-50), { phraseRolePlan });
+    const finalSettings = generated.settings;
     setMelody({
       ...generated,
       intent: nextIntent,
-      generationProfile: profile,
-      phraseRolePlan
+      intentLabels: createIntentLabels(nextIntent),
+      generationProfile: createGenerationSettingsProfile(finalSettings),
+      intentPresetProfile: createIntentPresetProfile(nextIntent),
+      phraseRolePlan: createPhraseRolePlan(nextIntent, finalSettings)
     });
     setFingerprintHistory((history) => [...history, generated.fingerprint].slice(-100));
   };
