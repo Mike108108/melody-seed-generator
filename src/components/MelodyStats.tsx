@@ -7,27 +7,21 @@ type MelodyStatsProps = {
 export function MelodyStatsCompact({ melody }: MelodyStatsProps) {
   if (!melody) {
     return (
-      <div className="melody-stats-compact melody-stats-compact--empty" aria-label="Melody quality scores">
-        <MiniStat label="Quality" value="—" status="neutral" suffix="/ 100" />
-        <MiniStat label="Similarity risk" value="—" status="neutral" suffix="/ 100" />
+      <div className="melody-stats-compact melody-stats-compact--empty" aria-label="Melody output stats">
+        <MiniStat label="Quality" value="—" status="neutral" />
+        <MiniStat label="Risk" value="—" status="neutral" />
+        <MiniStat label="Warnings" value="—" status="neutral" />
       </div>
     );
   }
 
+  const warningCount = melody.warnings.length;
+
   return (
-    <div className="melody-stats-compact" aria-label="Melody quality scores">
-      <MiniStat
-        label="Quality score"
-        value={melody.qualityScore}
-        status={scoreStatus(melody.qualityScore, true)}
-        suffix="/ 100"
-      />
-      <MiniStat
-        label="Similarity risk"
-        value={melody.similarityRiskScore}
-        status={scoreStatus(melody.similarityRiskScore, false)}
-        suffix="/ 100"
-      />
+    <div className="melody-stats-compact" aria-label="Melody output stats">
+      <MiniStat label="Quality" value={melody.qualityScore} status={scoreStatus(melody.qualityScore, true)} />
+      <MiniStat label="Risk" value={melody.similarityRiskScore} status={scoreStatus(melody.similarityRiskScore, false)} />
+      <MiniStat label="Warnings" value={warningCount} status={warningStatus(warningCount)} title={warningCount > 0 ? melody.warnings.join(' · ') : undefined} />
     </div>
   );
 }
@@ -36,20 +30,17 @@ function MiniStat({
   label,
   value,
   status,
-  suffix
+  title
 }: {
   label: string;
   value: number | string;
   status: 'good' | 'mid' | 'bad' | 'neutral';
-  suffix?: string;
+  title?: string;
 }) {
   return (
-    <div className={`mini-stat mini-stat--${status}`}>
+    <div className={`mini-stat mini-stat--${status}`} title={title}>
       <span className="mini-stat-label">{label}</span>
-      <strong className="mini-stat-value">
-        {value}
-        {suffix ? <small>{suffix}</small> : null}
-      </strong>
+      <strong className="mini-stat-value">{value}</strong>
     </div>
   );
 }
@@ -62,5 +53,11 @@ function scoreStatus(value: number, goodHigh: boolean): 'good' | 'mid' | 'bad' {
   }
   if (value <= 35) return 'good';
   if (value <= 60) return 'mid';
+  return 'bad';
+}
+
+function warningStatus(count: number): 'good' | 'mid' | 'bad' {
+  if (count === 0) return 'good';
+  if (count <= 2) return 'mid';
   return 'bad';
 }

@@ -1,12 +1,13 @@
 import { useMemo } from 'react';
 import type { GeneratedMelody } from '../lib/types';
-import { DRAMA_OPTIONS, GENRE_OPTIONS, ROLE_OPTIONS } from '../lib/melody/intent';
+import { midiToNoteName } from '../lib/music/notes';
 import { MelodyStatsCompact } from './MelodyStats';
 import { MelodyTransport } from './MelodyTransport';
 import { SeedIdChip } from './SeedIdChip';
 
 const PIANO_ROLL_HEIGHT = 280;
 const FIXED_PITCH_SPAN = 24;
+const PITCH_KEY_WIDTH = 52;
 
 type PianoRollProps = {
   melody: GeneratedMelody | null;
@@ -14,28 +15,20 @@ type PianoRollProps = {
 
 export function PianoRoll({ melody }: PianoRollProps) {
   const displayRange = useMemo(() => getDisplayRange(melody), [melody]);
+  const pitchLabels = useMemo(() => buildPitchLabels(displayRange), [displayRange]);
+  const outputMeta = buildOutputMeta(melody);
   const totalBeats = melody ? melody.settings.bars * 4 : 32;
   const beatLines = Array.from({ length: totalBeats + 1 }, (_, index) => index);
-  const statusTags = buildStatusTags(melody);
 
   return (
     <section className="panel current-melody-panel melody-panel">
       <div className="current-melody-header">
         <div className="current-melody-title">
-          <p className="eyebrow">Output</p>
           <h2>Current Melody</h2>
-          {statusTags.length > 0 ? (
-            <div className="status-tags" aria-label="Melody status">
-              {statusTags.map((tag) => (
-                <span
-                  key={tag}
-                  className="status-tag"
-                  title={tag === 'Similarity Guard: On' ? 'Designed to reduce similarity risk, not to guarantee legal clearance.' : undefined}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
+          {outputMeta ? (
+            <p className="output-meta-line" title={outputMeta.includes('Similarity Guard') ? 'Designed to reduce similarity risk, not to guarantee legal clearance.' : undefined}>
+              {outputMeta}
+            </p>
           ) : null}
           {!melody ? (
             <p className="hint current-melody-empty">Generate a melody to preview playback and export.</p>
@@ -46,48 +39,53 @@ export function PianoRoll({ melody }: PianoRollProps) {
 
       <MelodyTransport melody={melody} />
 
-      <div className="piano-roll piano-roll-fixed" style={{ height: PIANO_ROLL_HEIGHT }}>
-        {beatLines.map((beat) => (
-          <div
-            key={beat}
-            className={`beat-line ${beat % 4 === 0 ? 'bar-line' : ''}`}
-            style={{ left: `${(beat / totalBeats) * 100}%` }}
-          />
-        ))}
+      <div className="piano-roll-shell piano-roll-fixed" style={{ height: PIANO_ROLL_HEIGHT }}>
+        <div className="piano-roll-keys" style={{ width: PITCH_KEY_WIDTH }} aria-hidden="true">
+          {pitchLabels.map((label, index) => (
+            <div
+              key={label.midi}
+              className={`pitch-key ${label.isC ? 'pitch-key--c' : ''} ${index % 2 === 1 ? 'pitch-key--alt' : ''}`}
+            >
+              {label.text}
+            </div>
+          ))}
+        </div>
 
-        {melody && melody.notes.length > 0 ? (
-          melody.notes.map((note, index) => {
-            const left = (note.startBeats / totalBeats) * 100;
-            const width = (note.durationBeats / totalBeats) * 100;
-            const top = ((displayRange.maxMidi - note.midi) / (displayRange.span - 1)) * 100;
+        <div className="piano-roll-grid">
+          {beatLines.map((beat) => (
+            <div
+              key={beat}
+              className={`beat-line ${beat % 4 === 0 ? 'bar-line' : ''}`}
+              style={{ left: `${(beat / totalBeats) * 100}%` }}
+            />
+          ))}
 
-            return (
-              <div
-                key={`${note.startBeats}-${note.midi}-${index}`}
-                className="piano-note"
-                style={{ left: `${left}%`, width: `${Math.max(width, 1.2)}%`, top: `${top}%` }}
-                title={`${note.noteName} / beat ${note.startBeats} / ${note.durationBeats} beats`}
-              >
-                {note.noteName}
-              </div>
-            );
-          })
-        ) : (
-          <div className="piano-roll-placeholder">Piano roll preview</div>
-        )}
+          {melody && melody.notes.length > 0 ? (
+            melody.notes.map((note, index) => {
+              const left = (note.startBeats / totalBeats) * 100;
+              const width = (note.durationBeats / totalBeats) * 100;
+              const top = ((displayRange.maxMidi - note.midi) / (displayRange.span - 1)) * 100;
+
+              return (
+                <div
+                  key={`${note.startBeats}-${note.midi}-${index}`}
+                  className="piano-note"
+                  style={{ left: `${left}%`, width: `${Math.max(width, 1.2)}%`, top: `${top}%` }}
+                  title={`${note.noteName} / beat ${note.startBeats} / ${note.durationBeats} beats`}
+                >
+                  {note.noteName}
+                </div>
+              );
+            })
+          ) : (
+            <div className="piano-roll-placeholder">Piano roll preview</div>
+          )}
+        </div>
       </div>
 
       {melody ? (
         <footer className="melody-meta-row">
-          <div className="melody-meta-primary">
-            <span>Type: Monophonic Lead</span>
-            <SeedIdChip seed={melody.settings.seed} />
-          </div>
-          {melody.warnings.length > 0 ? (
-            <span className="melody-meta-warning" title={melody.warnings.join(' · ')}>
-              {melody.warnings.length} warning{melody.warnings.length === 1 ? '' : 's'}
-            </span>
-          ) : null}
+          <SeedIdChip seed={melody.settings.seed} />
         </footer>
       ) : null}
     </section>
@@ -106,31 +104,28 @@ function getDisplayRange(melody: GeneratedMelody | null) {
   return { minMidi, maxMidi: minMidi + FIXED_PITCH_SPAN - 1, span: FIXED_PITCH_SPAN };
 }
 
-function buildStatusTags(melody: GeneratedMelody | null): string[] {
-  const saferMode = melody?.settings.commercialSaferMode ?? true;
-  const tags: string[] = saferMode ? ['Similarity Guard: On'] : [];
-
-  if (!melody) {
-    return tags;
-  }
-
-  const intent = melody.intent;
-  return [
-    ...tags,
-    labelFor(GENRE_OPTIONS, intent?.genre),
-    labelFor(ROLE_OPTIONS, intent?.role),
-    labelFor(DRAMA_OPTIONS, intent?.drama),
-    `${melody.settings.key} ${melody.settings.scale}`,
-    `${melody.settings.bpm} BPM`,
-    `${melody.settings.bars} bars`,
-    'Active'
-  ].filter(Boolean) as string[];
+function buildPitchLabels(displayRange: { minMidi: number; maxMidi: number; span: number }) {
+  return Array.from({ length: displayRange.span }, (_, index) => {
+    const midi = displayRange.maxMidi - index;
+    const text = midiToNoteName(midi);
+    const isC = text.startsWith('C') && !text.startsWith('C#');
+    return { midi, text, isC };
+  });
 }
 
-function labelFor<T extends string>(
-  options: { value: T; label: string }[],
-  value: T | undefined
-): string | null {
-  if (!value) return null;
-  return options.find((option) => option.value === value)?.label ?? null;
+function buildOutputMeta(melody: GeneratedMelody | null): string | null {
+  const saferMode = melody?.settings.commercialSaferMode ?? true;
+  const parts: string[] = [];
+
+  if (melody) {
+    parts.push(`${melody.settings.key} ${melody.settings.scale}`);
+    parts.push(`${melody.settings.bpm} BPM`);
+    parts.push(`${melody.settings.bars} bars`);
+  }
+
+  if (saferMode) {
+    parts.push('Similarity Guard On');
+  }
+
+  return parts.length > 0 ? parts.join(' · ') : null;
 }
