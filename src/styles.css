@@ -377,6 +377,17 @@ input[type='range'] {
   min-width: 0;
 }
 
+.current-melody-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.current-melody-title-row h2 {
+  margin: 0;
+}
+
 .current-melody-empty {
   margin: 0.45rem 0 0;
   font-size: 0.86rem;
@@ -568,6 +579,134 @@ input[type='range'] {
   border: 0;
 }
 
+.piano-roll-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.piano-roll-lane-wrap {
+  position: relative;
+}
+
+.piano-roll-lane-wrap--melody {
+  padding-bottom: 0.15rem;
+}
+
+.piano-roll-lane-label {
+  margin-bottom: 0.28rem;
+  color: rgba(244, 240, 255, 0.62);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.melody-lock-icon-button {
+  position: absolute;
+  top: 0.42rem;
+  right: 0.42rem;
+  z-index: 2;
+  width: 1.85rem;
+  height: 1.85rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(8, 11, 20, 0.82);
+  color: rgba(244, 240, 255, 0.92);
+  font-size: 0.92rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.melody-lock-icon-button:hover {
+  border-color: rgba(167, 139, 250, 0.42);
+  background: rgba(167, 139, 250, 0.12);
+}
+
+.piano-roll-add-layer {
+  position: absolute;
+  right: 0.42rem;
+  bottom: 0.42rem;
+  z-index: 2;
+}
+
+.add-layer-trigger {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(8, 11, 20, 0.88);
+  color: rgba(244, 240, 255, 0.92);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.add-layer-trigger:hover,
+.add-layer-trigger[aria-expanded='true'] {
+  border-color: rgba(167, 139, 250, 0.42);
+  background: rgba(167, 139, 250, 0.14);
+}
+
+.add-layer-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.35rem);
+  min-width: 11.5rem;
+  padding: 0.28rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-control);
+  background: rgba(8, 11, 20, 0.96);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42);
+}
+
+.add-layer-menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12rem;
+  width: 100%;
+  padding: 0.42rem 0.55rem;
+  border: none;
+  border-radius: calc(var(--radius-control) - 2px);
+  background: transparent;
+  color: rgba(244, 240, 255, 0.92);
+  text-align: left;
+  cursor: pointer;
+}
+
+.add-layer-menu-item:not(:disabled):hover {
+  background: rgba(167, 139, 250, 0.12);
+}
+
+.add-layer-menu-item:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.add-layer-menu-item-label {
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.add-layer-menu-item-hint {
+  color: rgba(244, 240, 255, 0.52);
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
+.melody-chord-playback-hint {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
 .piano-roll-shell {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -575,6 +714,10 @@ input[type='range'] {
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
   background: rgba(0, 0, 0, 0.28);
+}
+
+.piano-roll-shell--chord {
+  background: rgba(0, 0, 0, 0.22);
 }
 
 .piano-roll-shell.piano-roll-fixed {
@@ -692,6 +835,12 @@ input[type='range'] {
   overflow: hidden;
   text-overflow: ellipsis;
   box-sizing: border-box;
+}
+
+.piano-note--chord {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.82), rgba(52, 211, 153, 0.62));
+  color: rgba(8, 11, 20, 0.92);
 }
 
 .melody-meta-row {
