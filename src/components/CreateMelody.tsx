@@ -44,7 +44,8 @@ export function CreateMelody({
         <h2>Create Melody</h2>
       </div>
 
-      <div className="create-melody-section">
+      <fieldset className="create-melody-fields" disabled={isMelodyLocked}>
+        <div className="create-melody-section">
         <h3 className="section-title">Hook Intent</h3>
         <div className="control-grid compact">
           <label>
@@ -230,6 +231,7 @@ export function CreateMelody({
           </div>
         ) : null}
       </div>
+      </fieldset>
 
       <button
         className="primary generate-button"
@@ -240,7 +242,7 @@ export function CreateMelody({
         Generate Melody
       </button>
       {isMelodyLocked ? (
-        <p className="generate-locked-hint">Unlock to generate a new melody</p>
+        <p className="generate-locked-hint">Unlock to edit settings or generate a new melody</p>
       ) : null}
     </section>
   );

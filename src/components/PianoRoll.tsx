@@ -309,7 +309,7 @@ export function PianoRoll({
           {melody ? (
             <button
               type="button"
-              className="icon-circle-button melody-lock-icon-button"
+              className={`icon-circle-button melody-lock-icon-button${isMelodyLocked ? ' is-locked' : ''}`}
               onClick={handleLockToggle}
               aria-label={isMelodyLocked ? 'Unlock melody' : 'Lock melody'}
               title={isMelodyLocked ? 'Unlock melody' : 'Lock melody'}
@@ -336,38 +336,6 @@ export function PianoRoll({
               />
             </div>
           </div>
-
-          {melody ? (
-            <div className="piano-roll-add-layer" ref={addLayerMenuRef}>
-              <button
-                type="button"
-                className="icon-circle-button add-layer-trigger"
-                onClick={() => setIsAddLayerMenuOpen((open) => !open)}
-                aria-label="Add layer"
-                title="Add layer"
-                aria-expanded={isAddLayerMenuOpen}
-                aria-haspopup="menu"
-              >
-                <AddLayerIcon />
-              </button>
-              {isAddLayerMenuOpen ? (
-                <div className="add-layer-menu" role="menu">
-                  <button
-                    type="button"
-                    className="add-layer-menu-item"
-                    role="menuitem"
-                    disabled={addChordsDisabled}
-                    onClick={handleAddChordsFromMenu}
-                  >
-                    <span className="add-layer-menu-item-label">Add Chords</span>
-                    {addChordsHint ? (
-                      <span className="add-layer-menu-item-hint">{addChordsHint}</span>
-                    ) : null}
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
         </div>
 
         {hasChordLayerReady && chordNotes.length > 0 ? (
@@ -396,6 +364,40 @@ export function PianoRoll({
 
         {hasChordLayerReady ? (
           <p className="hint melody-chord-playback-hint">Playback includes chords · downloads remain melody-only</p>
+        ) : null}
+
+        {melody ? (
+          <div className="piano-roll-stack-footer">
+            <div className="add-layer-footer-action" ref={addLayerMenuRef}>
+              <button
+                type="button"
+                className="icon-circle-button add-layer-trigger"
+                onClick={() => setIsAddLayerMenuOpen((open) => !open)}
+                aria-label="Add layer"
+                title="Add layer"
+                aria-expanded={isAddLayerMenuOpen}
+                aria-haspopup="menu"
+              >
+                <AddLayerIcon />
+              </button>
+              {isAddLayerMenuOpen ? (
+                <div className="add-layer-menu" role="menu">
+                  <button
+                    type="button"
+                    className="add-layer-menu-item"
+                    role="menuitem"
+                    disabled={addChordsDisabled}
+                    onClick={handleAddChordsFromMenu}
+                  >
+                    <span className="add-layer-menu-item-label">Add Chords</span>
+                    {addChordsHint ? (
+                      <span className="add-layer-menu-item-hint">{addChordsHint}</span>
+                    ) : null}
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </div>
         ) : null}
       </div>
     </section>
