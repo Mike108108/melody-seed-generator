@@ -6,20 +6,26 @@ import { playMelody, stopPlayback } from '../lib/audio/playback';
 
 export type DownloadFormat = 'midi' | 'layered-midi' | 'provenance' | 'wav' | 'mp3';
 
+type DownloadOption = {
+  value: DownloadFormat;
+  label: string;
+  disabled?: boolean;
+};
+
 type MelodyTransportProps = {
   melody: GeneratedMelody | null;
   chordNotes?: MelodyNote[] | null;
   layeredSeedWithChords?: LayeredSeed | null;
 };
 
-const BASE_DOWNLOAD_OPTIONS: { value: DownloadFormat; label: string; disabled?: boolean }[] = [
+const BASE_DOWNLOAD_OPTIONS: DownloadOption[] = [
   { value: 'midi', label: 'MIDI' },
   { value: 'wav', label: 'WAV' },
   { value: 'provenance', label: 'JSON' },
   { value: 'mp3', label: 'MP3', disabled: true }
 ];
 
-const LAYERED_MIDI_OPTION = { value: 'layered-midi' as const, label: 'MIDI + Chords' };
+const LAYERED_MIDI_OPTION: DownloadOption = { value: 'layered-midi', label: 'MIDI + Chords' };
 
 function hasPreparedChordTrack(layeredSeed: LayeredSeed | null | undefined): layeredSeed is LayeredSeed {
   return (
@@ -38,7 +44,7 @@ export function MelodyTransport({
   const disabled = melody === null;
   const layeredMidiAvailable = hasPreparedChordTrack(layeredSeedWithChords);
 
-  const downloadOptions = useMemo(() => {
+  const downloadOptions: DownloadOption[] = useMemo(() => {
     if (!layeredMidiAvailable) {
       return BASE_DOWNLOAD_OPTIONS;
     }
