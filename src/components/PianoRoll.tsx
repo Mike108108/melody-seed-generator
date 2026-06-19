@@ -97,11 +97,14 @@ type PianoRollProps = {
   melody: GeneratedMelody | null;
   isMelodyLocked: boolean;
   hasChordLayerReady: boolean;
+  chordNotesForDisplay: MelodyNote[] | null;
   chordNotesForPlayback: MelodyNote[] | null;
+  isChordLayerEnabled: boolean;
   layeredSeedWithChords: LayeredSeed | null;
   onLockMelody: () => void;
   onUnlockMelody: () => void;
   onAddChords: () => void;
+  onToggleChordLayerEnabled: () => void;
 };
 
 type PianoRollTimelineProps = {
@@ -190,11 +193,14 @@ export function PianoRoll({
   melody,
   isMelodyLocked,
   hasChordLayerReady,
+  chordNotesForDisplay,
   chordNotesForPlayback,
+  isChordLayerEnabled,
   layeredSeedWithChords,
   onLockMelody,
   onUnlockMelody,
-  onAddChords
+  onAddChords,
+  onToggleChordLayerEnabled
 }: PianoRollProps) {
   const [isAddLayerMenuOpen, setIsAddLayerMenuOpen] = useState(false);
   const addLayerMenuRef = useRef<HTMLDivElement>(null);
@@ -205,14 +211,14 @@ export function PianoRoll({
   const bars = melody?.settings.bars ?? DEFAULT_PREVIEW_BARS;
   const melodyDisplayRange = useMemo(() => getDisplayRange(melody), [melody]);
   const chordDisplayRange = useMemo(
-    () => getDisplayRangeForNotes(chordNotesForPlayback ?? [], CHORD_VISIBLE_PITCH_ROWS),
-    [chordNotesForPlayback]
+    () => getDisplayRangeForNotes(chordNotesForDisplay ?? [], CHORD_VISIBLE_PITCH_ROWS),
+    [chordNotesForDisplay]
   );
   const outputMeta = buildOutputMeta(melody);
   const timelineWidthPx = bars * BAR_WIDTH_PX;
   const totalBeats = bars * 4;
   const melodyNotes = melody?.notes ?? [];
-  const chordNotes = hasChordLayerReady && chordNotesForPlayback ? chordNotesForPlayback : [];
+  const chordNotes = hasChordLayerReady && chordNotesForDisplay ? chordNotesForDisplay : [];
 
   const pianoRollStyle = {
     height: PIANO_ROLL_HEIGHT,
@@ -308,6 +314,7 @@ export function PianoRoll({
         melody={melody}
         chordNotes={chordNotesForPlayback}
         layeredSeedWithChords={layeredSeedWithChords}
+        isChordLayerEnabled={isChordLayerEnabled}
       />
 
       <div className="piano-roll-stack">
@@ -345,8 +352,22 @@ export function PianoRoll({
         </div>
 
         {hasChordLayerReady && chordNotes.length > 0 ? (
-          <div className="piano-roll-lane-wrap piano-roll-lane-wrap--chord">
-            <div className="piano-roll-lane-label">Chord Layer</div>
+          <div
+            className={`piano-roll-lane-wrap piano-roll-lane-wrap--chord${isChordLayerEnabled ? '' : ' is-layer-disabled'}`}
+          >
+            <div className="piano-roll-lane-header">
+              <div className="piano-roll-lane-label">Chord Layer</div>
+              <button
+                type="button"
+                className={`layer-toggle${isChordLayerEnabled ? ' is-enabled' : ''}`}
+                onClick={onToggleChordLayerEnabled}
+                aria-label={isChordLayerEnabled ? 'Disable chord layer' : 'Enable chord layer'}
+                aria-pressed={isChordLayerEnabled}
+                title={isChordLayerEnabled ? 'Disable chord layer' : 'Enable chord layer'}
+              >
+                {isChordLayerEnabled ? 'On' : 'Off'}
+              </button>
+            </div>
             <div className="piano-roll-shell piano-roll-shell--chord piano-roll-fixed" style={chordRollStyle}>
               <PianoRollKeys displayRange={chordDisplayRange} height={CHORD_ROLL_HEIGHT} />
 
@@ -370,7 +391,9 @@ export function PianoRoll({
 
         {hasChordLayerReady ? (
           <p className="hint melody-chord-playback-hint">
-            Playback includes chords · MIDI + Chords available · WAV remains melody-only
+            {isChordLayerEnabled
+              ? 'Chord Layer enabled · MIDI includes active layers · WAV remains melody-only'
+              : 'Chord Layer disabled · MIDI exports melody only · WAV remains melody-only'}
           </p>
         ) : null}
 
