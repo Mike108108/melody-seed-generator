@@ -118,6 +118,7 @@ export default function App() {
             isMelodyLocked={isMelodyLocked}
             hasChordLayerReady={hasChordLayerReady}
             chordNotesForPlayback={chordNotesForPlayback}
+            layeredSeedWithChords={layeredSeedWithChords}
             onLockMelody={handleLockMelody}
             onUnlockMelody={handleUnlockMelody}
             onAddChords={handleAddChords}

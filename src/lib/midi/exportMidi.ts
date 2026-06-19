@@ -1,6 +1,6 @@
 import { Midi } from '@tonejs/midi';
 import { createProvenanceLayers } from '../seed/layeredSeed';
-import type { GeneratedMelody, ProvenanceJson } from '../types';
+import type { GeneratedMelody, LayeredSeed, ProvenanceJson } from '../types';
 import { slugifyFilePart } from '../utils/hash';
 
 export function exportMelodyToMidiBytes(melody: GeneratedMelody): Uint8Array {
@@ -59,12 +59,70 @@ export function createProvenanceJson(melody: GeneratedMelody): ProvenanceJson {
   };
 }
 
+export function exportLayeredSeedToMidiBytes(
+  melody: GeneratedMelody,
+  layeredSeed: LayeredSeed
+): Uint8Array {
+  const midi = new Midi();
+  midi.header.setTempo(melody.settings.bpm);
+
+  const melodyTrackSource =
+    layeredSeed.tracks.find((track) => track.id === layeredSeed.primaryTrackId) ??
+    layeredSeed.tracks.find((track) => track.role === 'melody');
+
+  if (melodyTrackSource) {
+    const melodyTrack = midi.addTrack();
+    melodyTrack.name = melodyTrackSource.name || 'Procedural Melody Seed';
+    melodyTrack.instrument.name = 'synth lead';
+    melodyTrack.channel = 0;
+
+    melodyTrackSource.notes.forEach((note) => {
+      melodyTrack.addNote({
+        midi: note.midi,
+        time: beatsToSeconds(note.startBeats, melody.settings.bpm),
+        duration: beatsToSeconds(note.durationBeats, melody.settings.bpm),
+        velocity: note.velocity
+      });
+    });
+  }
+
+  const chordTrackSource = layeredSeed.tracks.find(
+    (track) => track.role === 'chords' && track.notes.length > 0
+  );
+
+  if (chordTrackSource) {
+    const chordTrack = midi.addTrack();
+    chordTrack.name = chordTrackSource.name || 'Chords';
+    chordTrack.instrument.name = 'synth pad';
+    chordTrack.channel = 1;
+
+    chordTrackSource.notes.forEach((note) => {
+      chordTrack.addNote({
+        midi: note.midi,
+        time: beatsToSeconds(note.startBeats, melody.settings.bpm),
+        duration: beatsToSeconds(note.durationBeats, melody.settings.bpm),
+        velocity: note.velocity
+      });
+    });
+  }
+
+  return new Uint8Array(midi.toArray());
+}
+
 export function downloadMidi(melody: GeneratedMelody): void {
   const bytes = exportMelodyToMidiBytes(melody);
   const arrayBuffer = new ArrayBuffer(bytes.byteLength);
   new Uint8Array(arrayBuffer).set(bytes);
   const midiBlob = new Blob([arrayBuffer], { type: 'audio/midi' });
   downloadBlob(midiBlob, `${baseFileName(melody)}.mid`, 'audio/midi');
+}
+
+export function downloadLayeredMidi(melody: GeneratedMelody, layeredSeed: LayeredSeed): void {
+  const bytes = exportLayeredSeedToMidiBytes(melody, layeredSeed);
+  const arrayBuffer = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(arrayBuffer).set(bytes);
+  const midiBlob = new Blob([arrayBuffer], { type: 'audio/midi' });
+  downloadBlob(midiBlob, `${baseFileName(melody)}-midi-chords.mid`, 'audio/midi');
 }
 
 export function downloadProvenance(melody: GeneratedMelody): void {

@@ -1,28 +1,50 @@
-import { useEffect, useState } from 'react';
-import type { GeneratedMelody, MelodyNote } from '../lib/types';
+import { useEffect, useMemo, useState } from 'react';
+import type { GeneratedMelody, LayeredSeed, MelodyNote } from '../lib/types';
 import { downloadWav } from '../lib/audio/exportWav';
-import { downloadMidi, downloadProvenance } from '../lib/midi/exportMidi';
+import { downloadLayeredMidi, downloadMidi, downloadProvenance } from '../lib/midi/exportMidi';
 import { playMelody, stopPlayback } from '../lib/audio/playback';
 
-export type DownloadFormat = 'midi' | 'provenance' | 'wav' | 'mp3';
+export type DownloadFormat = 'midi' | 'layered-midi' | 'provenance' | 'wav' | 'mp3';
 
 type MelodyTransportProps = {
   melody: GeneratedMelody | null;
   chordNotes?: MelodyNote[] | null;
+  layeredSeedWithChords?: LayeredSeed | null;
 };
 
-const DOWNLOAD_OPTIONS: { value: DownloadFormat; label: string; disabled?: boolean }[] = [
+const BASE_DOWNLOAD_OPTIONS: { value: DownloadFormat; label: string; disabled?: boolean }[] = [
   { value: 'midi', label: 'MIDI' },
   { value: 'wav', label: 'WAV' },
   { value: 'provenance', label: 'JSON' },
   { value: 'mp3', label: 'MP3', disabled: true }
 ];
 
-export function MelodyTransport({ melody, chordNotes = null }: MelodyTransportProps) {
+const LAYERED_MIDI_OPTION = { value: 'layered-midi' as const, label: 'MIDI + Chords' };
+
+function hasPreparedChordTrack(layeredSeed: LayeredSeed | null | undefined): layeredSeed is LayeredSeed {
+  return (
+    layeredSeed?.tracks.some((track) => track.role === 'chords' && track.notes.length > 0) ?? false
+  );
+}
+
+export function MelodyTransport({
+  melody,
+  chordNotes = null,
+  layeredSeedWithChords = null
+}: MelodyTransportProps) {
   const [downloadFormat, setDownloadFormat] = useState<DownloadFormat>('midi');
   const [exporting, setExporting] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const disabled = melody === null;
+  const layeredMidiAvailable = hasPreparedChordTrack(layeredSeedWithChords);
+
+  const downloadOptions = useMemo(() => {
+    if (!layeredMidiAvailable) {
+      return BASE_DOWNLOAD_OPTIONS;
+    }
+
+    return [BASE_DOWNLOAD_OPTIONS[0], LAYERED_MIDI_OPTION, ...BASE_DOWNLOAD_OPTIONS.slice(1)];
+  }, [layeredMidiAvailable]);
 
   useEffect(() => {
     stopPlayback();
@@ -30,12 +52,18 @@ export function MelodyTransport({ melody, chordNotes = null }: MelodyTransportPr
   }, [melody, chordNotes]);
 
   useEffect(() => {
+    if (!layeredMidiAvailable && downloadFormat === 'layered-midi') {
+      setDownloadFormat('midi');
+    }
+  }, [layeredMidiAvailable, downloadFormat]);
+
+  useEffect(() => {
     return () => {
       stopPlayback();
     };
   }, []);
 
-  const selectedOption = DOWNLOAD_OPTIONS.find((option) => option.value === downloadFormat) ?? DOWNLOAD_OPTIONS[0];
+  const selectedOption = downloadOptions.find((option) => option.value === downloadFormat) ?? downloadOptions[0];
 
   const handlePlay = async () => {
     if (!melody) return;
@@ -57,6 +85,13 @@ export function MelodyTransport({ melody, chordNotes = null }: MelodyTransportPr
 
     if (downloadFormat === 'midi') {
       downloadMidi(melody);
+      return;
+    }
+
+    if (downloadFormat === 'layered-midi') {
+      if (hasPreparedChordTrack(layeredSeedWithChords)) {
+        downloadLayeredMidi(melody, layeredSeedWithChords);
+      }
       return;
     }
 
@@ -124,7 +159,7 @@ export function MelodyTransport({ melody, chordNotes = null }: MelodyTransportPr
               aria-label="Download format"
               title="Download format"
             >
-              {DOWNLOAD_OPTIONS.map((option) => (
+              {downloadOptions.map((option) => (
                 <option key={option.value} value={option.value} disabled={option.disabled}>
                   {option.disabled ? `${option.label} (soon)` : option.label}
                 </option>

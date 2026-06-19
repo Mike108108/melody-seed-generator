@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import type { GeneratedMelody, MelodyNote } from '../lib/types';
+import type { GeneratedMelody, LayeredSeed, MelodyNote } from '../lib/types';
 import { midiToNoteName } from '../lib/music/notes';
 import { MelodyStatsCompact } from './MelodyStats';
 import { MelodyTransport } from './MelodyTransport';
@@ -98,6 +98,7 @@ type PianoRollProps = {
   isMelodyLocked: boolean;
   hasChordLayerReady: boolean;
   chordNotesForPlayback: MelodyNote[] | null;
+  layeredSeedWithChords: LayeredSeed | null;
   onLockMelody: () => void;
   onUnlockMelody: () => void;
   onAddChords: () => void;
@@ -190,6 +191,7 @@ export function PianoRoll({
   isMelodyLocked,
   hasChordLayerReady,
   chordNotesForPlayback,
+  layeredSeedWithChords,
   onLockMelody,
   onUnlockMelody,
   onAddChords
@@ -302,7 +304,11 @@ export function PianoRoll({
         <MelodyStatsCompact melody={melody} />
       </div>
 
-      <MelodyTransport melody={melody} chordNotes={chordNotesForPlayback} />
+      <MelodyTransport
+        melody={melody}
+        chordNotes={chordNotesForPlayback}
+        layeredSeedWithChords={layeredSeedWithChords}
+      />
 
       <div className="piano-roll-stack">
         <div className="piano-roll-lane-wrap piano-roll-lane-wrap--melody">
@@ -363,7 +369,9 @@ export function PianoRoll({
         ) : null}
 
         {hasChordLayerReady ? (
-          <p className="hint melody-chord-playback-hint">Playback includes chords · downloads remain melody-only</p>
+          <p className="hint melody-chord-playback-hint">
+            Playback includes chords · MIDI + Chords available · WAV remains melody-only
+          </p>
         ) : null}
 
         {melody ? (
