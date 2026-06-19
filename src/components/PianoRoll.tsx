@@ -16,6 +16,81 @@ const NOTE_INSET_PX = 2;
 const NOTE_HEIGHT_PX = PITCH_ROW_HEIGHT_PX - NOTE_INSET_PX * 2;
 const DEFAULT_PREVIEW_BARS = 8;
 
+type IconProps = {
+  className?: string;
+};
+
+function LockedIcon({ className = 'icon-circle-button__icon' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" aria-hidden="true">
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4.75 7.25V5a3.25 3.25 0 0 1 6.5 0v2.25"
+      />
+      <rect
+        x="3.25"
+        y="7.25"
+        width="9.5"
+        height="6.75"
+        rx="1.25"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
+}
+
+function UnlockedIcon({ className = 'icon-circle-button__icon' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" aria-hidden="true">
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4.75 7.25V5a3.25 3.25 0 0 1 6.5 0"
+      />
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        d="M11.25 5v2"
+      />
+      <rect
+        x="3.25"
+        y="7.25"
+        width="9.5"
+        height="6.75"
+        rx="1.25"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
+}
+
+function AddLayerIcon({ className = 'icon-circle-button__icon' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" aria-hidden="true">
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        d="M8 3.75v8.5M3.75 8h8.5"
+      />
+    </svg>
+  );
+}
+
 type DisplayRange = { minMidi: number; maxMidi: number; span: number };
 
 type PianoRollProps = {
@@ -234,12 +309,12 @@ export function PianoRoll({
           {melody ? (
             <button
               type="button"
-              className="melody-lock-icon-button"
+              className="icon-circle-button melody-lock-icon-button"
               onClick={handleLockToggle}
               aria-label={isMelodyLocked ? 'Unlock melody' : 'Lock melody'}
               title={isMelodyLocked ? 'Unlock melody' : 'Lock melody'}
             >
-              {isMelodyLocked ? '🔒' : '🔓'}
+              {isMelodyLocked ? <LockedIcon /> : <UnlockedIcon />}
             </button>
           ) : null}
 
@@ -266,14 +341,14 @@ export function PianoRoll({
             <div className="piano-roll-add-layer" ref={addLayerMenuRef}>
               <button
                 type="button"
-                className="add-layer-trigger"
+                className="icon-circle-button add-layer-trigger"
                 onClick={() => setIsAddLayerMenuOpen((open) => !open)}
                 aria-label="Add layer"
                 title="Add layer"
                 aria-expanded={isAddLayerMenuOpen}
                 aria-haspopup="menu"
               >
-                +
+                <AddLayerIcon />
               </button>
               {isAddLayerMenuOpen ? (
                 <div className="add-layer-menu" role="menu">
