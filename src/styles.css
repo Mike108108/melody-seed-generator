@@ -702,10 +702,38 @@ input[type='range'] {
   padding-top: 0.1rem;
 }
 
-.melody-lock-controls {
+.melody-footer-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.melody-lock-controls,
+.melody-chord-controls {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.melody-chord-hint {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
+.melody-chord-ready-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  border-radius: 999px;
+  padding: 0.18rem 0.55rem;
+  background: rgba(167, 139, 250, 0.1);
+  color: rgba(244, 240, 255, 0.88);
+  font-size: 0.72rem;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .melody-lock-chip {

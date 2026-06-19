@@ -11,8 +11,9 @@ import {
   type MelodyIntent
 } from './lib/melody/intent';
 import { createPhraseRolePlan } from './lib/melody/phraseRolePlan';
+import { createLayeredSeedWithChordTrack } from './lib/seed/layeredChordSeed';
 import { createMelodyOnlyLayeredSeed } from './lib/seed/layeredSeed';
-import type { GeneratedMelody, MelodyFingerprint, MelodySettings } from './lib/types';
+import type { GeneratedMelody, LayeredSeed, MelodyFingerprint, MelodySettings } from './lib/types';
 import { makeRandomSeed } from './lib/utils/seededRandom';
 import './styles.css';
 
@@ -30,6 +31,11 @@ export default function App() {
   const [melody, setMelody] = useState<GeneratedMelody | null>(null);
   const [fingerprintHistory, setFingerprintHistory] = useState<MelodyFingerprint[]>([]);
   const [isMelodyLocked, setIsMelodyLocked] = useState(false);
+  const [layeredSeedWithChords, setLayeredSeedWithChords] = useState<LayeredSeed | null>(null);
+
+  const hasChordLayerReady =
+    layeredSeedWithChords?.tracks.some((track) => track.role === 'chords' && track.notes.length > 0) ??
+    false;
 
   const generateFromSettings = (nextSettings: MelodySettings, nextIntent: MelodyIntent) => {
     const phraseRolePlan = createPhraseRolePlan(nextIntent, nextSettings);
@@ -47,6 +53,7 @@ export default function App() {
       ...enrichedMelody,
       layeredSeed: createMelodyOnlyLayeredSeed(enrichedMelody)
     });
+    setLayeredSeedWithChords(null);
     setFingerprintHistory((history) => [...history, generated.fingerprint].slice(-100));
   };
 
@@ -70,6 +77,12 @@ export default function App() {
 
   const handleUnlockMelody = () => {
     setIsMelodyLocked(false);
+    setLayeredSeedWithChords(null);
+  };
+
+  const handleAddChords = () => {
+    if (!melody || !isMelodyLocked) return;
+    setLayeredSeedWithChords(createLayeredSeedWithChordTrack(melody));
   };
 
   return (
@@ -99,8 +112,11 @@ export default function App() {
           <PianoRoll
             melody={melody}
             isMelodyLocked={isMelodyLocked}
+            hasChordLayerReady={hasChordLayerReady}
+            chordLayerAttempted={layeredSeedWithChords !== null}
             onLockMelody={handleLockMelody}
             onUnlockMelody={handleUnlockMelody}
+            onAddChords={handleAddChords}
           />
         </div>
       </div>

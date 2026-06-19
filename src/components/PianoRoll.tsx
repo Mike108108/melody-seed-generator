@@ -17,11 +17,22 @@ const DEFAULT_PREVIEW_BARS = 8;
 type PianoRollProps = {
   melody: GeneratedMelody | null;
   isMelodyLocked: boolean;
+  hasChordLayerReady: boolean;
+  chordLayerAttempted: boolean;
   onLockMelody: () => void;
   onUnlockMelody: () => void;
+  onAddChords: () => void;
 };
 
-export function PianoRoll({ melody, isMelodyLocked, onLockMelody, onUnlockMelody }: PianoRollProps) {
+export function PianoRoll({
+  melody,
+  isMelodyLocked,
+  hasChordLayerReady,
+  chordLayerAttempted,
+  onLockMelody,
+  onUnlockMelody,
+  onAddChords
+}: PianoRollProps) {
   const bars = melody?.settings.bars ?? DEFAULT_PREVIEW_BARS;
   const displayRange = useMemo(() => getDisplayRange(melody), [melody]);
   const pitchLabels = useMemo(() => buildPitchLabels(displayRange), [displayRange]);
@@ -107,21 +118,46 @@ export function PianoRoll({ melody, isMelodyLocked, onLockMelody, onUnlockMelody
       {melody ? (
         <footer className="melody-meta-row">
           <SeedIdChip seed={melody.settings.seed} />
-          <div className="melody-lock-controls">
-            {isMelodyLocked ? (
-              <>
-                <span className="melody-lock-chip" aria-label="Melody locked">
-                  Locked
-                </span>
-                <button type="button" className="melody-lock-button" onClick={onUnlockMelody}>
-                  Unlock
+          <div className="melody-footer-actions">
+            <div className="melody-lock-controls">
+              {isMelodyLocked ? (
+                <>
+                  <span className="melody-lock-chip" aria-label="Melody locked">
+                    Locked
+                  </span>
+                  <button type="button" className="melody-lock-button" onClick={onUnlockMelody}>
+                    Unlock
+                  </button>
+                </>
+              ) : (
+                <button type="button" className="melody-lock-button" onClick={onLockMelody}>
+                  Lock Melody
                 </button>
-              </>
-            ) : (
-              <button type="button" className="melody-lock-button" onClick={onLockMelody}>
-                Lock Melody
-              </button>
-            )}
+              )}
+            </div>
+            <div className="melody-chord-controls">
+              {!isMelodyLocked ? (
+                <>
+                  <button type="button" className="melody-lock-button" disabled>
+                    Add Chords
+                  </button>
+                  <span className="hint melody-chord-hint">Lock melody to add chords</span>
+                </>
+              ) : hasChordLayerReady ? (
+                <>
+                  <span className="melody-chord-ready-chip" aria-label="Chord layer ready">
+                    Chord Layer Ready
+                  </span>
+                  <span className="hint melody-chord-hint">Melody-only playback/export for now</span>
+                </>
+              ) : chordLayerAttempted ? (
+                <span className="hint melody-chord-hint">No chord layer generated for this melody</span>
+              ) : (
+                <button type="button" className="melody-lock-button" onClick={onAddChords}>
+                  Add Chords
+                </button>
+              )}
+            </div>
           </div>
         </footer>
       ) : null}
