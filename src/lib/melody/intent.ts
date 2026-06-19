@@ -40,19 +40,19 @@ export type GenerationProfile = {
 };
 
 export const GENRE_OPTIONS: { value: MelodyGenre; label: string }[] = [
-  { value: 'pop-hook', label: 'Pop Hook' },
-  { value: 'dark-trap', label: 'Dark Trap' },
-  { value: 'edm-lead', label: 'EDM Lead' },
-  { value: 'afro-house', label: 'Afro House' },
-  { value: 'cinematic', label: 'Cinematic' },
-  { value: 'hyperpop', label: 'Hyperpop' }
+  { value: 'pop-hook', label: 'Pop Diatonic' },
+  { value: 'dark-trap', label: 'Dark Minor' },
+  { value: 'edm-lead', label: 'EDM Bright' },
+  { value: 'afro-house', label: 'Afro Modal' },
+  { value: 'cinematic', label: 'Cinematic Minor' },
+  { value: 'hyperpop', label: 'Hyperpop Bright' }
 ];
 
 export const ROLE_OPTIONS: { value: MelodyRole; label: string }[] = [
   { value: 'chorus-hook', label: 'Chorus Hook' },
-  { value: 'verse-motif', label: 'Verse Motif' },
-  { value: 'drop-lead', label: 'Drop Lead' },
-  { value: 'pre-chorus-lift', label: 'Pre-Chorus Lift' }
+  { value: 'verse-motif', label: 'Verse' },
+  { value: 'drop-lead', label: 'Drop' },
+  { value: 'pre-chorus-lift', label: 'Pre-Chorus' }
 ];
 
 export const DRAMA_OPTIONS: { value: MelodyDrama; label: string }[] = [
@@ -69,9 +69,9 @@ export const COMPLEXITY_OPTIONS: { value: MelodyComplexity; label: string }[] = 
 ];
 
 export const HOOKINESS_OPTIONS: { value: MelodyHookiness; label: string }[] = [
-  { value: 'safe', label: 'Safe' },
+  { value: 'safe', label: 'Light' },
   { value: 'catchy', label: 'Catchy' },
-  { value: 'bold', label: 'Bold' }
+  { value: 'bold', label: 'Strong' }
 ];
 
 export const DEFAULT_INTENT: MelodyIntent = {

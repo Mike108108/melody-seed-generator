@@ -46,7 +46,7 @@ export function CreateMelody({
         <h3 className="section-title">Hook Intent</h3>
         <div className="control-grid compact">
           <label>
-            Genre
+            Melodic Language
             <select
               value={intent.genre}
               onChange={(event) => patchIntent('genre', event.target.value as MelodyIntent['genre'])}
@@ -60,7 +60,7 @@ export function CreateMelody({
           </label>
 
           <label>
-            Melody Role
+            Song Part
             <select
               value={intent.role}
               onChange={(event) => patchIntent('role', event.target.value as MelodyIntent['role'])}
@@ -74,7 +74,7 @@ export function CreateMelody({
           </label>
 
           <label>
-            Drama
+            Phrase Shape
             <select
               value={intent.drama}
               onChange={(event) => patchIntent('drama', event.target.value as MelodyIntent['drama'])}
@@ -88,7 +88,7 @@ export function CreateMelody({
           </label>
 
           <label>
-            Complexity
+            Detail
             <select
               value={intent.complexity}
               onChange={(event) => patchIntent('complexity', event.target.value as MelodyIntent['complexity'])}
@@ -102,7 +102,7 @@ export function CreateMelody({
           </label>
 
           <label className="control-grid-span">
-            Hookiness
+            Hook Strength
             <select
               value={intent.hookiness}
               onChange={(event) => patchIntent('hookiness', event.target.value as MelodyIntent['hookiness'])}
