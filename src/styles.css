@@ -626,6 +626,36 @@ input[type='range'] {
   justify-content: flex-start;
 }
 
+.chord-layer-performance-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.75rem;
+  margin: -0.08rem 0 0.32rem;
+}
+
+.chord-layer-performance-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  min-width: 0;
+}
+
+.chord-layer-performance-label {
+  color: rgba(244, 240, 255, 0.58);
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.chord-layer-performance-control select {
+  min-width: 7.5rem;
+  padding: 0.28rem 0.45rem;
+  font-size: 0.72rem;
+}
+
 .layer-switch {
   flex-shrink: 0;
   border: 0;

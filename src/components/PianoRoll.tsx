@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { GeneratedMelody, LayeredSeed, MelodyNote } from '../lib/types';
+import type { ChordLength, ChordPattern } from '../lib/harmony/chordPerformance';
 import { midiToNoteName } from '../lib/music/notes';
 import { MelodyStatsCompact } from './MelodyStats';
 import { MelodyTransport } from './MelodyTransport';
@@ -129,6 +130,10 @@ type PianoRollProps = {
   onRegenerateChords?: () => void;
   canRegenerateChords?: boolean;
   chordLayerVariant?: number;
+  chordPattern?: ChordPattern;
+  chordLength?: ChordLength;
+  onChordPatternChange?: (pattern: ChordPattern) => void;
+  onChordLengthChange?: (length: ChordLength) => void;
   onToggleChordLayerEnabled: () => void;
 };
 
@@ -228,6 +233,10 @@ export function PianoRoll({
   onRegenerateChords,
   canRegenerateChords = false,
   chordLayerVariant = 0,
+  chordPattern = 'sustained',
+  chordLength = 'long',
+  onChordPatternChange,
+  onChordLengthChange,
   onToggleChordLayerEnabled
 }: PianoRollProps) {
   const [isAddLayerMenuOpen, setIsAddLayerMenuOpen] = useState(false);
@@ -397,6 +406,34 @@ export function PianoRoll({
                 </span>
               </button>
             </div>
+            <div className="chord-layer-performance-controls">
+              <label className="chord-layer-performance-control">
+                <span className="chord-layer-performance-label">Pattern</span>
+                <select
+                  value={chordPattern}
+                  onChange={(event) => onChordPatternChange?.(event.target.value as ChordPattern)}
+                  aria-label="Chord pattern"
+                >
+                  <option value="sustained">Sustained</option>
+                  <option value="half-bar">Half-bar</option>
+                  <option value="quarter-pulse">Quarter pulse</option>
+                  <option value="syncopated">Syncopated</option>
+                </select>
+              </label>
+              <label className="chord-layer-performance-control">
+                <span className="chord-layer-performance-label">Length</span>
+                <select
+                  value={chordLength}
+                  onChange={(event) => onChordLengthChange?.(event.target.value as ChordLength)}
+                  aria-label="Chord length"
+                >
+                  <option value="long">Long</option>
+                  <option value="medium">Medium</option>
+                  <option value="short">Short</option>
+                  <option value="staccato">Staccato</option>
+                </select>
+              </label>
+            </div>
             <div className="piano-roll-shell piano-roll-shell--chord piano-roll-fixed" style={chordRollStyle}>
               {canRegenerateChords && onRegenerateChords ? (
                 <button
@@ -418,7 +455,7 @@ export function PianoRoll({
                 onScroll={(event) => syncViewportScroll(event.currentTarget, melodyViewportRef.current)}
               >
                 <PianoRollTimeline
-                  key={`chord-v${chordLayerVariant}`}
+                  key={`chord-v${chordLayerVariant}-${chordPattern}-${chordLength}`}
                   notes={chordNotes}
                   displayRange={chordDisplayRange}
                   timelineWidthPx={timelineWidthPx}

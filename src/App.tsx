@@ -13,41 +13,39 @@ import {
 import { createPhraseRolePlan } from './lib/melody/phraseRolePlan';
 import { createLayeredSeedWithChordTrack } from './lib/seed/layeredChordSeed';
 import { createMelodyOnlyLayeredSeed } from './lib/seed/layeredSeed';
+import {
+  chordHarmonicSignature,
+  DEFAULT_CHORD_LENGTH,
+  DEFAULT_CHORD_PATTERN,
+  type ChordLength,
+  type ChordPattern
+} from './lib/harmony/chordPerformance';
+import type { ChordTrackOptions } from './lib/harmony/chordLayer';
 import type { GeneratedMelody, LayeredSeed, MelodyFingerprint, MelodyNote, MelodySettings } from './lib/types';
 import { makeRandomSeed } from './lib/utils/seededRandom';
 import './styles.css';
 
 const MAX_CHORD_REGENERATE_ATTEMPTS = 64;
 
-function chordNotesSignature(notes: MelodyNote[]): string {
-  return notes
-    .map((note) => `${note.startBeats}:${note.midi}:${note.durationBeats}:${note.velocity}`)
-    .join('|');
-}
-
 function getChordNotesFromLayeredSeed(layeredSeed: LayeredSeed): MelodyNote[] {
   return layeredSeed.tracks.find((track) => track.role === 'chords')?.notes ?? [];
 }
 
-function areChordNotesIdentical(current: MelodyNote[], next: MelodyNote[]): boolean {
-  if (current.length !== next.length) {
-    return false;
-  }
+function buildChordLayeredSeed(
+  melody: GeneratedMelody,
+  variant: number,
+  pattern: ChordPattern,
+  length: ChordLength
+): LayeredSeed {
+  const options: ChordTrackOptions = {
+    variant,
+    performance: { pattern, length }
+  };
+  return createLayeredSeedWithChordTrack(melody, options);
+}
 
-  for (let index = 0; index < current.length; index += 1) {
-    const currentNote = current[index];
-    const nextNote = next[index];
-
-    if (
-      currentNote.midi !== nextNote.midi ||
-      currentNote.startBeats !== nextNote.startBeats ||
-      currentNote.durationBeats !== nextNote.durationBeats
-    ) {
-      return false;
-    }
-  }
-
-  return true;
+function areChordHarmoniesIdentical(current: MelodyNote[], next: MelodyNote[]): boolean {
+  return chordHarmonicSignature(current) === chordHarmonicSignature(next);
 }
 
 export default function App() {
@@ -68,6 +66,8 @@ export default function App() {
   const [isChordLayerEnabled, setIsChordLayerEnabled] = useState(false);
   const [chordLayerVariant, setChordLayerVariant] = useState(0);
   const [seenChordLayerSignatures, setSeenChordLayerSignatures] = useState<string[]>([]);
+  const [chordPattern, setChordPattern] = useState<ChordPattern>(DEFAULT_CHORD_PATTERN);
+  const [chordLength, setChordLength] = useState<ChordLength>(DEFAULT_CHORD_LENGTH);
 
   const hasChordLayerReady =
     layeredSeedWithChords?.tracks.some((track) => track.role === 'chords' && track.notes.length > 0) ??
@@ -100,6 +100,8 @@ export default function App() {
     setIsChordLayerEnabled(false);
     setChordLayerVariant(0);
     setSeenChordLayerSignatures([]);
+    setChordPattern(DEFAULT_CHORD_PATTERN);
+    setChordLength(DEFAULT_CHORD_LENGTH);
     setFingerprintHistory((history) => [...history, generated.fingerprint].slice(-100));
   };
 
@@ -127,16 +129,33 @@ export default function App() {
     setIsChordLayerEnabled(false);
     setChordLayerVariant(0);
     setSeenChordLayerSignatures([]);
+    setChordPattern(DEFAULT_CHORD_PATTERN);
+    setChordLength(DEFAULT_CHORD_LENGTH);
   };
 
   const handleAddChords = () => {
     if (!melody || !isMelodyLocked) return;
-    const initialLayeredSeed = createLayeredSeedWithChordTrack(melody, { variant: 0 });
-    const initialSignature = chordNotesSignature(getChordNotesFromLayeredSeed(initialLayeredSeed));
+    const initialLayeredSeed = buildChordLayeredSeed(melody, 0, chordPattern, chordLength);
+    const initialSignature = chordHarmonicSignature(getChordNotesFromLayeredSeed(initialLayeredSeed));
     setChordLayerVariant(0);
     setSeenChordLayerSignatures(initialSignature ? [initialSignature] : []);
     setLayeredSeedWithChords(initialLayeredSeed);
     setIsChordLayerEnabled(true);
+  };
+
+  const rebuildChordPerformance = (nextPattern: ChordPattern, nextLength: ChordLength) => {
+    if (!melody || !hasChordLayerReady) return;
+    setChordPattern(nextPattern);
+    setChordLength(nextLength);
+    setLayeredSeedWithChords(buildChordLayeredSeed(melody, chordLayerVariant, nextPattern, nextLength));
+  };
+
+  const handleChordPatternChange = (nextPattern: ChordPattern) => {
+    rebuildChordPerformance(nextPattern, chordLength);
+  };
+
+  const handleChordLengthChange = (nextLength: ChordLength) => {
+    rebuildChordPerformance(chordPattern, nextLength);
   };
 
   const handleRegenerateChords = () => {
@@ -151,11 +170,11 @@ export default function App() {
     let firstDifferentVariant = attemptVariant;
 
     for (let attempt = 0; attempt < MAX_CHORD_REGENERATE_ATTEMPTS; attempt += 1) {
-      const candidateSeed = createLayeredSeedWithChordTrack(melody, { variant: attemptVariant });
+      const candidateSeed = buildChordLayeredSeed(melody, attemptVariant, chordPattern, chordLength);
       const candidateNotes = getChordNotesFromLayeredSeed(candidateSeed);
-      const candidateSignature = chordNotesSignature(candidateNotes);
+      const candidateSignature = chordHarmonicSignature(candidateNotes);
 
-      if (areChordNotesIdentical(currentChordNotes, candidateNotes)) {
+      if (areChordHarmoniesIdentical(currentChordNotes, candidateNotes)) {
         attemptVariant += 1;
         continue;
       }
@@ -183,7 +202,7 @@ export default function App() {
       return;
     }
 
-    const chosenSignature = chordNotesSignature(getChordNotesFromLayeredSeed(chosenLayeredSeed));
+    const chosenSignature = chordHarmonicSignature(getChordNotesFromLayeredSeed(chosenLayeredSeed));
     setSeenChordLayerSignatures((previous) =>
       previous.includes(chosenSignature) ? previous : [...previous, chosenSignature]
     );
@@ -236,6 +255,10 @@ export default function App() {
             onRegenerateChords={handleRegenerateChords}
             canRegenerateChords={canRegenerateChords}
             chordLayerVariant={chordLayerVariant}
+            chordPattern={chordPattern}
+            chordLength={chordLength}
+            onChordPatternChange={handleChordPatternChange}
+            onChordLengthChange={handleChordLengthChange}
             onToggleChordLayerEnabled={handleToggleChordLayerEnabled}
           />
         </div>

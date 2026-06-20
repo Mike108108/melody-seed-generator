@@ -1,11 +1,11 @@
 import type { GeneratedMelody, LayeredSeed } from '../types';
-import type { HarmonicPlanOptions } from '../harmony/harmonicPlan';
+import type { ChordTrackOptions } from '../harmony/chordLayer';
 import { createChordTrackFromHarmonicPlan } from '../harmony/chordLayer';
 import { createMelodyOnlyLayeredSeed } from './layeredSeed';
 
 export function createLayeredSeedWithChordTrack(
   melody: GeneratedMelody,
-  options?: HarmonicPlanOptions
+  options?: ChordTrackOptions
 ): LayeredSeed {
   const melodyOnly = createMelodyOnlyLayeredSeed(melody);
   const chordTrack = createChordTrackFromHarmonicPlan(melody, options);
