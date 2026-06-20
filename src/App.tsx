@@ -12,7 +12,17 @@ import {
 } from './lib/melody/intent';
 import { createPhraseRolePlan } from './lib/melody/phraseRolePlan';
 import {
+  createBassLayerState,
+  getBassNotesFromBassLayer,
+  hasBassLayerNotes,
+  rebuildBassLayerMode,
+  regenerateBassLayer,
+  type BassLayerState,
+  type BassMode
+} from './lib/seed/bassLayerState';
+import {
   createChordLayerState,
+  getChordLayerSignature,
   getChordNotesFromLayeredSeed,
   hasChordLayerNotes,
   rebuildChordLayerPerformance,
@@ -40,8 +50,10 @@ export default function App() {
   const [fingerprintHistory, setFingerprintHistory] = useState<MelodyFingerprint[]>([]);
   const [isMelodyLocked, setIsMelodyLocked] = useState(false);
   const [chordLayer, setChordLayer] = useState<ChordLayerState | null>(null);
+  const [bassLayer, setBassLayer] = useState<BassLayerState | null>(null);
 
   const hasChordLayerReady = chordLayer !== null && hasChordLayerNotes(chordLayer.layeredSeed);
+  const hasBassLayerReady = bassLayer !== null && hasBassLayerNotes(bassLayer);
 
   const chordNotesForDisplay: MelodyNote[] | null = hasChordLayerReady
     ? getChordNotesFromLayeredSeed(chordLayer.layeredSeed)
@@ -49,6 +61,10 @@ export default function App() {
 
   const chordNotesForPlayback: MelodyNote[] | null =
     hasChordLayerReady && chordLayer.enabled ? chordNotesForDisplay : null;
+
+  const bassNotesForDisplay: MelodyNote[] | null = hasBassLayerReady
+    ? getBassNotesFromBassLayer(bassLayer)
+    : null;
 
   const generateFromSettings = (nextSettings: MelodySettings, nextIntent: MelodyIntent) => {
     const phraseRolePlan = createPhraseRolePlan(nextIntent, nextSettings);
@@ -67,6 +83,7 @@ export default function App() {
       layeredSeed: createMelodyOnlyLayeredSeed(enrichedMelody)
     });
     setChordLayer(null);
+    setBassLayer(null);
     setFingerprintHistory((history) => [...history, generated.fingerprint].slice(-100));
   };
 
@@ -91,6 +108,7 @@ export default function App() {
   const handleUnlockMelody = () => {
     setIsMelodyLocked(false);
     setChordLayer(null);
+    setBassLayer(null);
   };
 
   const handleAddChords = () => {
@@ -98,9 +116,20 @@ export default function App() {
     setChordLayer(createChordLayerState(melody));
   };
 
+  const applyChordLayerUpdate = (nextChordLayer: ChordLayerState) => {
+    const previousSignature = chordLayer ? getChordLayerSignature(chordLayer.layeredSeed) : null;
+    const nextSignature = getChordLayerSignature(nextChordLayer.layeredSeed);
+
+    setChordLayer(nextChordLayer);
+
+    if (previousSignature !== nextSignature) {
+      setBassLayer(null);
+    }
+  };
+
   const handleChordPatternChange = (nextPattern: ChordPattern) => {
     if (!melody || !chordLayer) return;
-    setChordLayer(
+    applyChordLayerUpdate(
       rebuildChordLayerPerformance(chordLayer, melody, {
         ...chordLayer.performance,
         pattern: nextPattern
@@ -110,7 +139,7 @@ export default function App() {
 
   const handleChordLengthChange = (nextLength: ChordLength) => {
     if (!melody || !chordLayer) return;
-    setChordLayer(
+    applyChordLayerUpdate(
       rebuildChordLayerPerformance(chordLayer, melody, {
         ...chordLayer.performance,
         length: nextLength
@@ -120,7 +149,7 @@ export default function App() {
 
   const handleChordFeelChange = (nextFeel: ChordFeel) => {
     if (!melody || !chordLayer) return;
-    setChordLayer(
+    applyChordLayerUpdate(
       rebuildChordLayerPerformance(chordLayer, melody, {
         ...chordLayer.performance,
         feel: nextFeel
@@ -134,7 +163,36 @@ export default function App() {
     const nextChordLayer = regenerateChordLayer(chordLayer, melody);
     if (nextChordLayer) {
       setChordLayer(nextChordLayer);
+      setBassLayer(null);
     }
+  };
+
+  const handleAddBass = () => {
+    if (!melody || !isMelodyLocked || !chordLayer || bassLayer) return;
+    const nextBassLayer = createBassLayerState(melody, chordLayer);
+    if (nextBassLayer) {
+      setBassLayer(nextBassLayer);
+    }
+  };
+
+  const handleBassModeChange = (nextMode: BassMode) => {
+    if (!melody || !chordLayer || !bassLayer) return;
+    const nextBassLayer = rebuildBassLayerMode(bassLayer, melody, chordLayer, nextMode);
+    if (nextBassLayer) {
+      setBassLayer(nextBassLayer);
+    }
+  };
+
+  const handleRegenerateBass = () => {
+    if (!melody || !isMelodyLocked || !chordLayer || !bassLayer) return;
+    const nextBassLayer = regenerateBassLayer(bassLayer, melody, chordLayer);
+    if (nextBassLayer) {
+      setBassLayer(nextBassLayer);
+    }
+  };
+
+  const handleToggleBassLayerEnabled = () => {
+    setBassLayer((current) => (current ? { ...current, enabled: !current.enabled } : current));
   };
 
   const handleToggleChordLayerEnabled = () => {
@@ -142,6 +200,7 @@ export default function App() {
   };
 
   const canRegenerateChords = melody !== null && isMelodyLocked && hasChordLayerReady;
+  const canRegenerateBass = melody !== null && isMelodyLocked && hasBassLayerReady && hasChordLayerReady;
 
   return (
     <main className="app-shell">
@@ -183,6 +242,14 @@ export default function App() {
             onChordLengthChange={handleChordLengthChange}
             onChordFeelChange={handleChordFeelChange}
             onToggleChordLayerEnabled={handleToggleChordLayerEnabled}
+            hasBassLayerReady={hasBassLayerReady}
+            bassNotesForDisplay={bassNotesForDisplay}
+            bassLayer={bassLayer}
+            onAddBass={handleAddBass}
+            onRegenerateBass={handleRegenerateBass}
+            canRegenerateBass={canRegenerateBass}
+            onBassModeChange={handleBassModeChange}
+            onToggleBassLayerEnabled={handleToggleBassLayerEnabled}
           />
         </div>
       </div>

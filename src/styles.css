@@ -667,6 +667,52 @@ input[type='range'] {
   font-size: 0.72rem;
 }
 
+.piano-roll-lane-header--bass {
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem 1rem;
+  flex-wrap: wrap;
+}
+
+.bass-layer-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  flex-shrink: 0;
+}
+
+.bass-layer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.45rem 0.75rem;
+  margin-left: auto;
+  margin-bottom: 0;
+}
+
+.bass-layer-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  min-width: 0;
+}
+
+.bass-layer-control-label {
+  color: rgba(244, 240, 255, 0.58);
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.bass-layer-control select {
+  min-width: 7.5rem;
+  padding: 0.28rem 0.45rem;
+  font-size: 0.72rem;
+}
+
 .layer-switch {
   flex-shrink: 0;
   border: 0;
@@ -717,6 +763,10 @@ input[type='range'] {
 }
 
 .piano-roll-lane-wrap.is-layer-disabled .piano-note--chord {
+  opacity: 0.72;
+}
+
+.piano-roll-lane-wrap.is-layer-disabled .piano-note--bass {
   opacity: 0.72;
 }
 
@@ -778,6 +828,22 @@ input[type='range'] {
 }
 
 .chord-regenerate-icon-button:hover {
+  border-color: rgba(167, 139, 250, 0.42);
+  background: rgba(167, 139, 250, 0.12);
+}
+
+.bass-regenerate-icon-button {
+  position: absolute;
+  top: 0.42rem;
+  right: 0.42rem;
+  z-index: 2;
+  width: 1.85rem;
+  height: 1.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  pointer-events: auto;
+}
+
+.bass-regenerate-icon-button:hover {
   border-color: rgba(167, 139, 250, 0.42);
   background: rgba(167, 139, 250, 0.12);
 }
@@ -873,6 +939,10 @@ input[type='range'] {
 
 .piano-roll-shell--chord {
   background: rgba(0, 0, 0, 0.22);
+}
+
+.piano-roll-shell--bass {
+  background: rgba(0, 0, 0, 0.18);
 }
 
 .piano-roll-shell.piano-roll-fixed {
@@ -995,6 +1065,12 @@ input[type='range'] {
 .piano-note--chord {
   border-color: rgba(255, 255, 255, 0.2);
   background: linear-gradient(135deg, rgba(45, 212, 191, 0.82), rgba(52, 211, 153, 0.62));
+  color: rgba(8, 11, 20, 0.92);
+}
+
+.piano-note--bass {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.82), rgba(245, 158, 11, 0.62));
   color: rgba(8, 11, 20, 0.92);
 }
 

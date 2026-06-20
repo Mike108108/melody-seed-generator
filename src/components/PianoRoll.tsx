@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { ChordFeel, ChordLength, ChordPattern } from '../lib/harmony/chordPerformance';
+import type { BassLayerState, BassMode } from '../lib/seed/bassLayerState';
 import type { ChordLayerState } from '../lib/seed/chordLayerState';
 import type { GeneratedMelody, MelodyNote } from '../lib/types';
 import { midiToNoteName } from '../lib/music/notes';
@@ -12,6 +13,9 @@ export const VISIBLE_PITCH_ROWS = 15;
 export const PIANO_ROLL_HEIGHT = VISIBLE_PITCH_ROWS * PITCH_ROW_HEIGHT_PX;
 export const CHORD_VISIBLE_PITCH_ROWS = 8;
 export const CHORD_ROLL_HEIGHT = CHORD_VISIBLE_PITCH_ROWS * PITCH_ROW_HEIGHT_PX;
+export const BASS_VISIBLE_PITCH_ROWS = 6;
+export const BASS_ROLL_HEIGHT = BASS_VISIBLE_PITCH_ROWS * PITCH_ROW_HEIGHT_PX;
+export const BASS_DEFAULT_MIN_MIDI = 28;
 export const PITCH_KEY_WIDTH = 52;
 const NOTE_INSET_PX = 2;
 const NOTE_HEIGHT_PX = PITCH_ROW_HEIGHT_PX - NOTE_INSET_PX * 2;
@@ -133,6 +137,14 @@ type PianoRollProps = {
   onChordLengthChange?: (length: ChordLength) => void;
   onChordFeelChange?: (feel: ChordFeel) => void;
   onToggleChordLayerEnabled: () => void;
+  hasBassLayerReady: boolean;
+  bassNotesForDisplay: MelodyNote[] | null;
+  bassLayer: BassLayerState | null;
+  onAddBass: () => void;
+  onRegenerateBass?: () => void;
+  canRegenerateBass?: boolean;
+  onBassModeChange?: (mode: BassMode) => void;
+  onToggleBassLayerEnabled: () => void;
 };
 
 type PianoRollTimelineProps = {
@@ -232,18 +244,30 @@ export function PianoRoll({
   onChordPatternChange,
   onChordLengthChange,
   onChordFeelChange,
-  onToggleChordLayerEnabled
+  onToggleChordLayerEnabled,
+  hasBassLayerReady,
+  bassNotesForDisplay,
+  bassLayer,
+  onAddBass,
+  onRegenerateBass,
+  canRegenerateBass = false,
+  onBassModeChange,
+  onToggleBassLayerEnabled
 }: PianoRollProps) {
   const isChordLayerEnabled = chordLayer?.enabled ?? false;
+  const isBassLayerEnabled = bassLayer?.enabled ?? false;
   const chordLayerVariant = chordLayer?.variant ?? 0;
   const chordPattern = chordLayer?.performance.pattern ?? 'sustained';
   const chordLength = chordLayer?.performance.length ?? 'long';
   const chordFeel = chordLayer?.performance.feel ?? 'straight';
+  const bassMode = bassLayer?.mode ?? 'root-pulse';
+  const bassLayerVariant = bassLayer?.variant ?? 0;
 
   const [isAddLayerMenuOpen, setIsAddLayerMenuOpen] = useState(false);
   const addLayerMenuRef = useRef<HTMLDivElement>(null);
   const melodyViewportRef = useRef<HTMLDivElement>(null);
   const chordViewportRef = useRef<HTMLDivElement>(null);
+  const bassViewportRef = useRef<HTMLDivElement>(null);
   const isSyncingScrollRef = useRef(false);
 
   const bars = melody?.settings.bars ?? DEFAULT_PREVIEW_BARS;
@@ -252,11 +276,16 @@ export function PianoRoll({
     () => getDisplayRangeForNotes(chordNotesForDisplay ?? [], CHORD_VISIBLE_PITCH_ROWS),
     [chordNotesForDisplay]
   );
+  const bassDisplayRange = useMemo(
+    () => getBassDisplayRange(bassNotesForDisplay ?? []),
+    [bassNotesForDisplay]
+  );
   const outputMeta = buildOutputMeta(melody);
   const timelineWidthPx = bars * BAR_WIDTH_PX;
   const totalBeats = bars * 4;
   const melodyNotes = melody?.notes ?? [];
   const chordNotes = hasChordLayerReady && chordNotesForDisplay ? chordNotesForDisplay : [];
+  const bassNotes = hasBassLayerReady && bassNotesForDisplay ? bassNotesForDisplay : [];
 
   const pianoRollStyle = {
     height: PIANO_ROLL_HEIGHT,
@@ -268,9 +297,14 @@ export function PianoRoll({
     '--pitch-row-height': `${PITCH_ROW_HEIGHT_PX}px`
   } as CSSProperties;
 
+  const bassRollStyle = {
+    height: BASS_ROLL_HEIGHT,
+    '--pitch-row-height': `${PITCH_ROW_HEIGHT_PX}px`
+  } as CSSProperties;
+
   useEffect(() => {
     setIsAddLayerMenuOpen(false);
-  }, [isMelodyLocked, hasChordLayerReady]);
+  }, [isMelodyLocked, hasChordLayerReady, hasBassLayerReady]);
 
   useEffect(() => {
     if (!isAddLayerMenuOpen) return;
@@ -309,10 +343,23 @@ export function PianoRoll({
     setIsAddLayerMenuOpen(false);
   };
 
-  const syncViewportScroll = (source: HTMLDivElement, target: HTMLDivElement | null) => {
-    if (!target || isSyncingScrollRef.current) return;
+  const handleAddBassFromMenu = () => {
+    if (!isMelodyLocked || !hasChordLayerReady || hasBassLayerReady) return;
+    onAddBass();
+    setIsAddLayerMenuOpen(false);
+  };
+
+  const syncViewportScroll = (source: HTMLDivElement) => {
+    if (isSyncingScrollRef.current) return;
     isSyncingScrollRef.current = true;
-    target.scrollLeft = source.scrollLeft;
+    const scrollLeft = source.scrollLeft;
+
+    for (const viewportRef of [melodyViewportRef, chordViewportRef, bassViewportRef]) {
+      if (viewportRef.current && viewportRef.current !== source) {
+        viewportRef.current.scrollLeft = scrollLeft;
+      }
+    }
+
     requestAnimationFrame(() => {
       isSyncingScrollRef.current = false;
     });
@@ -320,10 +367,19 @@ export function PianoRoll({
 
   const addChordsDisabled = !isMelodyLocked || hasChordLayerReady;
   const addChordsHint = !isMelodyLocked
-    ? 'Lock melody to add layers'
+    ? 'Lock melody first'
     : hasChordLayerReady
       ? 'Chords already added'
       : null;
+
+  const addBassDisabled = !isMelodyLocked || !hasChordLayerReady || hasBassLayerReady;
+  const addBassHint = !isMelodyLocked
+    ? 'Lock melody first'
+    : !hasChordLayerReady
+      ? 'Add chords first'
+      : hasBassLayerReady
+        ? 'Bass already added'
+        : null;
 
   return (
     <section className="panel current-melody-panel melody-panel">
@@ -372,7 +428,7 @@ export function PianoRoll({
             <div
               className="piano-roll-viewport"
               ref={melodyViewportRef}
-              onScroll={(event) => syncViewportScroll(event.currentTarget, chordViewportRef.current)}
+              onScroll={(event) => syncViewportScroll(event.currentTarget)}
             >
               <PianoRollTimeline
                 notes={melodyNotes}
@@ -467,7 +523,7 @@ export function PianoRoll({
               <div
                 className="piano-roll-viewport"
                 ref={chordViewportRef}
-                onScroll={(event) => syncViewportScroll(event.currentTarget, melodyViewportRef.current)}
+                onScroll={(event) => syncViewportScroll(event.currentTarget)}
               >
                 <PianoRollTimeline
                   key={`chord-v${chordLayerVariant}-${chordPattern}-${chordLength}-${chordFeel}`}
@@ -483,11 +539,82 @@ export function PianoRoll({
           </div>
         ) : null}
 
-        {hasChordLayerReady ? (
+        {hasBassLayerReady && bassNotes.length > 0 ? (
+          <div
+            className={`piano-roll-lane-wrap piano-roll-lane-wrap--bass${isBassLayerEnabled ? '' : ' is-layer-disabled'}`}
+          >
+            <div className="piano-roll-lane-header piano-roll-lane-header--bass">
+              <div className="bass-layer-header-left">
+                <h3 className="piano-roll-lane-label">Bass Layer</h3>
+                <button
+                  type="button"
+                  role="switch"
+                  className={`layer-switch${isBassLayerEnabled ? ' is-on' : ''}`}
+                  onClick={onToggleBassLayerEnabled}
+                  aria-label={isBassLayerEnabled ? 'Disable bass layer' : 'Enable bass layer'}
+                  aria-checked={isBassLayerEnabled}
+                  title={isBassLayerEnabled ? 'Disable bass layer' : 'Enable bass layer'}
+                >
+                  <span className="layer-switch__track" aria-hidden="true">
+                    <span className="layer-switch__thumb" />
+                  </span>
+                </button>
+              </div>
+              <div className="bass-layer-controls">
+                <label className="bass-layer-control">
+                  <span className="bass-layer-control-label">Mode</span>
+                  <select
+                    value={bassMode}
+                    onChange={(event) => onBassModeChange?.(event.target.value as BassMode)}
+                    aria-label="Bass mode"
+                  >
+                    <option value="root-pulse">Root Pulse</option>
+                    <option value="groove">Groove</option>
+                    <option value="sparse">Sparse</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+            <div className="piano-roll-shell piano-roll-shell--bass piano-roll-fixed" style={bassRollStyle}>
+              {canRegenerateBass && onRegenerateBass ? (
+                <button
+                  type="button"
+                  className="icon-circle-button bass-regenerate-icon-button"
+                  onClick={onRegenerateBass}
+                  aria-label="Regenerate bass layer"
+                  title="Regenerate bass layer"
+                >
+                  <RegenerateIcon />
+                </button>
+              ) : null}
+
+              <PianoRollKeys displayRange={bassDisplayRange} height={BASS_ROLL_HEIGHT} />
+
+              <div
+                className="piano-roll-viewport"
+                ref={bassViewportRef}
+                onScroll={(event) => syncViewportScroll(event.currentTarget)}
+              >
+                <PianoRollTimeline
+                  key={`bass-v${bassLayerVariant}-${bassMode}`}
+                  notes={bassNotes}
+                  displayRange={bassDisplayRange}
+                  timelineWidthPx={timelineWidthPx}
+                  totalBeats={totalBeats}
+                  height={BASS_ROLL_HEIGHT}
+                  noteClassName="piano-note piano-note--bass"
+                />
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {hasChordLayerReady || hasBassLayerReady ? (
           <p className="hint melody-chord-playback-hint">
             {isChordLayerEnabled
-              ? 'Chord Layer enabled · MIDI includes active layers · WAV remains melody-only'
-              : 'Chord Layer disabled · MIDI exports melody only · WAV remains melody-only'}
+              ? 'Chord Layer enabled · MIDI and WAV include active layers'
+              : 'Chord Layer disabled · MIDI and WAV export melody only'}
+            {hasBassLayerReady ? ' · Playback/export support for Bass Layer is next.' : ''}
           </p>
         ) : null}
 
@@ -517,6 +644,18 @@ export function PianoRoll({
                     <span className="add-layer-menu-item-label">Add Chords</span>
                     {addChordsHint ? (
                       <span className="add-layer-menu-item-hint">{addChordsHint}</span>
+                    ) : null}
+                  </button>
+                  <button
+                    type="button"
+                    className="add-layer-menu-item"
+                    role="menuitem"
+                    disabled={addBassDisabled}
+                    onClick={handleAddBassFromMenu}
+                  >
+                    <span className="add-layer-menu-item-label">Add Bass</span>
+                    {addBassHint ? (
+                      <span className="add-layer-menu-item-hint">{addBassHint}</span>
                     ) : null}
                   </button>
                 </div>
@@ -549,6 +688,15 @@ function getDisplayRangeForNotes(notes: MelodyNote[], visibleRows: number): Disp
   const center = (noteMin + noteMax) / 2;
   const minMidi = Math.round(center - (visibleRows - 1) / 2);
   return { minMidi, maxMidi: minMidi + visibleRows - 1, span: visibleRows };
+}
+
+function getBassDisplayRange(notes: MelodyNote[]): DisplayRange {
+  if (notes.length === 0) {
+    const minMidi = BASS_DEFAULT_MIN_MIDI;
+    return { minMidi, maxMidi: minMidi + BASS_VISIBLE_PITCH_ROWS - 1, span: BASS_VISIBLE_PITCH_ROWS };
+  }
+
+  return getDisplayRangeForNotes(notes, BASS_VISIBLE_PITCH_ROWS);
 }
 
 function buildPitchLabels(displayRange: DisplayRange) {
