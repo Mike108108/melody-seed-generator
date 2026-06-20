@@ -1,6 +1,5 @@
 import type { GeneratedMelody, MelodyNote } from '../types';
 import { makeNote } from '../music/theory';
-import { SeededRandom } from '../utils/seededRandom';
 
 export type BassMode = 'root-pulse' | 'groove' | 'sparse';
 
@@ -8,11 +7,21 @@ const BEATS_PER_BAR = 4;
 const BASS_ROOT_MIDI = 36;
 const BASS_MAX_MIDI = 48;
 const BASS_VELOCITY = 0.62;
+const MIN_NOTE_DURATION = 0.12;
+const VARIANT_FAMILY_COUNT = 5;
 
 export type BassGenerationOptions = {
   mode: BassMode;
   variant: number;
   chordSignature: string;
+};
+
+type BassHit = {
+  beatOffset: number;
+  duration: number;
+  midiOffset: number;
+  velocityScale?: number;
+  degree?: number;
 };
 
 function pitchClassToBassMidi(pitchClass: number): number {
@@ -60,70 +69,298 @@ export function extractBarRoots(chordNotes: MelodyNote[], bars: number): number[
   return roots;
 }
 
-function createBassSeed(melody: GeneratedMelody, options: BassGenerationOptions): string {
-  const { seed, key, scale, bpm, bars } = melody.settings;
-  return `${seed}:${key}:${scale}:${bpm}:${bars}:${options.chordSignature}:bass:${options.mode}:${options.variant}`;
-}
-
 function safeFifthMidi(rootMidi: number): number | null {
   const fifth = rootMidi + 7;
   return fifth <= BASS_MAX_MIDI ? fifth : null;
 }
 
-function renderRootPulseBar(
-  barIndex: number,
-  rootMidi: number,
-  useQuarterPulse: boolean
-): MelodyNote[] {
-  const barStart = barIndex * BEATS_PER_BAR;
-  const hits = useQuarterPulse ? [0, 1, 2, 3] : [0, 2];
-  const duration = useQuarterPulse ? 0.92 : 1.85;
-
-  return hits.map((beatOffset) =>
-    makeNote(rootMidi, barStart + beatOffset, duration, BASS_VELOCITY, 1)
-  );
+function safeOctaveMidi(rootMidi: number): number | null {
+  const octave = rootMidi + 12;
+  return octave <= BASS_MAX_MIDI ? octave : null;
 }
 
-function renderGrooveBar(
+function resolveMidi(rootMidi: number, offset: number): number {
+  const midi = rootMidi + offset;
+  if (midi < BASS_ROOT_MIDI - 12 || midi > BASS_MAX_MIDI) {
+    return rootMidi;
+  }
+  return midi;
+}
+
+function getVariantFamily(variant: number): number {
+  return ((variant % VARIANT_FAMILY_COUNT) + VARIANT_FAMILY_COUNT) % VARIANT_FAMILY_COUNT;
+}
+
+function makeBassNote(
+  rootMidi: number,
+  barStart: number,
+  hit: BassHit,
+  totalBeats: number
+): MelodyNote | null {
+  const startBeats = barStart + hit.beatOffset;
+  if (startBeats >= totalBeats) {
+    return null;
+  }
+
+  const duration = Math.max(
+    MIN_NOTE_DURATION,
+    Math.min(hit.duration, totalBeats - startBeats)
+  );
+
+  if (duration < MIN_NOTE_DURATION) {
+    return null;
+  }
+
+  const midi = resolveMidi(rootMidi, hit.midiOffset);
+  const velocity = BASS_VELOCITY * (hit.velocityScale ?? 1);
+  const degree = hit.degree ?? (hit.midiOffset === 7 ? 5 : hit.midiOffset === 12 ? 8 : 1);
+
+  return makeNote(midi, startBeats, duration, velocity, degree);
+}
+
+function renderHits(
   barIndex: number,
   rootMidi: number,
-  templateIndex: number
+  hits: BassHit[],
+  totalBeats: number
 ): MelodyNote[] {
   const barStart = barIndex * BEATS_PER_BAR;
-  const fifth = safeFifthMidi(rootMidi);
-  const notes: MelodyNote[] = [
-    makeNote(rootMidi, barStart, 1.35, BASS_VELOCITY, 1)
-  ];
+  const notes: MelodyNote[] = [];
 
-  switch (templateIndex % 3) {
-    case 0:
-      if (fifth) {
-        notes.push(makeNote(fifth, barStart + 2, 1.1, BASS_VELOCITY * 0.92, 5));
-      } else {
-        notes.push(makeNote(rootMidi, barStart + 2.5, 1.0, BASS_VELOCITY * 0.88, 1));
-      }
-      break;
-    case 1:
-      notes.push(makeNote(rootMidi, barStart + 1.5, 0.85, BASS_VELOCITY * 0.9, 1));
-      if (fifth) {
-        notes.push(makeNote(fifth, barStart + 3, 0.75, BASS_VELOCITY * 0.86, 5));
-      }
-      break;
-    default:
-      notes.push(makeNote(rootMidi, barStart + 2, 1.25, BASS_VELOCITY * 0.9, 1));
-      break;
+  for (const hit of hits) {
+    const note = makeBassNote(rootMidi, barStart, hit, totalBeats);
+    if (note) {
+      notes.push(note);
+    }
   }
 
   return notes;
 }
 
-function renderSparseBar(barIndex: number, rootMidi: number, skipBar: boolean): MelodyNote[] {
-  if (skipBar) {
+function renderRootPulseBar(
+  barIndex: number,
+  rootMidi: number,
+  variantFamily: number,
+  variant: number,
+  totalBeats: number
+): MelodyNote[] {
+  const fifth = safeFifthMidi(rootMidi);
+  const octave = safeOctaveMidi(rootMidi);
+  const restBar = (barIndex + variant) % 4 === 0;
+
+  switch (variantFamily) {
+    case 0:
+      return renderHits(
+        barIndex,
+        rootMidi,
+        [
+          { beatOffset: 0, duration: 1.85, midiOffset: 0 },
+          { beatOffset: 2, duration: 1.85, midiOffset: 0 }
+        ],
+        totalBeats
+      );
+    case 1:
+      return renderHits(
+        barIndex,
+        rootMidi,
+        [
+          { beatOffset: 0, duration: 0.92, midiOffset: 0 },
+          { beatOffset: 1, duration: 0.92, midiOffset: 0 },
+          { beatOffset: 2, duration: 0.92, midiOffset: 0 },
+          { beatOffset: 3, duration: 0.92, midiOffset: 0 }
+        ],
+        totalBeats
+      );
+    case 2:
+      return renderHits(
+        barIndex,
+        rootMidi,
+        [
+          { beatOffset: 0, duration: 1.85, midiOffset: 0 },
+          { beatOffset: 2, duration: 1.5, midiOffset: octave ? 12 : 0, degree: 8 }
+        ],
+        totalBeats
+      );
+    case 3:
+      return renderHits(
+        barIndex,
+        rootMidi,
+        [
+          { beatOffset: 0, duration: 1.85, midiOffset: 0 },
+          { beatOffset: 2, duration: 1.45, midiOffset: fifth ? 7 : 0, degree: 5 }
+        ],
+        totalBeats
+      );
+    default:
+      if (restBar) {
+        return renderHits(
+          barIndex,
+          rootMidi,
+          [{ beatOffset: 1, duration: 2.5, midiOffset: 0 }],
+          totalBeats
+        );
+      }
+
+      return renderHits(
+        barIndex,
+        rootMidi,
+        [
+          { beatOffset: 0, duration: 2.35, midiOffset: 0 },
+          { beatOffset: 3.5, duration: 0.42, midiOffset: 0, velocityScale: 0.88 }
+        ],
+        totalBeats
+      );
+  }
+}
+
+function renderGrooveBar(
+  barIndex: number,
+  rootMidi: number,
+  variantFamily: number,
+  totalBeats: number
+): MelodyNote[] {
+  const fifth = safeFifthMidi(rootMidi);
+  const octave = safeOctaveMidi(rootMidi);
+
+  switch (variantFamily) {
+    case 0:
+      return renderHits(
+        barIndex,
+        rootMidi,
+        [
+          { beatOffset: 0, duration: 0.9, midiOffset: 0 },
+          { beatOffset: 1, duration: 0.72, midiOffset: 0, velocityScale: 0.92 },
+          { beatOffset: 2, duration: 0.88, midiOffset: fifth ? 7 : 0, degree: 5 },
+          { beatOffset: 3, duration: 0.78, midiOffset: 0, velocityScale: 0.9 }
+        ],
+        totalBeats
+      );
+    case 1:
+      return renderHits(
+        barIndex,
+        rootMidi,
+        [
+          { beatOffset: 0, duration: 1.0, midiOffset: 0 },
+          { beatOffset: 1.5, duration: 0.82, midiOffset: octave ? 12 : 0, degree: 8 },
+          { beatOffset: 2.5, duration: 0.85, midiOffset: fifth ? 7 : 0, degree: 5 },
+          { beatOffset: 3.5, duration: 0.45, midiOffset: 0, velocityScale: 0.88 }
+        ],
+        totalBeats
+      );
+    case 2:
+      return renderHits(
+        barIndex,
+        rootMidi,
+        [
+          { beatOffset: 0, duration: 1.85, midiOffset: 0 },
+          { beatOffset: 2, duration: 1.45, midiOffset: fifth ? 7 : 0, degree: 5, velocityScale: 0.94 }
+        ],
+        totalBeats
+      );
+    case 3:
+      return renderHits(
+        barIndex,
+        rootMidi,
+        [
+          { beatOffset: 0, duration: 1.15, midiOffset: 0 },
+          { beatOffset: 2.5, duration: 0.92, midiOffset: fifth ? 7 : 0, degree: 5 },
+          { beatOffset: 3.5, duration: 0.38, midiOffset: 0, velocityScale: 0.86 }
+        ],
+        totalBeats
+      );
+    default:
+      return renderHits(
+        barIndex,
+        rootMidi,
+        [
+          { beatOffset: 0, duration: 1.45, midiOffset: 0 },
+          { beatOffset: 2, duration: 0.95, midiOffset: octave ? 12 : 0, degree: 8 },
+          { beatOffset: 3.25, duration: 0.55, midiOffset: 0, velocityScale: 0.9 }
+        ],
+        totalBeats
+      );
+  }
+}
+
+function renderSparseBar(
+  barIndex: number,
+  rootMidi: number,
+  variantFamily: number,
+  variant: number,
+  totalBeats: number
+): MelodyNote[] {
+  const octave = safeOctaveMidi(rootMidi);
+  const leaveSpace = (barIndex + variant) % 3 === 2 && variantFamily === 4;
+
+  if (leaveSpace) {
     return [];
   }
 
-  const barStart = barIndex * BEATS_PER_BAR;
-  return [makeNote(rootMidi, barStart, 3.75, BASS_VELOCITY * 0.95, 1)];
+  switch (variantFamily) {
+    case 0:
+      return renderHits(
+        barIndex,
+        rootMidi,
+        [{ beatOffset: 0, duration: 3.75, midiOffset: 0, velocityScale: 0.95 }],
+        totalBeats
+      );
+    case 1:
+      return renderHits(
+        barIndex,
+        rootMidi,
+        [
+          { beatOffset: 0, duration: 1.85, midiOffset: 0, velocityScale: 0.94 },
+          { beatOffset: 2, duration: 1.85, midiOffset: 0, velocityScale: 0.92 }
+        ],
+        totalBeats
+      );
+    case 2:
+      if (barIndex % 2 === 1) {
+        return [];
+      }
+
+      return renderHits(
+        barIndex,
+        rootMidi,
+        [
+          { beatOffset: 0, duration: 1.85, midiOffset: 0, velocityScale: 0.93 },
+          { beatOffset: 2, duration: 1.85, midiOffset: 0, velocityScale: 0.91 }
+        ],
+        totalBeats
+      );
+    case 3:
+      return renderHits(
+        barIndex,
+        rootMidi,
+        [
+          { beatOffset: 0, duration: 3.15, midiOffset: 0, velocityScale: 0.95 },
+          {
+            beatOffset: 3.5,
+            duration: 0.38,
+            midiOffset: octave ? 12 : 0,
+            degree: 8,
+            velocityScale: 0.84
+          }
+        ],
+        totalBeats
+      );
+    default:
+      if (barIndex % 2 === 1) {
+        return renderHits(
+          barIndex,
+          rootMidi,
+          [{ beatOffset: 0, duration: 3.75, midiOffset: 0, velocityScale: 0.92 }],
+          totalBeats
+        );
+      }
+
+      return renderHits(
+        barIndex,
+        rootMidi,
+        [{ beatOffset: 0, duration: 3.75, midiOffset: 0, velocityScale: 0.95 }],
+        totalBeats
+      );
+  }
 }
 
 export function generateBassNotes(
@@ -132,29 +369,24 @@ export function generateBassNotes(
   options: BassGenerationOptions
 ): MelodyNote[] {
   const bars = melody.settings.bars;
+  const totalBeats = bars * BEATS_PER_BAR;
   const barRoots = extractBarRoots(chordNotes, bars);
-  const rng = new SeededRandom(createBassSeed(melody, options));
+  const variantFamily = getVariantFamily(options.variant);
   const notes: MelodyNote[] = [];
 
   for (let bar = 0; bar < bars; bar += 1) {
     const rootMidi = barRoots[bar];
 
     switch (options.mode) {
-      case 'root-pulse': {
-        const useQuarterPulse = options.variant % 2 === 1;
-        notes.push(...renderRootPulseBar(bar, rootMidi, useQuarterPulse));
+      case 'root-pulse':
+        notes.push(...renderRootPulseBar(bar, rootMidi, variantFamily, options.variant, totalBeats));
         break;
-      }
-      case 'groove': {
-        const templateIndex = options.variant + bar + Math.floor(rng.next() * 3);
-        notes.push(...renderGrooveBar(bar, rootMidi, templateIndex));
+      case 'groove':
+        notes.push(...renderGrooveBar(bar, rootMidi, variantFamily, totalBeats));
         break;
-      }
-      case 'sparse': {
-        const skipBar = bar % 2 === 1 && options.variant % 3 !== 0;
-        notes.push(...renderSparseBar(bar, rootMidi, skipBar));
+      case 'sparse':
+        notes.push(...renderSparseBar(bar, rootMidi, variantFamily, options.variant, totalBeats));
         break;
-      }
     }
   }
 

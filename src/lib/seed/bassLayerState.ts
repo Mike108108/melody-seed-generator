@@ -33,7 +33,8 @@ function buildBassLayerState(
   melody: GeneratedMelody,
   chordLayer: ChordLayerState,
   mode: BassMode,
-  variant: number
+  variant: number,
+  enabled = true
 ): BassLayerState {
   const chordNotes = getChordNotesFromLayeredSeed(chordLayer.layeredSeed);
   const sourceChordSignature = chordHarmonicSignature(chordNotes);
@@ -44,7 +45,7 @@ function buildBassLayerState(
   });
 
   return {
-    enabled: true,
+    enabled,
     track: buildBassTrack(notes),
     mode,
     variant,
@@ -81,7 +82,13 @@ export function regenerateBassLayer(
     return null;
   }
 
-  return buildBassLayerState(melody, chordLayer, bassLayer.mode, bassLayer.variant + 1);
+  return buildBassLayerState(
+    melody,
+    chordLayer,
+    bassLayer.mode,
+    bassLayer.variant + 1,
+    bassLayer.enabled
+  );
 }
 
 export function rebuildBassLayerMode(
@@ -94,7 +101,25 @@ export function rebuildBassLayerMode(
     return null;
   }
 
-  return buildBassLayerState(melody, chordLayer, nextMode, 0);
+  return buildBassLayerState(melody, chordLayer, nextMode, 0, bassLayer.enabled);
+}
+
+export function rebuildBassLayerFromChords(
+  bassLayer: BassLayerState,
+  melody: GeneratedMelody,
+  chordLayer: ChordLayerState
+): BassLayerState | null {
+  if (!hasChordLayerNotes(chordLayer.layeredSeed)) {
+    return null;
+  }
+
+  return buildBassLayerState(
+    melody,
+    chordLayer,
+    bassLayer.mode,
+    bassLayer.variant,
+    bassLayer.enabled
+  );
 }
 
 export function isBassLayerStale(

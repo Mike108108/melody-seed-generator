@@ -15,6 +15,7 @@ import {
   createBassLayerState,
   getBassNotesFromBassLayer,
   hasBassLayerNotes,
+  rebuildBassLayerFromChords,
   rebuildBassLayerMode,
   regenerateBassLayer,
   type BassLayerState,
@@ -22,7 +23,6 @@ import {
 } from './lib/seed/bassLayerState';
 import {
   createChordLayerState,
-  getChordLayerSignature,
   getChordNotesFromLayeredSeed,
   hasChordLayerNotes,
   rebuildChordLayerPerformance,
@@ -116,15 +116,20 @@ export default function App() {
     setChordLayer(createChordLayerState(melody));
   };
 
-  const applyChordLayerUpdate = (nextChordLayer: ChordLayerState) => {
-    const previousSignature = chordLayer ? getChordLayerSignature(chordLayer.layeredSeed) : null;
-    const nextSignature = getChordLayerSignature(nextChordLayer.layeredSeed);
-
-    setChordLayer(nextChordLayer);
-
-    if (previousSignature !== nextSignature) {
-      setBassLayer(null);
+  const syncBassLayerWithChords = (
+    nextChordLayer: ChordLayerState,
+    currentBassLayer: BassLayerState | null
+  ): BassLayerState | null => {
+    if (!melody || !currentBassLayer) {
+      return currentBassLayer;
     }
+
+    return rebuildBassLayerFromChords(currentBassLayer, melody, nextChordLayer);
+  };
+
+  const applyChordLayerUpdate = (nextChordLayer: ChordLayerState) => {
+    setChordLayer(nextChordLayer);
+    setBassLayer((currentBassLayer) => syncBassLayerWithChords(nextChordLayer, currentBassLayer));
   };
 
   const handleChordPatternChange = (nextPattern: ChordPattern) => {
@@ -163,7 +168,7 @@ export default function App() {
     const nextChordLayer = regenerateChordLayer(chordLayer, melody);
     if (nextChordLayer) {
       setChordLayer(nextChordLayer);
-      setBassLayer(null);
+      setBassLayer((currentBassLayer) => syncBassLayerWithChords(nextChordLayer, currentBassLayer));
     }
   };
 
