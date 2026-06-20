@@ -17,6 +17,29 @@ import type { GeneratedMelody, LayeredSeed, MelodyFingerprint, MelodyNote, Melod
 import { makeRandomSeed } from './lib/utils/seededRandom';
 import './styles.css';
 
+const MAX_CHORD_REGENERATE_ATTEMPTS = 8;
+
+function areChordNotesIdentical(current: MelodyNote[], next: MelodyNote[]): boolean {
+  if (current.length !== next.length) {
+    return false;
+  }
+
+  for (let index = 0; index < current.length; index += 1) {
+    const currentNote = current[index];
+    const nextNote = next[index];
+
+    if (
+      currentNote.midi !== nextNote.midi ||
+      currentNote.startBeats !== nextNote.startBeats ||
+      currentNote.durationBeats !== nextNote.durationBeats
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export default function App() {
   const [intent, setIntent] = useState<MelodyIntent>(DEFAULT_INTENT);
   const [settings, setSettings] = useState<MelodySettings>(() =>
@@ -101,10 +124,24 @@ export default function App() {
   };
 
   const handleRegenerateChords = () => {
-    if (!melody || !isMelodyLocked || !hasChordLayerReady) return;
-    const nextVariant = chordLayerVariant + 1;
-    setChordLayerVariant(nextVariant);
-    setLayeredSeedWithChords(createLayeredSeedWithChordTrack(melody, { variant: nextVariant }));
+    if (!melody || !isMelodyLocked || !hasChordLayerReady || !layeredSeedWithChords) return;
+
+    const currentChordNotes =
+      layeredSeedWithChords.tracks.find((track) => track.role === 'chords')?.notes ?? [];
+    let attemptVariant = chordLayerVariant + 1;
+    let nextLayeredSeed = createLayeredSeedWithChordTrack(melody, { variant: attemptVariant });
+
+    for (let attempt = 0; attempt < MAX_CHORD_REGENERATE_ATTEMPTS; attempt += 1) {
+      const nextChordNotes = nextLayeredSeed.tracks.find((track) => track.role === 'chords')?.notes ?? [];
+      if (!areChordNotesIdentical(currentChordNotes, nextChordNotes)) {
+        break;
+      }
+      attemptVariant += 1;
+      nextLayeredSeed = createLayeredSeedWithChordTrack(melody, { variant: attemptVariant });
+    }
+
+    setChordLayerVariant(attemptVariant);
+    setLayeredSeedWithChords(nextLayeredSeed);
     setIsChordLayerEnabled(true);
   };
 

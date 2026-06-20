@@ -121,6 +121,18 @@ function computePhraseScore(
   return score;
 }
 
+function buildAlternatePool(scored: ScoredCandidate[], scoreGap: number, limit?: number): ScoredCandidate[] {
+  const best = scored[0];
+  const pool = scored.filter((entry) => best.totalScore - entry.totalScore <= scoreGap);
+
+  if (pool.length <= 1) {
+    return [];
+  }
+
+  const alternates = pool.slice(1);
+  return limit === undefined ? alternates : alternates.slice(0, limit);
+}
+
 function selectCandidateForBar(
   scored: ScoredCandidate[],
   barIndex: number,
@@ -131,27 +143,18 @@ function selectCandidateForBar(
   }
 
   const best = scored[0];
-  const alternates = scored.filter(
-    (entry) => best.totalScore - entry.totalScore <= ALTERNATE_SCORE_GAP
-  );
+  let alternatePool = buildAlternatePool(scored, ALTERNATE_SCORE_GAP);
 
-  if (alternates.length > 1) {
-    const pickIndex = (variant + barIndex) % alternates.length;
-    return alternates[pickIndex];
+  if (alternatePool.length === 0) {
+    alternatePool = buildAlternatePool(scored, FALLBACK_SCORE_GAP, FALLBACK_CANDIDATE_LIMIT);
   }
 
-  if (scored.length > 1) {
-    const fallbackPool = scored
-      .slice(0, FALLBACK_CANDIDATE_LIMIT)
-      .filter((entry) => best.totalScore - entry.totalScore <= FALLBACK_SCORE_GAP);
-
-    if (fallbackPool.length > 1) {
-      const pickIndex = (variant + barIndex) % fallbackPool.length;
-      return fallbackPool[pickIndex];
-    }
+  if (alternatePool.length === 0) {
+    return best;
   }
 
-  return best;
+  const alternateIndex = (variant + barIndex - 1) % alternatePool.length;
+  return alternatePool[alternateIndex];
 }
 
 function compareCandidates(
