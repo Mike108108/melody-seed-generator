@@ -17,7 +17,7 @@ import type { GeneratedMelody, LayeredSeed, MelodyFingerprint, MelodyNote, Melod
 import { makeRandomSeed } from './lib/utils/seededRandom';
 import './styles.css';
 
-const MAX_CHORD_REGENERATE_ATTEMPTS = 32;
+const MAX_CHORD_REGENERATE_ATTEMPTS = 64;
 
 function chordNotesSignature(notes: MelodyNote[]): string {
   return notes

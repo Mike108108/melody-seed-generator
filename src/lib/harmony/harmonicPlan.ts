@@ -1,6 +1,7 @@
 import type { GeneratedMelody } from '../types';
 import { getPhraseBeats } from '../melody/phraseAnalysis';
 import { getDirectiveForPhrase } from '../melody/phraseRolePlan';
+import { SeededRandom } from '../utils/seededRandom';
 import {
   createChordCandidatesForMelody,
   type ChordCandidate
@@ -50,10 +51,11 @@ const PHRASE_UNRESOLVED_TONIC_PENALTY = -0.6;
 
 const STABLE_CADENCE_DEGREES = new Set([1, 4, 5]);
 
-const ALTERNATE_MELODY_SCORE_GAP = 1.25;
-const FALLBACK_MELODY_SCORE_GAP = 2.5;
-const FALLBACK_CANDIDATE_LIMIT = 4;
 const MIN_MELODY_SUPPORT_RATIO = 0.4;
+const WEIGHTED_CANDIDATE_LIMIT = 8;
+const MIN_SELECTION_WEIGHT = 0.05;
+const PHRASE_ENDING_TONIC_WEIGHT_FACTOR = 2.2;
+const PHRASE_ENDING_SUBDOMINANT_WEIGHT_FACTOR = 1.4;
 
 function normalizePitchClass(pitchClass: number): number {
   return ((pitchClass % 12) + 12) % 12;
@@ -122,64 +124,73 @@ function computePhraseScore(
   return score;
 }
 
-function buildAlternatePool(
-  scored: ScoredCandidate[],
-  melodyScoreGap: number,
-  limit?: number
-): ScoredCandidate[] {
-  const best = scored[0];
-  const minSupport = Math.max(0, best.melodySupportScore * MIN_MELODY_SUPPORT_RATIO);
-  const pool = scored.filter((entry) => {
-    const melodyGap = best.melodySupportScore - entry.melodySupportScore;
-    return melodyGap <= melodyScoreGap && entry.melodySupportScore >= minSupport;
-  });
+function createChordPlanSeed(melody: GeneratedMelody, variant: number): string {
+  const { seed, key, scale, bpm, bars } = melody.settings;
+  return `${seed}:${key}:${scale}:${bpm}:${bars}:chords:${variant}`;
+}
 
-  if (pool.length <= 1) {
+function filterViableCandidates(scored: ScoredCandidate[]): ScoredCandidate[] {
+  if (scored.length === 0) {
     return [];
   }
 
-  const alternates = pool.slice(1);
-  return limit === undefined ? alternates : alternates.slice(0, limit);
+  const best = scored[0];
+  const minSupport = Math.max(0, best.melodySupportScore * MIN_MELODY_SUPPORT_RATIO);
+  const viable = scored.filter((entry) => entry.melodySupportScore >= minSupport);
+
+  return viable.slice(0, WEIGHTED_CANDIDATE_LIMIT);
 }
 
-function deterministicVariantIndex(variant: number, barIndex: number, poolLength: number): number {
-  if (poolLength <= 1) {
-    return 0;
-  }
-
-  const mixed = variant * 31 + barIndex * 17 + variant * barIndex * 7;
-  return Math.abs(mixed) % poolLength;
-}
-
-function selectCandidateForBar(
-  scored: ScoredCandidate[],
+function buildSelectionWeights(
+  melody: GeneratedMelody,
   barIndex: number,
-  variant: number
+  candidates: ScoredCandidate[]
+): { value: ScoredCandidate; weight: number }[] {
+  const minScore = Math.min(...candidates.map((entry) => entry.totalScore));
+  const scoreOffset = minScore < 0 ? -minScore + 0.1 : 0.1;
+
+  const plan = melody.phraseRolePlan;
+  const phraseBeats = plan ? getPhraseBeats(melody.settings.bars) : 0;
+  const atPhraseEnding = plan ? isPhraseEndingBar(barIndex, phraseBeats) : false;
+  const phraseIndex = plan ? getPhraseIndexForBar(barIndex, phraseBeats) : 0;
+  const directive = plan ? getDirectiveForPhrase(plan, phraseIndex) : null;
+
+  return candidates.map((entry) => {
+    let weight = entry.totalScore + scoreOffset + MIN_SELECTION_WEIGHT;
+
+    if (directive?.stableEnding && atPhraseEnding) {
+      if (entry.candidate.degree === 1) {
+        weight *= PHRASE_ENDING_TONIC_WEIGHT_FACTOR;
+      } else if (entry.candidate.degree === 4 || entry.candidate.degree === 5) {
+        weight *= PHRASE_ENDING_SUBDOMINANT_WEIGHT_FACTOR;
+      }
+    }
+
+    return {
+      value: entry,
+      weight: Math.max(MIN_SELECTION_WEIGHT, weight)
+    };
+  });
+}
+
+function selectWeightedCandidate(
+  rng: SeededRandom,
+  melody: GeneratedMelody,
+  barIndex: number,
+  scored: ScoredCandidate[]
 ): ScoredCandidate {
-  if (variant === 0 || scored.length === 0) {
+  const pool = filterViableCandidates(scored);
+
+  if (pool.length === 0) {
     return scored[0];
   }
 
-  const best = scored[0];
-  let alternatePool = buildAlternatePool(scored, ALTERNATE_MELODY_SCORE_GAP);
-
-  if (alternatePool.length === 0) {
-    alternatePool = buildAlternatePool(scored, FALLBACK_MELODY_SCORE_GAP, FALLBACK_CANDIDATE_LIMIT);
+  if (pool.length === 1) {
+    return pool[0];
   }
 
-  if (alternatePool.length === 0 && scored.length > 1) {
-    const minSupport = Math.max(0, best.melodySupportScore * MIN_MELODY_SUPPORT_RATIO);
-    alternatePool = scored
-      .slice(1, FALLBACK_CANDIDATE_LIMIT + 1)
-      .filter((entry) => entry.melodySupportScore >= minSupport);
-  }
-
-  if (alternatePool.length === 0) {
-    return best;
-  }
-
-  const alternateIndex = deterministicVariantIndex(variant, barIndex, alternatePool.length);
-  return alternatePool[alternateIndex];
+  const weights = buildSelectionWeights(melody, barIndex, pool);
+  return rng.pickWeighted(weights);
 }
 
 function compareCandidates(
@@ -243,6 +254,8 @@ export function createHarmonicPlanForMelody(
   options: HarmonicPlanOptions = {}
 ): HarmonicPlan {
   const variant = options.variant ?? 0;
+  const useSeededRandom = variant > 0;
+  const rng = useSeededRandom ? new SeededRandom(createChordPlanSeed(melody, variant)) : null;
   const candidateAnalysis = createChordCandidatesForMelody(melody);
 
   if (candidateAnalysis.bars.length === 0) {
@@ -274,17 +287,20 @@ export function createHarmonicPlanForMelody(
     });
 
     scored.sort(compareCandidates);
-    const best = selectCandidateForBar(scored, barCandidates.barIndex, variant);
+    const selected =
+      useSeededRandom && rng
+        ? selectWeightedCandidate(rng, melody, barCandidates.barIndex, scored)
+        : scored[0];
 
-    previousRootPitchClass = best.candidate.rootPitchClass;
+    previousRootPitchClass = selected.candidate.rootPitchClass;
 
     plannedBars.push({
       barIndex: barCandidates.barIndex,
-      candidate: best.candidate,
-      melodySupportScore: best.melodySupportScore,
-      transitionScore: best.transitionScore,
-      phraseScore: best.phraseScore,
-      totalScore: best.totalScore
+      candidate: selected.candidate,
+      melodySupportScore: selected.melodySupportScore,
+      transitionScore: selected.transitionScore,
+      phraseScore: selected.phraseScore,
+      totalScore: selected.totalScore
     });
   }
 
