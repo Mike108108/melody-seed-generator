@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { hasChordLayerNotes, type ChordLayerState } from '../lib/seed/chordLayerState';
 import type { GeneratedMelody, LayeredSeed, MelodyNote } from '../lib/types';
 import { downloadWav } from '../lib/audio/exportWav';
 import { downloadLayeredMidi, downloadMidi, downloadProvenance } from '../lib/midi/exportMidi';
@@ -15,8 +16,7 @@ type DownloadOption = {
 type MelodyTransportProps = {
   melody: GeneratedMelody | null;
   chordNotes?: MelodyNote[] | null;
-  layeredSeedWithChords?: LayeredSeed | null;
-  isChordLayerEnabled?: boolean;
+  chordLayer?: ChordLayerState | null;
 };
 
 const DOWNLOAD_OPTIONS: DownloadOption[] = [
@@ -27,16 +27,13 @@ const DOWNLOAD_OPTIONS: DownloadOption[] = [
 ];
 
 function hasPreparedChordTrack(layeredSeed: LayeredSeed | null | undefined): layeredSeed is LayeredSeed {
-  return (
-    layeredSeed?.tracks.some((track) => track.role === 'chords' && track.notes.length > 0) ?? false
-  );
+  return hasChordLayerNotes(layeredSeed);
 }
 
 export function MelodyTransport({
   melody,
   chordNotes = null,
-  layeredSeedWithChords = null,
-  isChordLayerEnabled = false
+  chordLayer = null
 }: MelodyTransportProps) {
   const [downloadFormat, setDownloadFormat] = useState<DownloadFormat>('midi');
   const [exporting, setExporting] = useState(false);
@@ -75,8 +72,8 @@ export function MelodyTransport({
     if (!melody || exporting) return;
 
     if (downloadFormat === 'midi') {
-      if (isChordLayerEnabled && hasPreparedChordTrack(layeredSeedWithChords)) {
-        downloadLayeredMidi(melody, layeredSeedWithChords);
+      if (chordLayer?.enabled && hasPreparedChordTrack(chordLayer.layeredSeed)) {
+        downloadLayeredMidi(melody, chordLayer.layeredSeed);
       } else {
         downloadMidi(melody);
       }

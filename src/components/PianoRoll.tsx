@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import type { GeneratedMelody, LayeredSeed, MelodyNote } from '../lib/types';
 import type { ChordFeel, ChordLength, ChordPattern } from '../lib/harmony/chordPerformance';
+import type { ChordLayerState } from '../lib/seed/chordLayerState';
+import type { GeneratedMelody, MelodyNote } from '../lib/types';
 import { midiToNoteName } from '../lib/music/notes';
 import { MelodyStatsCompact } from './MelodyStats';
 import { MelodyTransport } from './MelodyTransport';
@@ -122,17 +123,12 @@ type PianoRollProps = {
   hasChordLayerReady: boolean;
   chordNotesForDisplay: MelodyNote[] | null;
   chordNotesForPlayback: MelodyNote[] | null;
-  isChordLayerEnabled: boolean;
-  layeredSeedWithChords: LayeredSeed | null;
+  chordLayer: ChordLayerState | null;
   onLockMelody: () => void;
   onUnlockMelody: () => void;
   onAddChords: () => void;
   onRegenerateChords?: () => void;
   canRegenerateChords?: boolean;
-  chordLayerVariant?: number;
-  chordPattern?: ChordPattern;
-  chordLength?: ChordLength;
-  chordFeel?: ChordFeel;
   onChordPatternChange?: (pattern: ChordPattern) => void;
   onChordLengthChange?: (length: ChordLength) => void;
   onChordFeelChange?: (feel: ChordFeel) => void;
@@ -227,22 +223,23 @@ export function PianoRoll({
   hasChordLayerReady,
   chordNotesForDisplay,
   chordNotesForPlayback,
-  isChordLayerEnabled,
-  layeredSeedWithChords,
+  chordLayer,
   onLockMelody,
   onUnlockMelody,
   onAddChords,
   onRegenerateChords,
   canRegenerateChords = false,
-  chordLayerVariant = 0,
-  chordPattern = 'sustained',
-  chordLength = 'long',
-  chordFeel = 'straight',
   onChordPatternChange,
   onChordLengthChange,
   onChordFeelChange,
   onToggleChordLayerEnabled
 }: PianoRollProps) {
+  const isChordLayerEnabled = chordLayer?.enabled ?? false;
+  const chordLayerVariant = chordLayer?.variant ?? 0;
+  const chordPattern = chordLayer?.performance.pattern ?? 'sustained';
+  const chordLength = chordLayer?.performance.length ?? 'long';
+  const chordFeel = chordLayer?.performance.feel ?? 'straight';
+
   const [isAddLayerMenuOpen, setIsAddLayerMenuOpen] = useState(false);
   const addLayerMenuRef = useRef<HTMLDivElement>(null);
   const melodyViewportRef = useRef<HTMLDivElement>(null);
@@ -334,8 +331,7 @@ export function PianoRoll({
         <MelodyTransport
           melody={melody}
           chordNotes={chordNotesForPlayback}
-          layeredSeedWithChords={layeredSeedWithChords}
-          isChordLayerEnabled={isChordLayerEnabled}
+          chordLayer={chordLayer}
         />
         <MelodyStatsCompact melody={melody} />
       </div>
