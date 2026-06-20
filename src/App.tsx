@@ -188,6 +188,7 @@ export default function App() {
             onAddChords={handleAddChords}
             onRegenerateChords={handleRegenerateChords}
             canRegenerateChords={canRegenerateChords}
+            chordLayerVariant={chordLayerVariant}
             onToggleChordLayerEnabled={handleToggleChordLayerEnabled}
           />
         </div>

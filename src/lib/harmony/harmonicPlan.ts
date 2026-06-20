@@ -50,9 +50,10 @@ const PHRASE_UNRESOLVED_TONIC_PENALTY = -0.6;
 
 const STABLE_CADENCE_DEGREES = new Set([1, 4, 5]);
 
-const ALTERNATE_SCORE_GAP = 0.75;
-const FALLBACK_SCORE_GAP = 1.5;
-const FALLBACK_CANDIDATE_LIMIT = 3;
+const ALTERNATE_MELODY_SCORE_GAP = 1.25;
+const FALLBACK_MELODY_SCORE_GAP = 2.5;
+const FALLBACK_CANDIDATE_LIMIT = 4;
+const MIN_MELODY_SUPPORT_RATIO = 0.4;
 
 function normalizePitchClass(pitchClass: number): number {
   return ((pitchClass % 12) + 12) % 12;
@@ -121,9 +122,17 @@ function computePhraseScore(
   return score;
 }
 
-function buildAlternatePool(scored: ScoredCandidate[], scoreGap: number, limit?: number): ScoredCandidate[] {
+function buildAlternatePool(
+  scored: ScoredCandidate[],
+  melodyScoreGap: number,
+  limit?: number
+): ScoredCandidate[] {
   const best = scored[0];
-  const pool = scored.filter((entry) => best.totalScore - entry.totalScore <= scoreGap);
+  const minSupport = Math.max(0, best.melodySupportScore * MIN_MELODY_SUPPORT_RATIO);
+  const pool = scored.filter((entry) => {
+    const melodyGap = best.melodySupportScore - entry.melodySupportScore;
+    return melodyGap <= melodyScoreGap && entry.melodySupportScore >= minSupport;
+  });
 
   if (pool.length <= 1) {
     return [];
@@ -143,10 +152,17 @@ function selectCandidateForBar(
   }
 
   const best = scored[0];
-  let alternatePool = buildAlternatePool(scored, ALTERNATE_SCORE_GAP);
+  let alternatePool = buildAlternatePool(scored, ALTERNATE_MELODY_SCORE_GAP);
 
   if (alternatePool.length === 0) {
-    alternatePool = buildAlternatePool(scored, FALLBACK_SCORE_GAP, FALLBACK_CANDIDATE_LIMIT);
+    alternatePool = buildAlternatePool(scored, FALLBACK_MELODY_SCORE_GAP, FALLBACK_CANDIDATE_LIMIT);
+  }
+
+  if (alternatePool.length === 0 && scored.length > 1) {
+    const minSupport = Math.max(0, best.melodySupportScore * MIN_MELODY_SUPPORT_RATIO);
+    alternatePool = scored
+      .slice(1, FALLBACK_CANDIDATE_LIMIT + 1)
+      .filter((entry) => entry.melodySupportScore >= minSupport);
   }
 
   if (alternatePool.length === 0) {

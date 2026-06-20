@@ -733,6 +733,7 @@ input[type='range'] {
   width: 1.85rem;
   height: 1.85rem;
   border: 1px solid rgba(255, 255, 255, 0.14);
+  pointer-events: auto;
 }
 
 .chord-regenerate-icon-button:hover {

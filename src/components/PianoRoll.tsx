@@ -128,6 +128,7 @@ type PianoRollProps = {
   onAddChords: () => void;
   onRegenerateChords?: () => void;
   canRegenerateChords?: boolean;
+  chordLayerVariant?: number;
   onToggleChordLayerEnabled: () => void;
 };
 
@@ -226,6 +227,7 @@ export function PianoRoll({
   onAddChords,
   onRegenerateChords,
   canRegenerateChords = false,
+  chordLayerVariant = 0,
   onToggleChordLayerEnabled
 }: PianoRollProps) {
   const [isAddLayerMenuOpen, setIsAddLayerMenuOpen] = useState(false);
@@ -416,6 +418,7 @@ export function PianoRoll({
                 onScroll={(event) => syncViewportScroll(event.currentTarget, melodyViewportRef.current)}
               >
                 <PianoRollTimeline
+                  key={`chord-v${chordLayerVariant}`}
                   notes={chordNotes}
                   displayRange={chordDisplayRange}
                   timelineWidthPx={timelineWidthPx}
