@@ -142,6 +142,15 @@ function buildAlternatePool(
   return limit === undefined ? alternates : alternates.slice(0, limit);
 }
 
+function deterministicVariantIndex(variant: number, barIndex: number, poolLength: number): number {
+  if (poolLength <= 1) {
+    return 0;
+  }
+
+  const mixed = variant * 31 + barIndex * 17 + variant * barIndex * 7;
+  return Math.abs(mixed) % poolLength;
+}
+
 function selectCandidateForBar(
   scored: ScoredCandidate[],
   barIndex: number,
@@ -169,7 +178,7 @@ function selectCandidateForBar(
     return best;
   }
 
-  const alternateIndex = (variant + barIndex - 1) % alternatePool.length;
+  const alternateIndex = deterministicVariantIndex(variant, barIndex, alternatePool.length);
   return alternatePool[alternateIndex];
 }
 

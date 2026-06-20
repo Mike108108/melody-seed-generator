@@ -17,7 +17,17 @@ import type { GeneratedMelody, LayeredSeed, MelodyFingerprint, MelodyNote, Melod
 import { makeRandomSeed } from './lib/utils/seededRandom';
 import './styles.css';
 
-const MAX_CHORD_REGENERATE_ATTEMPTS = 8;
+const MAX_CHORD_REGENERATE_ATTEMPTS = 32;
+
+function chordNotesSignature(notes: MelodyNote[]): string {
+  return notes
+    .map((note) => `${note.startBeats}:${note.midi}:${note.durationBeats}:${note.velocity}`)
+    .join('|');
+}
+
+function getChordNotesFromLayeredSeed(layeredSeed: LayeredSeed): MelodyNote[] {
+  return layeredSeed.tracks.find((track) => track.role === 'chords')?.notes ?? [];
+}
 
 function areChordNotesIdentical(current: MelodyNote[], next: MelodyNote[]): boolean {
   if (current.length !== next.length) {
@@ -57,6 +67,7 @@ export default function App() {
   const [layeredSeedWithChords, setLayeredSeedWithChords] = useState<LayeredSeed | null>(null);
   const [isChordLayerEnabled, setIsChordLayerEnabled] = useState(false);
   const [chordLayerVariant, setChordLayerVariant] = useState(0);
+  const [seenChordLayerSignatures, setSeenChordLayerSignatures] = useState<string[]>([]);
 
   const hasChordLayerReady =
     layeredSeedWithChords?.tracks.some((track) => track.role === 'chords' && track.notes.length > 0) ??
@@ -88,6 +99,7 @@ export default function App() {
     setLayeredSeedWithChords(null);
     setIsChordLayerEnabled(false);
     setChordLayerVariant(0);
+    setSeenChordLayerSignatures([]);
     setFingerprintHistory((history) => [...history, generated.fingerprint].slice(-100));
   };
 
@@ -114,34 +126,69 @@ export default function App() {
     setLayeredSeedWithChords(null);
     setIsChordLayerEnabled(false);
     setChordLayerVariant(0);
+    setSeenChordLayerSignatures([]);
   };
 
   const handleAddChords = () => {
     if (!melody || !isMelodyLocked) return;
+    const initialLayeredSeed = createLayeredSeedWithChordTrack(melody, { variant: 0 });
+    const initialSignature = chordNotesSignature(getChordNotesFromLayeredSeed(initialLayeredSeed));
     setChordLayerVariant(0);
-    setLayeredSeedWithChords(createLayeredSeedWithChordTrack(melody, { variant: 0 }));
+    setSeenChordLayerSignatures(initialSignature ? [initialSignature] : []);
+    setLayeredSeedWithChords(initialLayeredSeed);
     setIsChordLayerEnabled(true);
   };
 
   const handleRegenerateChords = () => {
     if (!melody || !isMelodyLocked || !hasChordLayerReady || !layeredSeedWithChords) return;
 
-    const currentChordNotes =
-      layeredSeedWithChords.tracks.find((track) => track.role === 'chords')?.notes ?? [];
+    const currentChordNotes = getChordNotesFromLayeredSeed(layeredSeedWithChords);
+    const seenSignatures = new Set(seenChordLayerSignatures);
     let attemptVariant = chordLayerVariant + 1;
-    let nextLayeredSeed = createLayeredSeedWithChordTrack(melody, { variant: attemptVariant });
+    let chosenLayeredSeed: LayeredSeed | null = null;
+    let chosenVariant = chordLayerVariant;
+    let firstDifferentSeed: LayeredSeed | null = null;
+    let firstDifferentVariant = attemptVariant;
 
     for (let attempt = 0; attempt < MAX_CHORD_REGENERATE_ATTEMPTS; attempt += 1) {
-      const nextChordNotes = nextLayeredSeed.tracks.find((track) => track.role === 'chords')?.notes ?? [];
-      if (!areChordNotesIdentical(currentChordNotes, nextChordNotes)) {
+      const candidateSeed = createLayeredSeedWithChordTrack(melody, { variant: attemptVariant });
+      const candidateNotes = getChordNotesFromLayeredSeed(candidateSeed);
+      const candidateSignature = chordNotesSignature(candidateNotes);
+
+      if (areChordNotesIdentical(currentChordNotes, candidateNotes)) {
+        attemptVariant += 1;
+        continue;
+      }
+
+      if (!firstDifferentSeed) {
+        firstDifferentSeed = candidateSeed;
+        firstDifferentVariant = attemptVariant;
+      }
+
+      if (!seenSignatures.has(candidateSignature)) {
+        chosenLayeredSeed = candidateSeed;
+        chosenVariant = attemptVariant;
         break;
       }
+
       attemptVariant += 1;
-      nextLayeredSeed = createLayeredSeedWithChordTrack(melody, { variant: attemptVariant });
     }
 
-    setChordLayerVariant(attemptVariant);
-    setLayeredSeedWithChords(nextLayeredSeed);
+    if (!chosenLayeredSeed && firstDifferentSeed) {
+      chosenLayeredSeed = firstDifferentSeed;
+      chosenVariant = firstDifferentVariant;
+    }
+
+    if (!chosenLayeredSeed) {
+      return;
+    }
+
+    const chosenSignature = chordNotesSignature(getChordNotesFromLayeredSeed(chosenLayeredSeed));
+    setSeenChordLayerSignatures((previous) =>
+      previous.includes(chosenSignature) ? previous : [...previous, chosenSignature]
+    );
+    setChordLayerVariant(chosenVariant);
+    setLayeredSeedWithChords(chosenLayeredSeed);
     setIsChordLayerEnabled(true);
   };
 
