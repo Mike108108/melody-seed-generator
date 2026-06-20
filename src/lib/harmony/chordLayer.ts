@@ -2,7 +2,7 @@ import type { GeneratedMelody, GeneratedTrack, MelodyNote } from '../types';
 import { getScaleDegree } from '../music/scales';
 import { makeNote } from '../music/theory';
 import type { ChordTone } from './chordCandidates';
-import { createHarmonicPlanForMelody } from './harmonicPlan';
+import { createHarmonicPlanForMelody, type HarmonicPlanOptions } from './harmonicPlan';
 
 const BEATS_PER_BAR = 4;
 const CHORD_VELOCITY = 0.52;
@@ -49,8 +49,11 @@ function createChordNotesForBar(
   return notes;
 }
 
-export function createChordTrackFromHarmonicPlan(melody: GeneratedMelody): GeneratedTrack {
-  const plan = createHarmonicPlanForMelody(melody);
+export function createChordTrackFromHarmonicPlan(
+  melody: GeneratedMelody,
+  options?: HarmonicPlanOptions
+): GeneratedTrack {
+  const plan = createHarmonicPlanForMelody(melody, options);
 
   if (plan.bars.length === 0) {
     return createEmptyChordTrack();

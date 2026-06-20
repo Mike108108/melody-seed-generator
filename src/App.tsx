@@ -33,6 +33,7 @@ export default function App() {
   const [isMelodyLocked, setIsMelodyLocked] = useState(false);
   const [layeredSeedWithChords, setLayeredSeedWithChords] = useState<LayeredSeed | null>(null);
   const [isChordLayerEnabled, setIsChordLayerEnabled] = useState(false);
+  const [chordLayerVariant, setChordLayerVariant] = useState(0);
 
   const hasChordLayerReady =
     layeredSeedWithChords?.tracks.some((track) => track.role === 'chords' && track.notes.length > 0) ??
@@ -63,6 +64,7 @@ export default function App() {
     });
     setLayeredSeedWithChords(null);
     setIsChordLayerEnabled(false);
+    setChordLayerVariant(0);
     setFingerprintHistory((history) => [...history, generated.fingerprint].slice(-100));
   };
 
@@ -88,17 +90,29 @@ export default function App() {
     setIsMelodyLocked(false);
     setLayeredSeedWithChords(null);
     setIsChordLayerEnabled(false);
+    setChordLayerVariant(0);
   };
 
   const handleAddChords = () => {
     if (!melody || !isMelodyLocked) return;
-    setLayeredSeedWithChords(createLayeredSeedWithChordTrack(melody));
+    setChordLayerVariant(0);
+    setLayeredSeedWithChords(createLayeredSeedWithChordTrack(melody, { variant: 0 }));
+    setIsChordLayerEnabled(true);
+  };
+
+  const handleRegenerateChords = () => {
+    if (!melody || !isMelodyLocked || !hasChordLayerReady) return;
+    const nextVariant = chordLayerVariant + 1;
+    setChordLayerVariant(nextVariant);
+    setLayeredSeedWithChords(createLayeredSeedWithChordTrack(melody, { variant: nextVariant }));
     setIsChordLayerEnabled(true);
   };
 
   const handleToggleChordLayerEnabled = () => {
     setIsChordLayerEnabled((enabled) => !enabled);
   };
+
+  const canRegenerateChords = melody !== null && isMelodyLocked && hasChordLayerReady;
 
   return (
     <main className="app-shell">
@@ -135,6 +149,8 @@ export default function App() {
             onLockMelody={handleLockMelody}
             onUnlockMelody={handleUnlockMelody}
             onAddChords={handleAddChords}
+            onRegenerateChords={handleRegenerateChords}
+            canRegenerateChords={canRegenerateChords}
             onToggleChordLayerEnabled={handleToggleChordLayerEnabled}
           />
         </div>

@@ -725,6 +725,21 @@ input[type='range'] {
   background: rgba(45, 212, 191, 0.34);
 }
 
+.chord-regenerate-icon-button {
+  position: absolute;
+  top: 0.42rem;
+  right: 0.42rem;
+  z-index: 2;
+  width: 1.85rem;
+  height: 1.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.chord-regenerate-icon-button:hover {
+  border-color: rgba(167, 139, 250, 0.42);
+  background: rgba(167, 139, 250, 0.12);
+}
+
 .piano-roll-stack-footer {
   display: flex;
   justify-content: flex-end;

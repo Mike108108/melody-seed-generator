@@ -25,6 +25,18 @@ export type HarmonicPlan = {
   };
 };
 
+export type HarmonicPlanOptions = {
+  variant?: number;
+};
+
+type ScoredCandidate = {
+  candidate: ChordCandidate;
+  melodySupportScore: number;
+  transitionScore: number;
+  phraseScore: number;
+  totalScore: number;
+};
+
 const BEATS_PER_BAR = 4;
 
 const TRANSITION_SAME_ROOT = 0.3;
@@ -37,6 +49,10 @@ const PHRASE_STABLE_SUBDOMINANT_BONUS = 0.35;
 const PHRASE_UNRESOLVED_TONIC_PENALTY = -0.6;
 
 const STABLE_CADENCE_DEGREES = new Set([1, 4, 5]);
+
+const ALTERNATE_SCORE_GAP = 0.75;
+const FALLBACK_SCORE_GAP = 1.5;
+const FALLBACK_CANDIDATE_LIMIT = 3;
 
 function normalizePitchClass(pitchClass: number): number {
   return ((pitchClass % 12) + 12) % 12;
@@ -105,6 +121,39 @@ function computePhraseScore(
   return score;
 }
 
+function selectCandidateForBar(
+  scored: ScoredCandidate[],
+  barIndex: number,
+  variant: number
+): ScoredCandidate {
+  if (variant === 0 || scored.length === 0) {
+    return scored[0];
+  }
+
+  const best = scored[0];
+  const alternates = scored.filter(
+    (entry) => best.totalScore - entry.totalScore <= ALTERNATE_SCORE_GAP
+  );
+
+  if (alternates.length > 1) {
+    const pickIndex = (variant + barIndex) % alternates.length;
+    return alternates[pickIndex];
+  }
+
+  if (scored.length > 1) {
+    const fallbackPool = scored
+      .slice(0, FALLBACK_CANDIDATE_LIMIT)
+      .filter((entry) => best.totalScore - entry.totalScore <= FALLBACK_SCORE_GAP);
+
+    if (fallbackPool.length > 1) {
+      const pickIndex = (variant + barIndex) % fallbackPool.length;
+      return fallbackPool[pickIndex];
+    }
+  }
+
+  return best;
+}
+
 function compareCandidates(
   a: { candidate: ChordCandidate; totalScore: number },
   b: { candidate: ChordCandidate; totalScore: number }
@@ -161,7 +210,11 @@ function computeSummary(melody: GeneratedMelody, bars: PlannedChord[]): Harmonic
   };
 }
 
-export function createHarmonicPlanForMelody(melody: GeneratedMelody): HarmonicPlan {
+export function createHarmonicPlanForMelody(
+  melody: GeneratedMelody,
+  options: HarmonicPlanOptions = {}
+): HarmonicPlan {
+  const variant = options.variant ?? 0;
   const candidateAnalysis = createChordCandidatesForMelody(melody);
 
   if (candidateAnalysis.bars.length === 0) {
@@ -193,7 +246,7 @@ export function createHarmonicPlanForMelody(melody: GeneratedMelody): HarmonicPl
     });
 
     scored.sort(compareCandidates);
-    const best = scored[0];
+    const best = selectCandidateForBar(scored, barCandidates.barIndex, variant);
 
     previousRootPitchClass = best.candidate.rootPitchClass;
 

@@ -90,6 +90,29 @@ function AddLayerIcon({ className = 'icon-circle-button__icon' }: IconProps) {
   );
 }
 
+function RegenerateIcon({ className = 'icon-circle-button__icon' }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" aria-hidden="true">
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M11.5 2.75A5.25 5.25 0 0 0 4.5 4.5M4.5 13.25A5.25 5.25 0 0 0 11.5 11.5"
+      />
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M11.5 2.75V5.5h-2.75M4.5 13.25v-2.75h2.75"
+      />
+    </svg>
+  );
+}
+
 type DisplayRange = { minMidi: number; maxMidi: number; span: number };
 
 type PianoRollProps = {
@@ -103,6 +126,8 @@ type PianoRollProps = {
   onLockMelody: () => void;
   onUnlockMelody: () => void;
   onAddChords: () => void;
+  onRegenerateChords?: () => void;
+  canRegenerateChords?: boolean;
   onToggleChordLayerEnabled: () => void;
 };
 
@@ -199,6 +224,8 @@ export function PianoRoll({
   onLockMelody,
   onUnlockMelody,
   onAddChords,
+  onRegenerateChords,
+  canRegenerateChords = false,
   onToggleChordLayerEnabled
 }: PianoRollProps) {
   const [isAddLayerMenuOpen, setIsAddLayerMenuOpen] = useState(false);
@@ -369,6 +396,18 @@ export function PianoRoll({
               </button>
             </div>
             <div className="piano-roll-shell piano-roll-shell--chord piano-roll-fixed" style={chordRollStyle}>
+              {canRegenerateChords && onRegenerateChords ? (
+                <button
+                  type="button"
+                  className="icon-circle-button chord-regenerate-icon-button"
+                  onClick={onRegenerateChords}
+                  aria-label="Regenerate chord layer"
+                  title="Regenerate chord layer"
+                >
+                  <RegenerateIcon />
+                </button>
+              ) : null}
+
               <PianoRollKeys displayRange={chordDisplayRange} height={CHORD_ROLL_HEIGHT} />
 
               <div
