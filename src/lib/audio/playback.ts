@@ -3,10 +3,12 @@ import type { GeneratedMelody, MelodyNote } from '../types';
 
 let melodySynth: Tone.PolySynth | null = null;
 let chordSynth: Tone.PolySynth | null = null;
+let bassSynth: Tone.PolySynth | null = null;
 
 export async function playMelody(
   melody: GeneratedMelody,
-  chordNotes: MelodyNote[] | null = null
+  chordNotes: MelodyNote[] | null = null,
+  bassNotes: MelodyNote[] | null = null
 ): Promise<void> {
   await Tone.start();
   stopPlayback();
@@ -22,6 +24,7 @@ export async function playMelody(
   }).toDestination();
 
   const hasChords = chordNotes !== null && chordNotes.length > 0;
+  const hasBass = bassNotes !== null && bassNotes.length > 0;
 
   if (hasChords) {
     chordSynth = new Tone.PolySynth(Tone.Synth, {
@@ -36,6 +39,19 @@ export async function playMelody(
     chordSynth.volume.value = -12;
   }
 
+  if (hasBass) {
+    bassSynth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope: {
+        attack: 0.015,
+        decay: 0.1,
+        sustain: 0.5,
+        release: 0.22
+      }
+    }).toDestination();
+    bassSynth.volume.value = -14;
+  }
+
   const bpm = melody.settings.bpm;
   Tone.Transport.bpm.value = bpm;
   Tone.Transport.cancel(0);
@@ -48,6 +64,12 @@ export async function playMelody(
   if (hasChords) {
     chordNotes!.forEach((note) => {
       scheduleNote(chordSynth!, note, bpm);
+    });
+  }
+
+  if (hasBass) {
+    bassNotes!.forEach((note) => {
+      scheduleNote(bassSynth!, note, bpm);
     });
   }
 
@@ -68,6 +90,11 @@ export function stopPlayback(): void {
     chordSynth.releaseAll();
     chordSynth.dispose();
     chordSynth = null;
+  }
+  if (bassSynth) {
+    bassSynth.releaseAll();
+    bassSynth.dispose();
+    bassSynth = null;
   }
 }
 

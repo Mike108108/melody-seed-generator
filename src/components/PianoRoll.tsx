@@ -139,6 +139,7 @@ type PianoRollProps = {
   onToggleChordLayerEnabled: () => void;
   hasBassLayerReady: boolean;
   bassNotesForDisplay: MelodyNote[] | null;
+  bassNotesForPlayback: MelodyNote[] | null;
   bassLayer: BassLayerState | null;
   onAddBass: () => void;
   onRegenerateBass?: () => void;
@@ -247,6 +248,7 @@ export function PianoRoll({
   onToggleChordLayerEnabled,
   hasBassLayerReady,
   bassNotesForDisplay,
+  bassNotesForPlayback,
   bassLayer,
   onAddBass,
   onRegenerateBass,
@@ -387,7 +389,9 @@ export function PianoRoll({
         <MelodyTransport
           melody={melody}
           chordNotes={chordNotesForPlayback}
+          bassNotes={bassNotesForPlayback}
           chordLayer={chordLayer}
+          bassLayer={bassLayer}
         />
         <MelodyStatsCompact melody={melody} />
       </div>
@@ -611,10 +615,7 @@ export function PianoRoll({
 
         {hasChordLayerReady || hasBassLayerReady ? (
           <p className="hint melody-chord-playback-hint">
-            {isChordLayerEnabled
-              ? 'Chord Layer enabled · MIDI and WAV include active layers'
-              : 'Chord Layer disabled · MIDI and WAV export melody only'}
-            {hasBassLayerReady ? ' · Playback/export support for Bass Layer is next.' : ''}
+            Active layers are included in playback, MIDI, and WAV export.
           </p>
         ) : null}
 

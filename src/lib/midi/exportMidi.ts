@@ -1,4 +1,7 @@
 import { Midi } from '@tonejs/midi';
+import type { BassLayerState } from '../seed/bassLayerState';
+import { createActiveLayeredSeed } from '../seed/activeLayeredSeed';
+import type { ChordLayerState } from '../seed/chordLayerState';
 import { createProvenanceLayers } from '../seed/layeredSeed';
 import type { GeneratedMelody, LayeredSeed, ProvenanceJson } from '../types';
 import { slugifyFilePart } from '../utils/hash';
@@ -24,7 +27,13 @@ export function exportMelodyToMidiBytes(melody: GeneratedMelody): Uint8Array {
   return new Uint8Array(midi.toArray());
 }
 
-export function createProvenanceJson(melody: GeneratedMelody): ProvenanceJson {
+export function createProvenanceJson(
+  melody: GeneratedMelody,
+  chordLayer: ChordLayerState | null = null,
+  bassLayer: BassLayerState | null = null
+): ProvenanceJson {
+  const activeLayeredSeed = createActiveLayeredSeed(melody, chordLayer, bassLayer);
+
   return {
     createdBy: 'Melody Seed Generator',
     generatorVersion: '0.2.0',
@@ -40,8 +49,17 @@ export function createProvenanceJson(melody: GeneratedMelody): ProvenanceJson {
     generationProfile: melody.generationProfile,
     intentPresetProfile: melody.intentPresetProfile,
     phraseRolePlan: melody.phraseRolePlan,
-    layeredSeedVersion: melody.layeredSeed?.schemaVersion,
-    layers: melody.layeredSeed ? createProvenanceLayers(melody.layeredSeed) : undefined,
+    layeredSeedVersion: activeLayeredSeed.schemaVersion,
+    layers: createProvenanceLayers(activeLayeredSeed),
+    bassLayerSummary: bassLayer
+      ? {
+          exists: true,
+          enabled: bassLayer.enabled,
+          mode: bassLayer.mode,
+          variant: bassLayer.variant,
+          noteCount: bassLayer.track.notes.length
+        }
+      : undefined,
     usesSamples: false,
     usesAudioLoops: false,
     usesTrainingData: false,
@@ -66,38 +84,31 @@ export function exportLayeredSeedToMidiBytes(
   const midi = new Midi();
   midi.header.setTempo(melody.settings.bpm);
 
-  const melodyTrackSource =
-    layeredSeed.tracks.find((track) => track.id === layeredSeed.primaryTrackId) ??
-    layeredSeed.tracks.find((track) => track.role === 'melody');
+  for (const trackSource of layeredSeed.tracks) {
+    if (trackSource.notes.length === 0) {
+      continue;
+    }
 
-  if (melodyTrackSource) {
-    const melodyTrack = midi.addTrack();
-    melodyTrack.name = melodyTrackSource.name || 'Procedural Melody Seed';
-    melodyTrack.instrument.name = 'synth lead';
-    melodyTrack.channel = 0;
+    const track = midi.addTrack();
+    track.name = trackSource.name;
+    track.channel = trackSource.channel;
 
-    melodyTrackSource.notes.forEach((note) => {
-      melodyTrack.addNote({
-        midi: note.midi,
-        time: beatsToSeconds(note.startBeats, melody.settings.bpm),
-        duration: beatsToSeconds(note.durationBeats, melody.settings.bpm),
-        velocity: note.velocity
-      });
-    });
-  }
+    switch (trackSource.role) {
+      case 'melody':
+        track.instrument.name = 'synth lead';
+        break;
+      case 'chords':
+        track.instrument.name = 'synth pad';
+        break;
+      case 'bass':
+        track.instrument.name = 'synth bass';
+        break;
+      default:
+        track.instrument.name = 'synth';
+    }
 
-  const chordTrackSource = layeredSeed.tracks.find(
-    (track) => track.role === 'chords' && track.notes.length > 0
-  );
-
-  if (chordTrackSource) {
-    const chordTrack = midi.addTrack();
-    chordTrack.name = chordTrackSource.name || 'Chords';
-    chordTrack.instrument.name = 'synth pad';
-    chordTrack.channel = 1;
-
-    chordTrackSource.notes.forEach((note) => {
-      chordTrack.addNote({
+    trackSource.notes.forEach((note) => {
+      track.addNote({
         midi: note.midi,
         time: beatsToSeconds(note.startBeats, melody.settings.bpm),
         duration: beatsToSeconds(note.durationBeats, melody.settings.bpm),
@@ -122,11 +133,15 @@ export function downloadLayeredMidi(melody: GeneratedMelody, layeredSeed: Layere
   const arrayBuffer = new ArrayBuffer(bytes.byteLength);
   new Uint8Array(arrayBuffer).set(bytes);
   const midiBlob = new Blob([arrayBuffer], { type: 'audio/midi' });
-  downloadBlob(midiBlob, `${baseFileName(melody)}-midi-chords.mid`, 'audio/midi');
+  downloadBlob(midiBlob, `${baseFileName(melody)}-midi-layers.mid`, 'audio/midi');
 }
 
-export function downloadProvenance(melody: GeneratedMelody): void {
-  const provenance = createProvenanceJson(melody);
+export function downloadProvenance(
+  melody: GeneratedMelody,
+  chordLayer: ChordLayerState | null = null,
+  bassLayer: BassLayerState | null = null
+): void {
+  const provenance = createProvenanceJson(melody, chordLayer, bassLayer);
   const blob = new Blob([JSON.stringify(provenance, null, 2)], { type: 'application/json' });
   downloadBlob(blob, `${baseFileName(melody)}.provenance.json`, 'application/json');
 }

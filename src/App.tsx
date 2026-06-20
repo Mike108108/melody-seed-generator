@@ -66,6 +66,9 @@ export default function App() {
     ? getBassNotesFromBassLayer(bassLayer)
     : null;
 
+  const bassNotesForPlayback: MelodyNote[] | null =
+    hasBassLayerReady && bassLayer.enabled ? bassNotesForDisplay : null;
+
   const generateFromSettings = (nextSettings: MelodySettings, nextIntent: MelodyIntent) => {
     const phraseRolePlan = createPhraseRolePlan(nextIntent, nextSettings);
     const generated = generateMelody(nextSettings, fingerprintHistory.slice(-50), { phraseRolePlan });
@@ -249,6 +252,7 @@ export default function App() {
             onToggleChordLayerEnabled={handleToggleChordLayerEnabled}
             hasBassLayerReady={hasBassLayerReady}
             bassNotesForDisplay={bassNotesForDisplay}
+            bassNotesForPlayback={bassNotesForPlayback}
             bassLayer={bassLayer}
             onAddBass={handleAddBass}
             onRegenerateBass={handleRegenerateBass}

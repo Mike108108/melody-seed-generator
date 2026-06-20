@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { hasChordLayerNotes, type ChordLayerState } from '../lib/seed/chordLayerState';
-import type { GeneratedMelody, LayeredSeed, MelodyNote } from '../lib/types';
+import { createActiveLayeredSeed, hasActiveLayeredTracks } from '../lib/seed/activeLayeredSeed';
+import type { BassLayerState } from '../lib/seed/bassLayerState';
+import type { ChordLayerState } from '../lib/seed/chordLayerState';
+import type { GeneratedMelody, MelodyNote } from '../lib/types';
 import { downloadWav } from '../lib/audio/exportWav';
 import { downloadLayeredMidi, downloadMidi, downloadProvenance } from '../lib/midi/exportMidi';
 import { playMelody, stopPlayback } from '../lib/audio/playback';
@@ -16,7 +18,9 @@ type DownloadOption = {
 type MelodyTransportProps = {
   melody: GeneratedMelody | null;
   chordNotes?: MelodyNote[] | null;
+  bassNotes?: MelodyNote[] | null;
   chordLayer?: ChordLayerState | null;
+  bassLayer?: BassLayerState | null;
 };
 
 const DOWNLOAD_OPTIONS: DownloadOption[] = [
@@ -26,14 +30,12 @@ const DOWNLOAD_OPTIONS: DownloadOption[] = [
   { value: 'mp3', label: 'MP3', disabled: true }
 ];
 
-function hasPreparedChordTrack(layeredSeed: LayeredSeed | null | undefined): layeredSeed is LayeredSeed {
-  return hasChordLayerNotes(layeredSeed);
-}
-
 export function MelodyTransport({
   melody,
   chordNotes = null,
-  chordLayer = null
+  bassNotes = null,
+  chordLayer = null,
+  bassLayer = null
 }: MelodyTransportProps) {
   const [downloadFormat, setDownloadFormat] = useState<DownloadFormat>('midi');
   const [exporting, setExporting] = useState(false);
@@ -43,7 +45,7 @@ export function MelodyTransport({
   useEffect(() => {
     stopPlayback();
     setIsPlaying(false);
-  }, [melody, chordNotes]);
+  }, [melody, chordNotes, bassNotes]);
 
   useEffect(() => {
     return () => {
@@ -52,12 +54,13 @@ export function MelodyTransport({
   }, []);
 
   const selectedOption = DOWNLOAD_OPTIONS.find((option) => option.value === downloadFormat) ?? DOWNLOAD_OPTIONS[0];
+  const hasActiveLayers = hasActiveLayeredTracks(chordLayer, bassLayer);
 
   const handlePlay = async () => {
     if (!melody) return;
     setIsPlaying(true);
     try {
-      await playMelody(melody, chordNotes);
+      await playMelody(melody, chordNotes, bassNotes);
     } finally {
       setIsPlaying(false);
     }
@@ -72,8 +75,8 @@ export function MelodyTransport({
     if (!melody || exporting) return;
 
     if (downloadFormat === 'midi') {
-      if (chordLayer?.enabled && hasPreparedChordTrack(chordLayer.layeredSeed)) {
-        downloadLayeredMidi(melody, chordLayer.layeredSeed);
+      if (hasActiveLayers) {
+        downloadLayeredMidi(melody, createActiveLayeredSeed(melody, chordLayer, bassLayer));
       } else {
         downloadMidi(melody);
       }
@@ -81,18 +84,14 @@ export function MelodyTransport({
     }
 
     if (downloadFormat === 'provenance') {
-      downloadProvenance(melody);
+      downloadProvenance(melody, chordLayer, bassLayer);
       return;
     }
 
     if (downloadFormat === 'wav') {
       setExporting(true);
       try {
-        if (chordLayer?.enabled && hasPreparedChordTrack(chordLayer.layeredSeed)) {
-          await downloadWav(melody, chordNotes);
-        } else {
-          await downloadWav(melody);
-        }
+        await downloadWav(melody, chordNotes, bassNotes);
       } finally {
         setExporting(false);
       }

@@ -90,6 +90,14 @@ export type GeneratedMelody = {
   layeredSeed?: LayeredSeed;
 };
 
+export type BassLayerProvenance = {
+  exists: true;
+  enabled: boolean;
+  mode: import('./harmony/bassGeneration').BassMode;
+  variant: number;
+  noteCount: number;
+};
+
 export type ProvenanceJson = {
   createdBy: string;
   generatorVersion: string;
@@ -107,6 +115,7 @@ export type ProvenanceJson = {
   phraseRolePlan?: import('./melody/phraseRolePlan').PhraseRolePlan;
   layeredSeedVersion?: 1;
   layers?: ProvenanceLayer[];
+  bassLayerSummary?: BassLayerProvenance;
   usesSamples: false;
   usesAudioLoops: false;
   usesTrainingData: false;
