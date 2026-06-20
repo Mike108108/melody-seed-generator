@@ -24,12 +24,18 @@ export function createChordTrackFromHarmonicPlan(
   const plan = createHarmonicPlanForMelody(melody, options);
   const performance = options?.performance ?? {};
 
+  const variant = options?.variant ?? 0;
+  const performanceWithVariant = { ...performance, variant };
+
   if (plan.bars.length === 0) {
     return createEmptyChordTrack();
   }
 
-  const notes = plan.bars.flatMap((planned) =>
-    renderChordNotesForBar(melody, planned.barIndex, planned.candidate.tones, performance)
+  const notes = plan.bars.flatMap((planned, index) =>
+    renderChordNotesForBar(melody, planned.barIndex, planned.candidate.tones, {
+      ...performanceWithVariant,
+      nextBarTones: plan.bars[index + 1]?.candidate.tones
+    })
   );
 
   return {

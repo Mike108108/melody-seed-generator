@@ -623,15 +623,26 @@ input[type='range'] {
 
 .piano-roll-lane-header--chord {
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem 1rem;
+  flex-wrap: wrap;
+}
+
+.chord-layer-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  flex-shrink: 0;
 }
 
 .chord-layer-performance-controls {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.45rem 0.75rem;
-  margin: -0.08rem 0 0.32rem;
+  margin-left: auto;
+  margin-bottom: 0;
 }
 
 .chord-layer-performance-control {
