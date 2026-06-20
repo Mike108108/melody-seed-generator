@@ -1,5 +1,5 @@
 import * as Tone from 'tone';
-import type { GeneratedMelody } from '../types';
+import type { GeneratedMelody, MelodyNote } from '../types';
 import { slugifyFilePart } from '../utils/hash';
 
 const LEAD_SYNTH_OPTIONS = {
@@ -12,6 +12,18 @@ const LEAD_SYNTH_OPTIONS = {
   }
 };
 
+const CHORD_SYNTH_OPTIONS = {
+  oscillator: { type: 'sine' as const },
+  envelope: {
+    attack: 0.02,
+    decay: 0.12,
+    sustain: 0.55,
+    release: 0.25
+  }
+};
+
+const CHORD_VOLUME_DB = -12;
+
 const NOTE_DURATION_FACTOR = 0.92;
 const TAIL_BEATS = 0.25;
 const RELEASE_TAIL_SECONDS = 0.2;
@@ -20,32 +32,56 @@ function beatsToSeconds(beats: number, bpm: number): number {
   return beats * (60 / bpm);
 }
 
-function computeRenderDurationSeconds(melody: GeneratedMelody): number {
-  const { bpm, bars } = melody.settings;
-  const lastNoteEndBeats = melody.notes.reduce(
+function lastNoteEndBeats(notes: MelodyNote[]): number {
+  return notes.reduce(
     (max, note) => Math.max(max, note.startBeats + note.durationBeats * NOTE_DURATION_FACTOR),
     0
   );
-  const contentEndBeats = Math.max(bars * 4 + TAIL_BEATS, lastNoteEndBeats + TAIL_BEATS);
+}
+
+function computeRenderDurationSeconds(
+  melody: GeneratedMelody,
+  chordNotes?: MelodyNote[] | null
+): number {
+  const { bpm, bars } = melody.settings;
+  const melodyEndBeats = lastNoteEndBeats(melody.notes);
+  const chordEndBeats = chordNotes && chordNotes.length > 0 ? lastNoteEndBeats(chordNotes) : 0;
+  const lastNoteEndBeatsValue = Math.max(melodyEndBeats, chordEndBeats);
+  const contentEndBeats = Math.max(bars * 4 + TAIL_BEATS, lastNoteEndBeatsValue + TAIL_BEATS);
   return beatsToSeconds(contentEndBeats, bpm) + RELEASE_TAIL_SECONDS;
 }
 
-export async function renderMelodyToAudioBuffer(melody: GeneratedMelody): Promise<AudioBuffer> {
-  const durationSeconds = computeRenderDurationSeconds(melody);
+function scheduleNotes(
+  synth: Tone.PolySynth,
+  notes: MelodyNote[],
+  bpm: number,
+  transport: ReturnType<typeof Tone.getTransport>
+): void {
+  notes.forEach((note) => {
+    const startSeconds = beatsToSeconds(note.startBeats, bpm);
+    const noteDurationSeconds = beatsToSeconds(note.durationBeats * NOTE_DURATION_FACTOR, bpm);
+    transport.schedule((time) => {
+      synth.triggerAttackRelease(note.noteName, noteDurationSeconds, time, note.velocity);
+    }, startSeconds);
+  });
+}
+
+export async function renderMelodyToAudioBuffer(
+  melody: GeneratedMelody,
+  chordNotes?: MelodyNote[] | null
+): Promise<AudioBuffer> {
+  const hasChords = chordNotes !== null && chordNotes !== undefined && chordNotes.length > 0;
+  const durationSeconds = computeRenderDurationSeconds(melody, hasChords ? chordNotes : null);
 
   const toneBuffer = await Tone.Offline(({ transport }) => {
-    const synth = new Tone.PolySynth(Tone.Synth, LEAD_SYNTH_OPTIONS).toDestination();
+    const melodySynth = new Tone.PolySynth(Tone.Synth, LEAD_SYNTH_OPTIONS).toDestination();
+    scheduleNotes(melodySynth, melody.notes, melody.settings.bpm, transport);
 
-    melody.notes.forEach((note) => {
-      const startSeconds = beatsToSeconds(note.startBeats, melody.settings.bpm);
-      const noteDurationSeconds = beatsToSeconds(
-        note.durationBeats * NOTE_DURATION_FACTOR,
-        melody.settings.bpm
-      );
-      transport.schedule((time) => {
-        synth.triggerAttackRelease(note.noteName, noteDurationSeconds, time, note.velocity);
-      }, startSeconds);
-    });
+    if (hasChords) {
+      const chordSynth = new Tone.PolySynth(Tone.Synth, CHORD_SYNTH_OPTIONS).toDestination();
+      chordSynth.volume.value = CHORD_VOLUME_DB;
+      scheduleNotes(chordSynth, chordNotes!, melody.settings.bpm, transport);
+    }
 
     transport.start(0);
   }, durationSeconds);
@@ -119,9 +155,13 @@ function downloadBlob(blob: Blob, filename: string): void {
   URL.revokeObjectURL(url);
 }
 
-export async function downloadWav(melody: GeneratedMelody): Promise<void> {
-  const audioBuffer = await renderMelodyToAudioBuffer(melody);
+export async function downloadWav(melody: GeneratedMelody, chordNotes?: MelodyNote[] | null): Promise<void> {
+  const hasChords = chordNotes !== null && chordNotes !== undefined && chordNotes.length > 0;
+  const audioBuffer = await renderMelodyToAudioBuffer(melody, hasChords ? chordNotes : null);
   const wavArrayBuffer = audioBufferToWavBytes(audioBuffer);
   const blob = new Blob([wavArrayBuffer], { type: 'audio/wav' });
-  downloadBlob(blob, `${baseFileName(melody)}.wav`);
+  const filename = hasChords
+    ? `${baseFileName(melody)}-wav-chords.wav`
+    : `${baseFileName(melody)}.wav`;
+  downloadBlob(blob, filename);
 }

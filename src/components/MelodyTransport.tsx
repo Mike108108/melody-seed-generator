@@ -88,7 +88,11 @@ export function MelodyTransport({
     if (downloadFormat === 'wav') {
       setExporting(true);
       try {
-        await downloadWav(melody);
+        if (chordLayer?.enabled && hasPreparedChordTrack(chordLayer.layeredSeed)) {
+          await downloadWav(melody, chordNotes);
+        } else {
+          await downloadWav(melody);
+        }
       } finally {
         setExporting(false);
       }
