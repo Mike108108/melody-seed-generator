@@ -23,6 +23,7 @@ const CHORD_SYNTH_OPTIONS = {
 };
 
 const CHORD_VOLUME_DB = -12;
+const LAYERED_MASTER_GAIN = 0.88;
 
 const NOTE_DURATION_FACTOR = 0.92;
 const TAIL_BEATS = 0.25;
@@ -74,12 +75,20 @@ export async function renderMelodyToAudioBuffer(
   const durationSeconds = computeRenderDurationSeconds(melody, hasChords ? chordNotes : null);
 
   const toneBuffer = await Tone.Offline(({ transport }) => {
-    const melodySynth = new Tone.PolySynth(Tone.Synth, LEAD_SYNTH_OPTIONS).toDestination();
+    const output = hasChords ? new Tone.Gain(LAYERED_MASTER_GAIN).toDestination() : null;
+
+    const melodySynth = new Tone.PolySynth(Tone.Synth, LEAD_SYNTH_OPTIONS);
+    if (output) {
+      melodySynth.connect(output);
+    } else {
+      melodySynth.toDestination();
+    }
     scheduleNotes(melodySynth, melody.notes, melody.settings.bpm, transport);
 
     if (hasChords) {
-      const chordSynth = new Tone.PolySynth(Tone.Synth, CHORD_SYNTH_OPTIONS).toDestination();
+      const chordSynth = new Tone.PolySynth(Tone.Synth, CHORD_SYNTH_OPTIONS);
       chordSynth.volume.value = CHORD_VOLUME_DB;
+      chordSynth.connect(output!);
       scheduleNotes(chordSynth, chordNotes!, melody.settings.bpm, transport);
     }
 
