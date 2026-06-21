@@ -1,9 +1,18 @@
 import type { GeneratedMelody, LayeredSeed } from '../types';
 import type { BassLayerState } from './bassLayerState';
-import { hasBassLayerNotes } from './bassLayerState';
+import { createBassLayerState, hasBassLayerNotes } from './bassLayerState';
 import type { ChordLayerState } from './chordLayerState';
-import { hasChordLayerNotes } from './chordLayerState';
+import { createChordLayerState, hasChordLayerNotes } from './chordLayerState';
 import { createMelodyOnlyLayeredSeed } from './layeredSeed';
+
+export function createDefaultLayersForMelody(melody: GeneratedMelody): {
+  chordLayer: ChordLayerState;
+  bassLayer: BassLayerState | null;
+} {
+  const chordLayer = createChordLayerState(melody);
+  const bassLayer = createBassLayerState(melody, chordLayer);
+  return { chordLayer, bassLayer };
+}
 
 export function createActiveLayeredSeed(
   melody: GeneratedMelody,

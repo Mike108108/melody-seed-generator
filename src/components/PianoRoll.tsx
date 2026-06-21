@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useMemo, useRef, type CSSProperties } from 'react';
 import type { ChordFeel, ChordLength, ChordPattern } from '../lib/harmony/chordPerformance';
 import type { BassLayerState, BassMode } from '../lib/seed/bassLayerState';
 import type { ChordLayerState } from '../lib/seed/chordLayerState';
@@ -24,77 +24,6 @@ const DEFAULT_PREVIEW_BARS = 8;
 type IconProps = {
   className?: string;
 };
-
-function LockedIcon({ className = 'icon-circle-button__icon' }: IconProps) {
-  return (
-    <svg className={className} viewBox="0 0 16 16" aria-hidden="true">
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M4.75 7.25V5a3.25 3.25 0 0 1 6.5 0v2.25"
-      />
-      <rect
-        x="3.25"
-        y="7.25"
-        width="9.5"
-        height="6.75"
-        rx="1.25"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-    </svg>
-  );
-}
-
-function UnlockedIcon({ className = 'icon-circle-button__icon' }: IconProps) {
-  return (
-    <svg className={className} viewBox="0 0 16 16" aria-hidden="true">
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M4.75 7.25V5a3.25 3.25 0 0 1 6.5 0"
-      />
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        d="M11.25 5v2"
-      />
-      <rect
-        x="3.25"
-        y="7.25"
-        width="9.5"
-        height="6.75"
-        rx="1.25"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-    </svg>
-  );
-}
-
-function AddLayerIcon({ className = 'icon-circle-button__icon' }: IconProps) {
-  return (
-    <svg className={className} viewBox="0 0 16 16" aria-hidden="true">
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        d="M8 3.75v8.5M3.75 8h8.5"
-      />
-    </svg>
-  );
-}
 
 function RegenerateIcon({ className = 'icon-circle-button__icon' }: IconProps) {
   return (
@@ -123,14 +52,10 @@ type DisplayRange = { minMidi: number; maxMidi: number; span: number };
 
 type PianoRollProps = {
   melody: GeneratedMelody | null;
-  isMelodyLocked: boolean;
   hasChordLayerReady: boolean;
   chordNotesForDisplay: MelodyNote[] | null;
   chordNotesForPlayback: MelodyNote[] | null;
   chordLayer: ChordLayerState | null;
-  onLockMelody: () => void;
-  onUnlockMelody: () => void;
-  onAddChords: () => void;
   onRegenerateChords?: () => void;
   canRegenerateChords?: boolean;
   onChordPatternChange?: (pattern: ChordPattern) => void;
@@ -141,7 +66,6 @@ type PianoRollProps = {
   bassNotesForDisplay: MelodyNote[] | null;
   bassNotesForPlayback: MelodyNote[] | null;
   bassLayer: BassLayerState | null;
-  onAddBass: () => void;
   onRegenerateBass?: () => void;
   canRegenerateBass?: boolean;
   onBassModeChange?: (mode: BassMode) => void;
@@ -232,14 +156,10 @@ function PianoRollKeys({
 
 export function PianoRoll({
   melody,
-  isMelodyLocked,
   hasChordLayerReady,
   chordNotesForDisplay,
   chordNotesForPlayback,
   chordLayer,
-  onLockMelody,
-  onUnlockMelody,
-  onAddChords,
   onRegenerateChords,
   canRegenerateChords = false,
   onChordPatternChange,
@@ -250,7 +170,6 @@ export function PianoRoll({
   bassNotesForDisplay,
   bassNotesForPlayback,
   bassLayer,
-  onAddBass,
   onRegenerateBass,
   canRegenerateBass = false,
   onBassModeChange,
@@ -265,8 +184,6 @@ export function PianoRoll({
   const bassMode = bassLayer?.mode ?? 'root-pulse';
   const bassLayerVariant = bassLayer?.variant ?? 0;
 
-  const [isAddLayerMenuOpen, setIsAddLayerMenuOpen] = useState(false);
-  const addLayerMenuRef = useRef<HTMLDivElement>(null);
   const melodyViewportRef = useRef<HTMLDivElement>(null);
   const chordViewportRef = useRef<HTMLDivElement>(null);
   const bassViewportRef = useRef<HTMLDivElement>(null);
@@ -304,53 +221,6 @@ export function PianoRoll({
     '--pitch-row-height': `${PITCH_ROW_HEIGHT_PX}px`
   } as CSSProperties;
 
-  useEffect(() => {
-    setIsAddLayerMenuOpen(false);
-  }, [isMelodyLocked, hasChordLayerReady, hasBassLayerReady]);
-
-  useEffect(() => {
-    if (!isAddLayerMenuOpen) return;
-
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!addLayerMenuRef.current?.contains(event.target as Node)) {
-        setIsAddLayerMenuOpen(false);
-      }
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsAddLayerMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isAddLayerMenuOpen]);
-
-  const handleLockToggle = () => {
-    if (isMelodyLocked) {
-      onUnlockMelody();
-    } else {
-      onLockMelody();
-    }
-  };
-
-  const handleAddChordsFromMenu = () => {
-    if (!isMelodyLocked || hasChordLayerReady) return;
-    onAddChords();
-    setIsAddLayerMenuOpen(false);
-  };
-
-  const handleAddBassFromMenu = () => {
-    if (!isMelodyLocked || !hasChordLayerReady || hasBassLayerReady) return;
-    onAddBass();
-    setIsAddLayerMenuOpen(false);
-  };
-
   const syncViewportScroll = (source: HTMLDivElement) => {
     if (isSyncingScrollRef.current) return;
     isSyncingScrollRef.current = true;
@@ -367,22 +237,6 @@ export function PianoRoll({
     });
   };
 
-  const addChordsDisabled = !isMelodyLocked || hasChordLayerReady;
-  const addChordsHint = !isMelodyLocked
-    ? 'Lock melody first'
-    : hasChordLayerReady
-      ? 'Chords already added'
-      : null;
-
-  const addBassDisabled = !isMelodyLocked || !hasChordLayerReady || hasBassLayerReady;
-  const addBassHint = !isMelodyLocked
-    ? 'Lock melody first'
-    : !hasChordLayerReady
-      ? 'Add chords first'
-      : hasBassLayerReady
-        ? 'Bass already added'
-        : null;
-
   return (
     <section className="panel current-melody-panel melody-panel">
       <div className="current-melody-header">
@@ -397,7 +251,7 @@ export function PianoRoll({
       </div>
 
       {!melody ? (
-        <p className="hint current-melody-empty">Generate a melody to preview playback and export.</p>
+        <p className="hint current-melody-empty">Generate a seed to preview playback and export.</p>
       ) : null}
 
       <div className="piano-roll-stack">
@@ -415,18 +269,6 @@ export function PianoRoll({
           </div>
 
           <div className="piano-roll-shell piano-roll-shell--melody piano-roll-fixed" style={pianoRollStyle}>
-            {melody ? (
-              <button
-                type="button"
-                className={`icon-circle-button melody-lock-icon-button${isMelodyLocked ? ' is-locked' : ''}`}
-                onClick={handleLockToggle}
-                aria-label={isMelodyLocked ? 'Unlock melody' : 'Lock melody'}
-                title={isMelodyLocked ? 'Unlock melody' : 'Lock melody'}
-              >
-                {isMelodyLocked ? <LockedIcon /> : <UnlockedIcon />}
-              </button>
-            ) : null}
-
             <PianoRollKeys displayRange={melodyDisplayRange} height={PIANO_ROLL_HEIGHT} />
 
             <div
@@ -515,8 +357,8 @@ export function PianoRoll({
                   type="button"
                   className="icon-circle-button chord-regenerate-icon-button"
                   onClick={onRegenerateChords}
-                  aria-label="Regenerate chord layer"
-                  title="Regenerate chord layer"
+                  aria-label="Regenerate Chords"
+                  title="Regenerate Chords"
                 >
                   <RegenerateIcon />
                 </button>
@@ -585,8 +427,8 @@ export function PianoRoll({
                   type="button"
                   className="icon-circle-button bass-regenerate-icon-button"
                   onClick={onRegenerateBass}
-                  aria-label="Regenerate bass layer"
-                  title="Regenerate bass layer"
+                  aria-label="Regenerate Bass"
+                  title="Regenerate Bass"
                 >
                   <RegenerateIcon />
                 </button>
@@ -617,52 +459,6 @@ export function PianoRoll({
           <p className="hint melody-chord-playback-hint">
             Active layers are included in playback, MIDI, and WAV export.
           </p>
-        ) : null}
-
-        {melody ? (
-          <div className="piano-roll-stack-footer">
-            <div className="add-layer-footer-action" ref={addLayerMenuRef}>
-              <button
-                type="button"
-                className="icon-circle-button add-layer-trigger"
-                onClick={() => setIsAddLayerMenuOpen((open) => !open)}
-                aria-label="Add layer"
-                title="Add layer"
-                aria-expanded={isAddLayerMenuOpen}
-                aria-haspopup="menu"
-              >
-                <AddLayerIcon />
-              </button>
-              {isAddLayerMenuOpen ? (
-                <div className="add-layer-menu" role="menu">
-                  <button
-                    type="button"
-                    className="add-layer-menu-item"
-                    role="menuitem"
-                    disabled={addChordsDisabled}
-                    onClick={handleAddChordsFromMenu}
-                  >
-                    <span className="add-layer-menu-item-label">Add Chords</span>
-                    {addChordsHint ? (
-                      <span className="add-layer-menu-item-hint">{addChordsHint}</span>
-                    ) : null}
-                  </button>
-                  <button
-                    type="button"
-                    className="add-layer-menu-item"
-                    role="menuitem"
-                    disabled={addBassDisabled}
-                    onClick={handleAddBassFromMenu}
-                  >
-                    <span className="add-layer-menu-item-label">Add Bass</span>
-                    {addBassHint ? (
-                      <span className="add-layer-menu-item-hint">{addBassHint}</span>
-                    ) : null}
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          </div>
         ) : null}
       </div>
     </section>

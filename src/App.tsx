@@ -12,7 +12,6 @@ import {
 } from './lib/melody/intent';
 import { createPhraseRolePlan } from './lib/melody/phraseRolePlan';
 import {
-  createBassLayerState,
   getBassNotesFromBassLayer,
   hasBassLayerNotes,
   rebuildBassLayerFromChords,
@@ -22,13 +21,13 @@ import {
   type BassMode
 } from './lib/seed/bassLayerState';
 import {
-  createChordLayerState,
   getChordNotesFromLayeredSeed,
   hasChordLayerNotes,
   rebuildChordLayerPerformance,
   regenerateChordLayer,
   type ChordLayerState
 } from './lib/seed/chordLayerState';
+import { createDefaultLayersForMelody } from './lib/seed/activeLayeredSeed';
 import { createMelodyOnlyLayeredSeed } from './lib/seed/layeredSeed';
 import type { ChordFeel, ChordLength, ChordPattern } from './lib/harmony/chordPerformance';
 import type { GeneratedMelody, MelodyFingerprint, MelodyNote, MelodySettings } from './lib/types';
@@ -48,7 +47,6 @@ export default function App() {
   );
   const [melody, setMelody] = useState<GeneratedMelody | null>(null);
   const [fingerprintHistory, setFingerprintHistory] = useState<MelodyFingerprint[]>([]);
-  const [isMelodyLocked, setIsMelodyLocked] = useState(false);
   const [chordLayer, setChordLayer] = useState<ChordLayerState | null>(null);
   const [bassLayer, setBassLayer] = useState<BassLayerState | null>(null);
 
@@ -69,54 +67,36 @@ export default function App() {
   const bassNotesForPlayback: MelodyNote[] | null =
     hasBassLayerReady && bassLayer.enabled ? bassNotesForDisplay : null;
 
-  const generateFromSettings = (nextSettings: MelodySettings, nextIntent: MelodyIntent) => {
-    const phraseRolePlan = createPhraseRolePlan(nextIntent, nextSettings);
+  const handleGenerateSeed = () => {
+    const nextSettings = { ...settings, seed: makeRandomSeed('suno-idea') };
+    setSettings(nextSettings);
+
+    const phraseRolePlan = createPhraseRolePlan(intent, nextSettings);
     const generated = generateMelody(nextSettings, fingerprintHistory.slice(-50), { phraseRolePlan });
     const finalSettings = generated.settings;
     const enrichedMelody: GeneratedMelody = {
       ...generated,
-      intent: nextIntent,
-      intentLabels: createIntentLabels(nextIntent),
+      intent,
+      intentLabels: createIntentLabels(intent),
       generationProfile: createGenerationSettingsProfile(finalSettings),
-      intentPresetProfile: createIntentPresetProfile(nextIntent),
-      phraseRolePlan: createPhraseRolePlan(nextIntent, finalSettings)
+      intentPresetProfile: createIntentPresetProfile(intent),
+      phraseRolePlan: createPhraseRolePlan(intent, finalSettings)
     };
+    const { chordLayer: nextChordLayer, bassLayer: nextBassLayer } =
+      createDefaultLayersForMelody(enrichedMelody);
+
     setMelody({
       ...enrichedMelody,
       layeredSeed: createMelodyOnlyLayeredSeed(enrichedMelody)
     });
-    setChordLayer(null);
-    setBassLayer(null);
+    setChordLayer(nextChordLayer);
+    setBassLayer(nextBassLayer);
     setFingerprintHistory((history) => [...history, generated.fingerprint].slice(-100));
   };
 
   const handleIntentChange = (nextIntent: MelodyIntent) => {
     setIntent(nextIntent);
     setSettings((current) => applyIntentToSettings(current, nextIntent));
-  };
-
-  const handleGenerateMelody = () => {
-    if (isMelodyLocked) return;
-
-    const nextSettings = { ...settings, seed: makeRandomSeed('suno-idea') };
-    setSettings(nextSettings);
-    generateFromSettings(nextSettings, intent);
-  };
-
-  const handleLockMelody = () => {
-    if (!melody) return;
-    setIsMelodyLocked(true);
-  };
-
-  const handleUnlockMelody = () => {
-    setIsMelodyLocked(false);
-    setChordLayer(null);
-    setBassLayer(null);
-  };
-
-  const handleAddChords = () => {
-    if (!melody || !isMelodyLocked) return;
-    setChordLayer(createChordLayerState(melody));
   };
 
   const syncBassLayerWithChords = (
@@ -166,20 +146,12 @@ export default function App() {
   };
 
   const handleRegenerateChords = () => {
-    if (!melody || !isMelodyLocked || !chordLayer) return;
+    if (!melody || !chordLayer) return;
 
     const nextChordLayer = regenerateChordLayer(chordLayer, melody);
     if (nextChordLayer) {
       setChordLayer(nextChordLayer);
       setBassLayer((currentBassLayer) => syncBassLayerWithChords(nextChordLayer, currentBassLayer));
-    }
-  };
-
-  const handleAddBass = () => {
-    if (!melody || !isMelodyLocked || !chordLayer || bassLayer) return;
-    const nextBassLayer = createBassLayerState(melody, chordLayer);
-    if (nextBassLayer) {
-      setBassLayer(nextBassLayer);
     }
   };
 
@@ -192,7 +164,7 @@ export default function App() {
   };
 
   const handleRegenerateBass = () => {
-    if (!melody || !isMelodyLocked || !chordLayer || !bassLayer) return;
+    if (!melody || !chordLayer || !bassLayer) return;
     const nextBassLayer = regenerateBassLayer(bassLayer, melody, chordLayer);
     if (nextBassLayer) {
       setBassLayer(nextBassLayer);
@@ -207,8 +179,8 @@ export default function App() {
     setChordLayer((current) => (current ? { ...current, enabled: !current.enabled } : current));
   };
 
-  const canRegenerateChords = melody !== null && isMelodyLocked && hasChordLayerReady;
-  const canRegenerateBass = melody !== null && isMelodyLocked && hasBassLayerReady && hasChordLayerReady;
+  const canRegenerateChords = melody !== null && hasChordLayerReady;
+  const canRegenerateBass = melody !== null && hasBassLayerReady && hasChordLayerReady;
 
   return (
     <main className="app-shell">
@@ -226,24 +198,20 @@ export default function App() {
           <CreateMelody
             intent={intent}
             settings={settings}
-            isMelodyLocked={isMelodyLocked}
+            hasSeed={melody !== null}
             onIntentChange={handleIntentChange}
             onSettingsChange={setSettings}
-            onGenerate={handleGenerateMelody}
+            onGenerate={handleGenerateSeed}
           />
         </div>
 
         <div className="right-column">
           <PianoRoll
             melody={melody}
-            isMelodyLocked={isMelodyLocked}
             hasChordLayerReady={hasChordLayerReady}
             chordNotesForDisplay={chordNotesForDisplay}
             chordNotesForPlayback={chordNotesForPlayback}
             chordLayer={chordLayer}
-            onLockMelody={handleLockMelody}
-            onUnlockMelody={handleUnlockMelody}
-            onAddChords={handleAddChords}
             onRegenerateChords={handleRegenerateChords}
             canRegenerateChords={canRegenerateChords}
             onChordPatternChange={handleChordPatternChange}
@@ -254,7 +222,6 @@ export default function App() {
             bassNotesForDisplay={bassNotesForDisplay}
             bassNotesForPlayback={bassNotesForPlayback}
             bassLayer={bassLayer}
-            onAddBass={handleAddBass}
             onRegenerateBass={handleRegenerateBass}
             canRegenerateBass={canRegenerateBass}
             onBassModeChange={handleBassModeChange}

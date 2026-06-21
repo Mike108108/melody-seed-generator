@@ -331,7 +331,8 @@ input[type='range'] {
   font-weight: 650;
 }
 
-.generate-locked-hint {
+.generate-locked-hint,
+.generate-seed-hint {
   margin: 0.45rem 0 0;
   color: var(--muted);
   font-size: 0.82rem;

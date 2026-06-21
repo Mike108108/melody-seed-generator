@@ -14,7 +14,7 @@ import type { MelodySettings, ScaleName } from '../lib/types';
 type CreateMelodyProps = {
   intent: MelodyIntent;
   settings: MelodySettings;
-  isMelodyLocked: boolean;
+  hasSeed: boolean;
   onIntentChange: (nextIntent: MelodyIntent) => void;
   onSettingsChange: (nextSettings: MelodySettings) => void;
   onGenerate: () => void;
@@ -23,7 +23,7 @@ type CreateMelodyProps = {
 export function CreateMelody({
   intent,
   settings,
-  isMelodyLocked,
+  hasSeed,
   onIntentChange,
   onSettingsChange,
   onGenerate
@@ -39,12 +39,12 @@ export function CreateMelody({
   };
 
   return (
-    <section className="panel create-melody-panel" aria-label="Create melody">
+    <section className="panel create-melody-panel" aria-label="Generate seed">
       <div className="panel-header slim">
-        <h2>Create Melody</h2>
+        <h2>Seed Settings</h2>
       </div>
 
-      <fieldset className="create-melody-fields" disabled={isMelodyLocked}>
+      <fieldset className="create-melody-fields">
         <div className="create-melody-section">
         <h3 className="section-title">Hook Intent</h3>
         <div className="control-grid compact">
@@ -233,17 +233,12 @@ export function CreateMelody({
       </div>
       </fieldset>
 
-      <button
-        className="primary generate-button"
-        onClick={onGenerate}
-        type="button"
-        disabled={isMelodyLocked}
-      >
-        Generate Melody
+      <button className="primary generate-button" onClick={onGenerate} type="button">
+        {hasSeed ? 'Generate New Seed' : 'Generate Seed'}
       </button>
-      {isMelodyLocked ? (
-        <p className="generate-locked-hint">Unlock to edit settings or generate a new melody</p>
-      ) : null}
+      <p className="generate-seed-hint">
+        Creates a melody with chord and bass layers for Suno/Udio workflows.
+      </p>
     </section>
   );
 }
