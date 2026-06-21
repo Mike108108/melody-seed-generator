@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CreateMelody } from './components/CreateMelody';
 import { PianoRoll } from './components/PianoRoll';
+import { ProjectControls } from './components/ProjectControls';
 import { DEFAULT_SETTINGS, generateMelody } from './lib/melody/generateMelody';
 import {
   DEFAULT_INTENT,
@@ -27,12 +28,23 @@ import {
   regenerateChordLayer,
   type ChordLayerState
 } from './lib/seed/chordLayerState';
+import {
+  createProjectFile,
+  downloadProjectFile,
+  parseProjectFileText,
+  ProjectFileError
+} from './lib/project/projectFile';
 import { createDefaultLayersForMelody } from './lib/seed/activeLayeredSeed';
 import { createMelodyOnlyLayeredSeed } from './lib/seed/layeredSeed';
 import type { ChordFeel, ChordLength, ChordPattern } from './lib/harmony/chordPerformance';
 import type { GeneratedMelody, MelodyFingerprint, MelodyNote, MelodySettings } from './lib/types';
 import { makeRandomSeed } from './lib/utils/seededRandom';
 import './styles.css';
+
+type ProjectStatus = {
+  type: 'success' | 'error';
+  message: string;
+} | null;
 
 export default function App() {
   const [intent, setIntent] = useState<MelodyIntent>(DEFAULT_INTENT);
@@ -49,6 +61,8 @@ export default function App() {
   const [fingerprintHistory, setFingerprintHistory] = useState<MelodyFingerprint[]>([]);
   const [chordLayer, setChordLayer] = useState<ChordLayerState | null>(null);
   const [bassLayer, setBassLayer] = useState<BassLayerState | null>(null);
+  const [projectStatus, setProjectStatus] = useState<ProjectStatus>(null);
+  const [projectCreatedAt, setProjectCreatedAt] = useState<string | null>(null);
 
   const hasChordLayerReady = chordLayer !== null && hasChordLayerNotes(chordLayer.layeredSeed);
   const hasBassLayerReady = bassLayer !== null && hasBassLayerNotes(bassLayer);
@@ -92,6 +106,8 @@ export default function App() {
     setChordLayer(nextChordLayer);
     setBassLayer(nextBassLayer);
     setFingerprintHistory((history) => [...history, generated.fingerprint].slice(-100));
+    setProjectCreatedAt(new Date().toISOString());
+    setProjectStatus(null);
   };
 
   const handleIntentChange = (nextIntent: MelodyIntent) => {
@@ -182,6 +198,51 @@ export default function App() {
   const canRegenerateChords = melody !== null && hasChordLayerReady;
   const canRegenerateBass = melody !== null && hasBassLayerReady && hasChordLayerReady;
 
+  const handleDownloadProject = () => {
+    if (!melody) return;
+
+    const now = new Date().toISOString();
+    const project = createProjectFile({
+      melody,
+      chordLayer,
+      bassLayer,
+      createdAt: projectCreatedAt ?? now,
+      updatedAt: now
+    });
+
+    downloadProjectFile(project);
+    setProjectCreatedAt(project.createdAt);
+    setProjectStatus({ type: 'success', message: 'Project file downloaded.' });
+  };
+
+  const handleOpenProjectFile = async (file: File) => {
+    try {
+      const text = await file.text();
+      const project = parseProjectFileText(text);
+
+      setIntent(project.melody.intent ?? DEFAULT_INTENT);
+      setSettings(project.melody.settings);
+      setMelody(project.melody);
+      setChordLayer(project.chordLayer);
+      setBassLayer(project.bassLayer);
+      setProjectCreatedAt(project.createdAt);
+      setProjectStatus({ type: 'success', message: 'Project opened.' });
+
+      setFingerprintHistory((history) => {
+        const nextFingerprint = project.melody.fingerprint;
+        const alreadyExists = history.some((item) => item.hash === nextFingerprint.hash);
+        return alreadyExists ? history : [...history, nextFingerprint].slice(-100);
+      });
+    } catch (error) {
+      const message =
+        error instanceof ProjectFileError
+          ? error.message
+          : 'Could not open this project file.';
+
+      setProjectStatus({ type: 'error', message });
+    }
+  };
+
   return (
     <main className="app-shell">
       <header className="hero">
@@ -202,6 +263,13 @@ export default function App() {
             onIntentChange={handleIntentChange}
             onSettingsChange={setSettings}
             onGenerate={handleGenerateSeed}
+          />
+
+          <ProjectControls
+            hasSeed={melody !== null}
+            status={projectStatus}
+            onDownloadProject={handleDownloadProject}
+            onOpenProjectFile={handleOpenProjectFile}
           />
         </div>
 

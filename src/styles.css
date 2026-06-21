@@ -1181,3 +1181,53 @@ input[type='range'] {
     justify-content: center;
   }
 }
+
+.project-controls-panel {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.project-drop-zone {
+  border: 1px dashed var(--line);
+  border-radius: calc(var(--radius-panel) - 4px);
+  padding: 0.85rem 0.75rem;
+  text-align: center;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.project-drop-zone .hint {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.project-drop-zone.is-drag-over {
+  border-color: rgba(167, 139, 250, 0.72);
+  background: rgba(167, 139, 250, 0.08);
+}
+
+.project-controls-actions {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.project-controls-actions button {
+  flex: 1;
+  min-width: 7.5rem;
+}
+
+.project-status {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.project-status--success {
+  color: rgba(134, 239, 172, 0.92);
+}
+
+.project-status--error {
+  color: rgba(252, 165, 165, 0.95);
+}
