@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { CreateMelody } from './components/CreateMelody';
 import { PianoRoll } from './components/PianoRoll';
 import { ProjectControls } from './components/ProjectControls';
-import { SiteHeader } from './components/SiteHeader';
 import { DEFAULT_SETTINGS, generateMelody } from './lib/melody/generateMelody';
 import {
   DEFAULT_INTENT,
@@ -246,8 +245,6 @@ export default function App() {
 
   return (
     <>
-      <SiteHeader />
-
       <main className="app-shell">
         <div className="layout-grid" id="generator">
           <div className="left-column">

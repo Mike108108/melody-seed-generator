@@ -1,0 +1,61 @@
+---
+import '../styles.css';
+import '../site-pages.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'Процедурный генератор MIDI-мелодий для AI-музыкальных workflow. Без сэмплов, без аудиопетель, без copyrighted training data.'
+} = Astro.props;
+
+const pageTitle =
+  title === 'Melody Seed Generator' ? title : `${title} — Melody Seed Generator`;
+
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+function navClass(href: string) {
+  const normalized = href === '/' ? '/' : href.replace(/\/$/, '');
+  return currentPath === normalized ? 'is-active' : '';
+}
+---
+
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <div class="site-header__left">
+          <a href="/" class="site-header__logo">Melody Seed Generator</a>
+          <nav class="site-header__nav" aria-label="Main">
+            <a href="/generator" class={navClass('/generator')}>Генератор</a>
+            <a href="/instructions" class={navClass('/instructions')}>Инструкция</a>
+            <a href="/suno-tips" class={navClass('/suno-tips')}>Советы для SUNO</a>
+          </nav>
+        </div>
+        <a href="/development" class={`site-header__support ${navClass('/development')}`}>
+          Развитие проекта
+        </a>
+      </div>
+    </header>
+
+    <slot />
+  </body>
+</html>
+
+<style>
+  .site-header__nav a.is-active,
+  .site-header__support.is-active {
+    color: #fff;
+    border-color: rgba(167, 139, 250, 0.45);
+  }
+</style>
