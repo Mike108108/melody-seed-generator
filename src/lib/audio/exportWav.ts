@@ -33,8 +33,8 @@ const BASS_SYNTH_OPTIONS = {
 };
 
 const CHORD_VOLUME_DB = -12;
-const BASS_VOLUME_DB = -14;
-const LAYERED_MASTER_GAIN = 0.88;
+const BASS_VOLUME_DB = -8;
+const LAYERED_MASTER_GAIN = 0.85;
 
 const NOTE_DURATION_FACTOR = 0.92;
 const TAIL_BEATS = 0.25;

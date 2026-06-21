@@ -49,7 +49,7 @@ export async function playMelody(
         release: 0.22
       }
     }).toDestination();
-    bassSynth.volume.value = -14;
+    bassSynth.volume.value = -8;
   }
 
   const bpm = melody.settings.bpm;

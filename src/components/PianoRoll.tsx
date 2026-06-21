@@ -201,6 +201,7 @@ export function PianoRoll({
     () => getBassDisplayRange(bassNotesForDisplay ?? []),
     [bassNotesForDisplay]
   );
+  const bassRollHeight = bassDisplayRange.span * PITCH_ROW_HEIGHT_PX;
   const outputMeta = buildOutputMeta(melody);
   const timelineWidthPx = bars * BAR_WIDTH_PX;
   const totalBeats = bars * 4;
@@ -219,7 +220,7 @@ export function PianoRoll({
   } as CSSProperties;
 
   const bassRollStyle = {
-    height: BASS_ROLL_HEIGHT,
+    height: bassRollHeight,
     '--pitch-row-height': `${PITCH_ROW_HEIGHT_PX}px`
   } as CSSProperties;
 
@@ -437,7 +438,7 @@ export function PianoRoll({
                 </button>
               ) : null}
 
-              <PianoRollKeys displayRange={bassDisplayRange} height={BASS_ROLL_HEIGHT} />
+              <PianoRollKeys displayRange={bassDisplayRange} height={bassRollHeight} />
 
               <div
                 className="piano-roll-viewport"
@@ -450,7 +451,7 @@ export function PianoRoll({
                   displayRange={bassDisplayRange}
                   timelineWidthPx={timelineWidthPx}
                   totalBeats={totalBeats}
-                  height={BASS_ROLL_HEIGHT}
+                  height={bassRollHeight}
                   noteClassName="piano-note piano-note--bass"
                 />
               </div>
@@ -496,7 +497,10 @@ function getBassDisplayRange(notes: MelodyNote[]): DisplayRange {
     return { minMidi, maxMidi: minMidi + BASS_VISIBLE_PITCH_ROWS - 1, span: BASS_VISIBLE_PITCH_ROWS };
   }
 
-  return getDisplayRangeForNotes(notes, BASS_VISIBLE_PITCH_ROWS);
+  const noteMin = Math.min(...notes.map((note) => note.midi));
+  const noteMax = Math.max(...notes.map((note) => note.midi));
+  const span = Math.max(BASS_VISIBLE_PITCH_ROWS, noteMax - noteMin + 1);
+  return { minMidi: noteMin, maxMidi: noteMin + span - 1, span };
 }
 
 function buildPitchLabels(displayRange: DisplayRange) {
