@@ -70,6 +70,7 @@ type PianoRollProps = {
   canRegenerateBass?: boolean;
   onBassModeChange?: (mode: BassMode) => void;
   onToggleBassLayerEnabled: () => void;
+  onDownloadProject?: () => void;
 };
 
 type PianoRollTimelineProps = {
@@ -173,7 +174,8 @@ export function PianoRoll({
   onRegenerateBass,
   canRegenerateBass = false,
   onBassModeChange,
-  onToggleBassLayerEnabled
+  onToggleBassLayerEnabled,
+  onDownloadProject
 }: PianoRollProps) {
   const isChordLayerEnabled = chordLayer?.enabled ?? false;
   const isBassLayerEnabled = bassLayer?.enabled ?? false;
@@ -246,6 +248,7 @@ export function PianoRoll({
           bassNotes={bassNotesForPlayback}
           chordLayer={chordLayer}
           bassLayer={bassLayer}
+          onDownloadProject={onDownloadProject}
         />
         <MelodyStatsCompact melody={melody} />
       </div>

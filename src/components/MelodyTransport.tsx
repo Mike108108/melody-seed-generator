@@ -4,10 +4,10 @@ import type { BassLayerState } from '../lib/seed/bassLayerState';
 import type { ChordLayerState } from '../lib/seed/chordLayerState';
 import type { GeneratedMelody, MelodyNote } from '../lib/types';
 import { downloadWav } from '../lib/audio/exportWav';
-import { downloadLayeredMidi, downloadMidi, downloadProvenance } from '../lib/midi/exportMidi';
+import { downloadLayeredMidi, downloadMidi } from '../lib/midi/exportMidi';
 import { playMelody, stopPlayback } from '../lib/audio/playback';
 
-export type DownloadFormat = 'midi' | 'provenance' | 'wav' | 'mp3';
+export type DownloadFormat = 'midi' | 'wav' | 'project' | 'mp3';
 
 type DownloadOption = {
   value: DownloadFormat;
@@ -21,12 +21,13 @@ type MelodyTransportProps = {
   bassNotes?: MelodyNote[] | null;
   chordLayer?: ChordLayerState | null;
   bassLayer?: BassLayerState | null;
+  onDownloadProject?: () => void;
 };
 
 const DOWNLOAD_OPTIONS: DownloadOption[] = [
   { value: 'midi', label: 'MIDI' },
   { value: 'wav', label: 'WAV' },
-  { value: 'provenance', label: 'JSON' },
+  { value: 'project', label: 'Project' },
   { value: 'mp3', label: 'MP3', disabled: true }
 ];
 
@@ -35,7 +36,8 @@ export function MelodyTransport({
   chordNotes = null,
   bassNotes = null,
   chordLayer = null,
-  bassLayer = null
+  bassLayer = null,
+  onDownloadProject
 }: MelodyTransportProps) {
   const [downloadFormat, setDownloadFormat] = useState<DownloadFormat>('midi');
   const [exporting, setExporting] = useState(false);
@@ -83,8 +85,8 @@ export function MelodyTransport({
       return;
     }
 
-    if (downloadFormat === 'provenance') {
-      downloadProvenance(melody, chordLayer, bassLayer);
+    if (downloadFormat === 'project') {
+      onDownloadProject?.();
       return;
     }
 

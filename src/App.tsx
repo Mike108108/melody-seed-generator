@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CreateMelody } from './components/CreateMelody';
 import { PianoRoll } from './components/PianoRoll';
 import { ProjectControls } from './components/ProjectControls';
+import { SiteHeader } from './components/SiteHeader';
 import { DEFAULT_SETTINGS, generateMelody } from './lib/melody/generateMelody';
 import {
   DEFAULT_INTENT,
@@ -244,59 +245,50 @@ export default function App() {
   };
 
   return (
-    <main className="app-shell">
-      <header className="hero">
-        <p className="eyebrow">Hook-oriented MIDI melody seeds</p>
-        <h1>Melody Seed Generator</h1>
-        <p className="hero-copy">
-          Generate short monophonic MIDI lead melodies for Suno and Udio workflows. Hook-oriented seeds with no samples
-          or audio loops.
-        </p>
-      </header>
+    <>
+      <SiteHeader />
 
-      <div className="layout-grid">
-        <div className="left-column">
-          <CreateMelody
-            intent={intent}
-            settings={settings}
-            hasSeed={melody !== null}
-            onIntentChange={handleIntentChange}
-            onSettingsChange={setSettings}
-            onGenerate={handleGenerateSeed}
-          />
+      <main className="app-shell">
+        <div className="layout-grid" id="generator">
+          <div className="left-column">
+            <ProjectControls status={projectStatus} onOpenProjectFile={handleOpenProjectFile} />
 
-          <ProjectControls
-            hasSeed={melody !== null}
-            status={projectStatus}
-            onDownloadProject={handleDownloadProject}
-            onOpenProjectFile={handleOpenProjectFile}
-          />
+            <CreateMelody
+              intent={intent}
+              settings={settings}
+              hasSeed={melody !== null}
+              onIntentChange={handleIntentChange}
+              onSettingsChange={setSettings}
+              onGenerate={handleGenerateSeed}
+            />
+          </div>
+
+          <div className="right-column">
+            <PianoRoll
+              melody={melody}
+              hasChordLayerReady={hasChordLayerReady}
+              chordNotesForDisplay={chordNotesForDisplay}
+              chordNotesForPlayback={chordNotesForPlayback}
+              chordLayer={chordLayer}
+              onRegenerateChords={handleRegenerateChords}
+              canRegenerateChords={canRegenerateChords}
+              onChordPatternChange={handleChordPatternChange}
+              onChordLengthChange={handleChordLengthChange}
+              onChordFeelChange={handleChordFeelChange}
+              onToggleChordLayerEnabled={handleToggleChordLayerEnabled}
+              hasBassLayerReady={hasBassLayerReady}
+              bassNotesForDisplay={bassNotesForDisplay}
+              bassNotesForPlayback={bassNotesForPlayback}
+              bassLayer={bassLayer}
+              onRegenerateBass={handleRegenerateBass}
+              canRegenerateBass={canRegenerateBass}
+              onBassModeChange={handleBassModeChange}
+              onToggleBassLayerEnabled={handleToggleBassLayerEnabled}
+              onDownloadProject={handleDownloadProject}
+            />
+          </div>
         </div>
-
-        <div className="right-column">
-          <PianoRoll
-            melody={melody}
-            hasChordLayerReady={hasChordLayerReady}
-            chordNotesForDisplay={chordNotesForDisplay}
-            chordNotesForPlayback={chordNotesForPlayback}
-            chordLayer={chordLayer}
-            onRegenerateChords={handleRegenerateChords}
-            canRegenerateChords={canRegenerateChords}
-            onChordPatternChange={handleChordPatternChange}
-            onChordLengthChange={handleChordLengthChange}
-            onChordFeelChange={handleChordFeelChange}
-            onToggleChordLayerEnabled={handleToggleChordLayerEnabled}
-            hasBassLayerReady={hasBassLayerReady}
-            bassNotesForDisplay={bassNotesForDisplay}
-            bassNotesForPlayback={bassNotesForPlayback}
-            bassLayer={bassLayer}
-            onRegenerateBass={handleRegenerateBass}
-            canRegenerateBass={canRegenerateBass}
-            onBassModeChange={handleBassModeChange}
-            onToggleBassLayerEnabled={handleToggleBassLayerEnabled}
-          />
-        </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }

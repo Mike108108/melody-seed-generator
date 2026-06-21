@@ -236,9 +236,6 @@ export function CreateMelody({
       <button className="primary generate-button" onClick={onGenerate} type="button">
         {hasSeed ? 'Generate New Seed' : 'Generate Seed'}
       </button>
-      <p className="generate-seed-hint">
-        Creates a melody with chord and bass layers for Suno/Udio workflows.
-      </p>
     </section>
   );
 }

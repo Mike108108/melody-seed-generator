@@ -6,18 +6,34 @@ type ProjectStatus = {
 } | null;
 
 type ProjectControlsProps = {
-  hasSeed: boolean;
   status: ProjectStatus;
-  onDownloadProject: () => void;
   onOpenProjectFile: (file: File) => Promise<void>;
 };
 
-export function ProjectControls({
-  hasSeed,
-  status,
-  onDownloadProject,
-  onOpenProjectFile
-}: ProjectControlsProps) {
+function OpenProjectIcon() {
+  return (
+    <svg className="project-open-button__icon" viewBox="0 0 16 16" aria-hidden="true">
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8 10V2.5M8 2.5 5.5 5M8 2.5l2.5 2.5"
+      />
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M2.5 10v2.5a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V10"
+      />
+    </svg>
+  );
+}
+
+export function ProjectControls({ status, onOpenProjectFile }: ProjectControlsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -62,11 +78,7 @@ export function ProjectControls({
   };
 
   return (
-    <section className="panel project-controls-panel" aria-label="Project">
-      <div className="panel-header slim">
-        <h2>Project</h2>
-      </div>
-
+    <section className="project-restore" aria-label="Open project">
       <div
         className={`project-drop-zone${isDragOver ? ' is-drag-over' : ''}`}
         onDragOver={handleDragOver}
@@ -74,14 +86,14 @@ export function ProjectControls({
         onDrop={handleDrop}
       >
         <p className="hint">Drop a .melody-seed.json project file here</p>
-      </div>
-
-      <div className="project-controls-actions">
-        <button type="button" onClick={handleOpenClick}>
-          Open Project
-        </button>
-        <button type="button" disabled={!hasSeed} onClick={onDownloadProject}>
-          Download Project
+        <button
+          type="button"
+          className="project-open-button"
+          onClick={handleOpenClick}
+          aria-label="Open Project"
+          title="Open Project"
+        >
+          <OpenProjectIcon />
         </button>
       </div>
 
