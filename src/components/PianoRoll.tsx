@@ -1,8 +1,9 @@
-import { useMemo, useRef, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import type { ChordFeel, ChordLength, ChordPattern } from '../lib/harmony/chordPerformance';
 import type { BassLayerState, BassMode } from '../lib/seed/bassLayerState';
 import type { ChordLayerState } from '../lib/seed/chordLayerState';
 import type { GeneratedMelody, MelodyNote } from '../lib/types';
+import { playMelody, stopPlayback } from '../lib/audio/playback';
 import { midiToNoteName } from '../lib/music/notes';
 import { MelodyStatsCompact } from './MelodyStats';
 import { MelodyTransport } from './MelodyTransport';
@@ -81,6 +82,8 @@ type PianoRollTimelineProps = {
   height: number;
   noteClassName?: string;
   placeholder?: string;
+  showPlayhead?: boolean;
+  playbackProgress?: number;
 };
 
 function PianoRollTimeline({
@@ -90,7 +93,9 @@ function PianoRollTimeline({
   totalBeats,
   height,
   noteClassName = 'piano-note',
-  placeholder
+  placeholder,
+  showPlayhead = false,
+  playbackProgress = 0
 }: PianoRollTimelineProps) {
   const beatLines = useMemo(
     () => Array.from({ length: totalBeats + 1 }, (_, index) => index),
@@ -127,6 +132,14 @@ function PianoRollTimeline({
         })
       ) : placeholder ? (
         <div className="piano-roll-placeholder">{placeholder}</div>
+      ) : null}
+
+      {showPlayhead ? (
+        <div
+          className="timeline-playhead"
+          style={{ left: `${playbackProgress * timelineWidthPx}px` }}
+          aria-hidden="true"
+        />
       ) : null}
     </div>
   );
@@ -177,6 +190,13 @@ export function PianoRoll({
   onToggleBassLayerEnabled,
   onDownloadProject
 }: PianoRollProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackProgress, setPlaybackProgress] = useState(0);
+
+  const playbackSessionRef = useRef(0);
+  const playbackStartRef = useRef<number | null>(null);
+  const rafRef = useRef<number | null>(null);
+
   const isChordLayerEnabled = chordLayer?.enabled ?? false;
   const isBassLayerEnabled = bassLayer?.enabled ?? false;
   const chordLayerVariant = chordLayer?.variant ?? 0;
@@ -208,6 +228,125 @@ export function PianoRoll({
   const melodyNotes = melody?.notes ?? [];
   const chordNotes = hasChordLayerReady && chordNotesForDisplay ? chordNotesForDisplay : [];
   const bassNotes = hasBassLayerReady && bassNotesForDisplay ? bassNotesForDisplay : [];
+
+  const stopAnimationLoop = useCallback(() => {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  }, []);
+
+  const resetPlayback = useCallback(() => {
+    playbackSessionRef.current += 1;
+    stopAnimationLoop();
+    playbackStartRef.current = null;
+    stopPlayback();
+    setIsPlaying(false);
+    setPlaybackProgress(0);
+  }, [stopAnimationLoop]);
+
+  const startPlaybackAnimation = useCallback(
+    (session: number, durationMs: number) => {
+      const tick = () => {
+        if (playbackSessionRef.current !== session) return;
+
+        const start = playbackStartRef.current;
+        if (start === null) return;
+
+        const elapsed = performance.now() - start;
+        const progress = Math.min(elapsed / durationMs, 1);
+        setPlaybackProgress(progress);
+
+        if (progress < 1) {
+          rafRef.current = requestAnimationFrame(tick);
+        }
+      };
+
+      rafRef.current = requestAnimationFrame(tick);
+    },
+    []
+  );
+
+  const handlePlay = useCallback(() => {
+    if (!melody) return;
+
+    const session = playbackSessionRef.current + 1;
+    playbackSessionRef.current = session;
+
+    stopAnimationLoop();
+    stopPlayback();
+
+    const durationMs = computePlaybackDurationSeconds(melody) * 1000;
+    playbackStartRef.current = performance.now();
+    setIsPlaying(true);
+    setPlaybackProgress(0);
+    startPlaybackAnimation(session, durationMs);
+
+    void playMelody(melody, chordNotesForPlayback, bassNotesForPlayback, () => {
+      if (playbackSessionRef.current === session) {
+        resetPlayback();
+      }
+    });
+  }, [
+    melody,
+    chordNotesForPlayback,
+    bassNotesForPlayback,
+    resetPlayback,
+    startPlaybackAnimation,
+    stopAnimationLoop
+  ]);
+
+  const handleStop = useCallback(() => {
+    resetPlayback();
+  }, [resetPlayback]);
+
+  const stopIfPlaying = useCallback(() => {
+    if (isPlaying) {
+      resetPlayback();
+    }
+  }, [isPlaying, resetPlayback]);
+
+  const handleToggleChordLayerEnabled = useCallback(() => {
+    stopIfPlaying();
+    onToggleChordLayerEnabled();
+  }, [onToggleChordLayerEnabled, stopIfPlaying]);
+
+  const handleToggleBassLayerEnabled = useCallback(() => {
+    stopIfPlaying();
+    onToggleBassLayerEnabled();
+  }, [onToggleBassLayerEnabled, stopIfPlaying]);
+
+  const handleRegenerateChords = useCallback(() => {
+    stopIfPlaying();
+    onRegenerateChords?.();
+  }, [onRegenerateChords, stopIfPlaying]);
+
+  const handleRegenerateBass = useCallback(() => {
+    stopIfPlaying();
+    onRegenerateBass?.();
+  }, [onRegenerateBass, stopIfPlaying]);
+
+  useEffect(() => {
+    resetPlayback();
+  }, [
+    melody,
+    chordLayer?.enabled,
+    chordLayer?.layeredSeed,
+    bassLayer?.enabled,
+    bassLayer?.track,
+    resetPlayback
+  ]);
+
+  useEffect(() => {
+    return () => {
+      stopAnimationLoop();
+      stopPlayback();
+    };
+  }, [stopAnimationLoop]);
+
+  const showMelodyPlayhead = isPlaying && melody !== null;
+  const showChordPlayhead = isPlaying && isChordLayerEnabled && hasChordLayerReady;
+  const showBassPlayhead = isPlaying && isBassLayerEnabled && hasBassLayerReady;
 
   const pianoRollStyle = {
     height: PIANO_ROLL_HEIGHT,
@@ -249,6 +388,9 @@ export function PianoRoll({
           bassNotes={bassNotesForPlayback}
           chordLayer={chordLayer}
           bassLayer={bassLayer}
+          isPlaying={isPlaying}
+          onPlay={handlePlay}
+          onStop={handleStop}
           onDownloadProject={onDownloadProject}
         />
         <MelodyStatsCompact melody={melody} />
@@ -287,6 +429,8 @@ export function PianoRoll({
                 totalBeats={totalBeats}
                 height={PIANO_ROLL_HEIGHT}
                 placeholder="Piano roll preview"
+                showPlayhead={showMelodyPlayhead}
+                playbackProgress={playbackProgress}
               />
             </div>
           </div>
@@ -303,7 +447,7 @@ export function PianoRoll({
                   type="button"
                   role="switch"
                   className={`layer-switch${isChordLayerEnabled ? ' is-on' : ''}`}
-                  onClick={onToggleChordLayerEnabled}
+                  onClick={handleToggleChordLayerEnabled}
                   aria-label={isChordLayerEnabled ? 'Disable chord layer' : 'Enable chord layer'}
                   aria-checked={isChordLayerEnabled}
                   title={isChordLayerEnabled ? 'Disable chord layer' : 'Enable chord layer'}
@@ -360,7 +504,7 @@ export function PianoRoll({
                 <button
                   type="button"
                   className="icon-circle-button chord-regenerate-icon-button"
-                  onClick={onRegenerateChords}
+                  onClick={handleRegenerateChords}
                   aria-label="Regenerate Chords"
                   title="Regenerate Chords"
                 >
@@ -383,6 +527,8 @@ export function PianoRoll({
                   totalBeats={totalBeats}
                   height={CHORD_ROLL_HEIGHT}
                   noteClassName="piano-note piano-note--chord"
+                  showPlayhead={showChordPlayhead}
+                  playbackProgress={playbackProgress}
                 />
               </div>
             </div>
@@ -400,7 +546,7 @@ export function PianoRoll({
                   type="button"
                   role="switch"
                   className={`layer-switch${isBassLayerEnabled ? ' is-on' : ''}`}
-                  onClick={onToggleBassLayerEnabled}
+                  onClick={handleToggleBassLayerEnabled}
                   aria-label={isBassLayerEnabled ? 'Disable bass layer' : 'Enable bass layer'}
                   aria-checked={isBassLayerEnabled}
                   title={isBassLayerEnabled ? 'Disable bass layer' : 'Enable bass layer'}
@@ -430,7 +576,7 @@ export function PianoRoll({
                 <button
                   type="button"
                   className="icon-circle-button bass-regenerate-icon-button"
-                  onClick={onRegenerateBass}
+                  onClick={handleRegenerateBass}
                   aria-label="Regenerate Bass"
                   title="Regenerate Bass"
                 >
@@ -453,6 +599,8 @@ export function PianoRoll({
                   totalBeats={totalBeats}
                   height={bassRollHeight}
                   noteClassName="piano-note piano-note--bass"
+                  showPlayhead={showBassPlayhead}
+                  playbackProgress={playbackProgress}
                 />
               </div>
             </div>
@@ -467,6 +615,10 @@ export function PianoRoll({
       </div>
     </section>
   );
+}
+
+function computePlaybackDurationSeconds(melody: GeneratedMelody): number {
+  return melody.settings.bars * 4 * (60 / melody.settings.bpm);
 }
 
 function getDisplayRange(melody: GeneratedMelody | null): DisplayRange {

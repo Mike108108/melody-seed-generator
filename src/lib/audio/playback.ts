@@ -8,7 +8,8 @@ let bassSynth: Tone.PolySynth | null = null;
 export async function playMelody(
   melody: GeneratedMelody,
   chordNotes: MelodyNote[] | null = null,
-  bassNotes: MelodyNote[] | null = null
+  bassNotes: MelodyNote[] | null = null,
+  onPlaybackEnd?: () => void
 ): Promise<void> {
   await Tone.start();
   stopPlayback();
@@ -74,7 +75,10 @@ export async function playMelody(
   }
 
   const endSeconds = beatsToSeconds(melody.settings.bars * 4 + 0.25, bpm);
-  Tone.Transport.scheduleOnce(() => stopPlayback(), endSeconds);
+  Tone.Transport.scheduleOnce(() => {
+    stopPlayback();
+    onPlaybackEnd?.();
+  }, endSeconds);
   Tone.Transport.start('+0.05', 0);
 }
 

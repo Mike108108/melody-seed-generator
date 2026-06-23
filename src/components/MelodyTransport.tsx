@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { createActiveLayeredSeed, hasActiveLayeredTracks } from '../lib/seed/activeLayeredSeed';
 import type { BassLayerState } from '../lib/seed/bassLayerState';
 import type { ChordLayerState } from '../lib/seed/chordLayerState';
 import type { GeneratedMelody, MelodyNote } from '../lib/types';
 import { downloadWav } from '../lib/audio/exportWav';
 import { downloadLayeredMidi, downloadMidi } from '../lib/midi/exportMidi';
-import { playMelody, stopPlayback } from '../lib/audio/playback';
 
 export type DownloadFormat = 'midi' | 'wav' | 'project' | 'mp3';
 
@@ -21,6 +20,9 @@ type MelodyTransportProps = {
   bassNotes?: MelodyNote[] | null;
   chordLayer?: ChordLayerState | null;
   bassLayer?: BassLayerState | null;
+  isPlaying: boolean;
+  onPlay: () => void;
+  onStop: () => void;
   onDownloadProject?: () => void;
 };
 
@@ -37,41 +39,17 @@ export function MelodyTransport({
   bassNotes = null,
   chordLayer = null,
   bassLayer = null,
+  isPlaying,
+  onPlay,
+  onStop,
   onDownloadProject
 }: MelodyTransportProps) {
   const [downloadFormat, setDownloadFormat] = useState<DownloadFormat>('midi');
   const [exporting, setExporting] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
   const disabled = melody === null;
-
-  useEffect(() => {
-    stopPlayback();
-    setIsPlaying(false);
-  }, [melody, chordNotes, bassNotes]);
-
-  useEffect(() => {
-    return () => {
-      stopPlayback();
-    };
-  }, []);
 
   const selectedOption = DOWNLOAD_OPTIONS.find((option) => option.value === downloadFormat) ?? DOWNLOAD_OPTIONS[0];
   const hasActiveLayers = hasActiveLayeredTracks(chordLayer, bassLayer);
-
-  const handlePlay = async () => {
-    if (!melody) return;
-    setIsPlaying(true);
-    try {
-      await playMelody(melody, chordNotes, bassNotes);
-    } finally {
-      setIsPlaying(false);
-    }
-  };
-
-  const handleStop = () => {
-    stopPlayback();
-    setIsPlaying(false);
-  };
 
   const handleDownload = async () => {
     if (!melody || exporting) return;
@@ -108,7 +86,7 @@ export function MelodyTransport({
             type="button"
             className={isPlaying ? '' : 'is-active'}
             disabled={disabled}
-            onClick={() => void handlePlay()}
+            onClick={onPlay}
             aria-label="Play melody"
             title="Play melody"
           >
@@ -118,7 +96,7 @@ export function MelodyTransport({
             type="button"
             className={isPlaying ? 'is-active' : ''}
             disabled={disabled}
-            onClick={handleStop}
+            onClick={onStop}
             aria-label="Stop playback"
             title="Stop playback"
           >
