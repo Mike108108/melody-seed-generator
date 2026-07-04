@@ -21,6 +21,11 @@
   --radius-panel: 1.15rem;
   --radius-control: 0.75rem;
   --gap-panel: 0.85rem;
+  --site-shell-max: 1320px;
+  --site-shell-gutter: 1rem;
+  --site-readable-max: 44rem;
+  --site-page-padding-top: 2.5rem;
+  --site-page-padding-bottom: 4rem;
 }
 
 * {
@@ -114,9 +119,9 @@ input[type='range'] {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  width: min(1320px, calc(100% - 2rem));
+  width: min(var(--site-shell-max), calc(100% - 2 * var(--site-shell-gutter)));
   height: 100%;
-  margin: 0 auto;
+  margin-inline: auto;
 }
 
 .site-header__left {
@@ -178,8 +183,8 @@ input[type='range'] {
 }
 
 .app-shell {
-  width: min(1320px, calc(100% - 2rem));
-  margin: 0 auto;
+  width: min(var(--site-shell-max), calc(100% - 2 * var(--site-shell-gutter)));
+  margin-inline: auto;
   padding: 0.85rem 0 1.75rem;
 }
 

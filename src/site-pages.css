@@ -1,7 +1,14 @@
 .page-content {
-  width: min(44rem, calc(100% - 2rem));
-  margin: 0 auto;
-  padding: 2.5rem 0 4rem;
+  width: min(var(--site-shell-max), calc(100% - 2 * var(--site-shell-gutter)));
+  margin-inline: auto;
+  padding: var(--site-page-padding-top) 0 var(--site-page-padding-bottom);
+}
+
+.page-content > h1,
+.page-content > .lead,
+.page-content > section,
+.page-content > .tips-header {
+  max-width: var(--site-readable-max);
 }
 
 .page-content h1 {
@@ -52,10 +59,6 @@
 
 /* Instructions page */
 
-.instructions-page {
-  width: min(72rem, calc(100% - 2rem));
-}
-
 .instr-layout {
   display: grid;
   grid-template-columns: 1fr;
@@ -65,7 +68,7 @@
 .instr-main {
   grid-row: 2;
   min-width: 0;
-  max-width: 48rem;
+  max-width: var(--site-readable-max);
 }
 
 .instr-toc {
@@ -139,6 +142,7 @@
 
 .instr-hero {
   margin-bottom: 0.5rem;
+  max-width: var(--site-readable-max);
 }
 
 .instr-hero > p:not(.lead) {
@@ -377,14 +381,9 @@
     align-items: start;
   }
 
-  .instr-hero {
-    max-width: 44rem;
-  }
-
   .instr-main {
     grid-column: 1;
     grid-row: 1;
-    max-width: 44rem;
   }
 
   .instr-toc {
@@ -445,9 +444,9 @@
 }
 
 .home-hero {
-  width: min(44rem, calc(100% - 2rem));
-  margin: 0 auto;
-  padding: 3.5rem 0 4rem;
+  width: min(var(--site-shell-max), calc(100% - 2 * var(--site-shell-gutter)));
+  margin-inline: auto;
+  padding: var(--site-page-padding-top) 0 var(--site-page-padding-bottom);
 }
 
 .home-hero h1 {
@@ -458,12 +457,17 @@
   line-height: 1.15;
 }
 
+.home-hero h1,
+.home-hero p,
+.home-hero .cta-row {
+  max-width: var(--site-readable-max);
+}
+
 .home-hero p {
   margin: 0 0 1.75rem;
   color: var(--muted);
   font-size: 1.1rem;
   line-height: 1.65;
-  max-width: 38rem;
 }
 
 .home-hero .cta-row {
@@ -495,10 +499,6 @@
 }
 
 /* Suno tips topic board */
-
-.tips-page {
-  width: min(56rem, calc(100% - 2rem));
-}
 
 .tips-header {
   margin-bottom: 0;
