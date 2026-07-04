@@ -4,19 +4,152 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout
   title="Советы для SUNO"
-  description="Будущий SEO-раздел с советами по использованию Melody Seed Generator в SUNO."
+  description="Практические советы по использованию melody seeds, WAV и MIDI экспорта в SUNO, Udio и DAW workflow."
 >
-  <main class="page-content">
-    <h1>Советы для SUNO</h1>
-    <p class="lead">
-      Здесь появится SEO-раздел с практическими советами: как загружать seed, настраивать prompt и
-      комбинировать экспорт генератора с workflow SUNO.
-    </p>
-    <section>
-      <p>
-        Раздел в разработке. Пока используйте <a href="/generator">генератор</a> и
-        <a href="/instructions">инструкцию</a> для быстрого старта.
+  <main class="page-content tips-page">
+    <header class="tips-hero">
+      <h1>Советы для SUNO</h1>
+      <p class="lead">
+        Практическая лента коротких материалов о том, как использовать melody seeds в SUNO, Udio и
+        DAW workflow: экспорт, prompt, сохранение идей и безопасное коммерческое использование.
       </p>
+      <div class="tips-actions">
+        <a href="/generator" class="button-link primary">Открыть генератор</a>
+        <a href="/instructions" class="button-link secondary">Читать инструкцию</a>
+      </div>
+    </header>
+
+    <section class="tips-intro">
+      <p>
+        Это не классический блог. Здесь собрана лента практических материалов: workflow, prompt и
+        заметки о безопасном использовании генератора.
+      </p>
+      <p>
+        Материалы сфокусированы на melody seeds, экспорте WAV и MIDI, prompt для AI-music tools,
+        workflow в SUNO и Udio, а также доработке идей в DAW. Тон простой и прикладной — как у
+        продукта, а не у медиа-издания.
+      </p>
+    </section>
+
+    <div class="tips-chip-row" aria-hidden="true">
+      <span class="tips-chip">SUNO workflow</span>
+      <span class="tips-chip">Prompt</span>
+      <span class="tips-chip">MIDI/WAV</span>
+      <span class="tips-chip">Коммерческий релиз</span>
+      <span class="tips-chip">Melody Seed Generator</span>
+    </div>
+
+    <section class="tips-featured" aria-labelledby="tips-featured-heading">
+      <h2 id="tips-featured-heading" class="visually-hidden">Рекомендуемый материал</h2>
+      <article class="tips-featured-card">
+        <p class="tips-card__meta">Стартовый материал</p>
+        <h3 class="tips-card__title">Как использовать melody seed в SUNO: базовый workflow</h3>
+        <p class="tips-featured-card__desc">
+          Сгенерируйте короткую музыкальную идею, скачайте WAV или MIDI, загрузите её в AI-music
+          workflow и используйте prompt как направление, а не как жёсткую инструкцию.
+        </p>
+        <div class="tips-card__tags">
+          <span class="tips-card__tag">SUNO workflow</span>
+          <span class="tips-card__tag">MIDI/WAV</span>
+        </div>
+        <a href="/instructions" class="tips-card__link">Открыть инструкцию</a>
+      </article>
+    </section>
+
+    <section class="tips-grid" aria-labelledby="tips-feed-heading">
+      <h2 id="tips-feed-heading" class="visually-hidden">Лента материалов</h2>
+
+      <article class="tips-card">
+        <p class="tips-card__meta">Экспорт</p>
+        <h3 class="tips-card__title">WAV или MIDI: что скачивать для SUNO и DAW</h3>
+        <p class="tips-card__desc">
+          Короткое объяснение, когда лучше использовать готовое звучание WAV, а когда — MIDI для
+          дальнейшей доработки в DAW.
+        </p>
+        <div class="tips-card__tags">
+          <span class="tips-card__tag">MIDI/WAV</span>
+          <span class="tips-card__tag">DAW</span>
+        </div>
+        <a href="/instructions" class="tips-card__link">Открыть</a>
+      </article>
+
+      <article class="tips-card">
+        <p class="tips-card__meta">Workflow</p>
+        <h3 class="tips-card__title">Как не потерять удачный seed</h3>
+        <p class="tips-card__desc">
+          Почему Project-файл важен, если вы нашли удачную музыкальную идею и хотите вернуться к
+          ней позже.
+        </p>
+        <div class="tips-card__tags">
+          <span class="tips-card__tag">Project file</span>
+          <span class="tips-card__tag">Seed</span>
+        </div>
+        <a href="/instructions" class="tips-card__link">Открыть</a>
+      </article>
+
+      <article class="tips-card tips-card--soon">
+        <p class="tips-card__meta">Безопасное использование</p>
+        <h3 class="tips-card__title">Что такое Commercial Safer Mode</h3>
+        <p class="tips-card__desc">
+          Зачем генератор делает идеи более осторожными для коммерческого workflow, и почему это не
+          означает абсолютную гарантию уникальности.
+        </p>
+        <div class="tips-card__tags">
+          <span class="tips-card__tag">Commercial Safer Mode</span>
+        </div>
+        <span class="tips-card__soon">Скоро</span>
+      </article>
+
+      <article class="tips-card tips-card--soon">
+        <p class="tips-card__meta">Основы</p>
+        <h3 class="tips-card__title">Почему seed — это стартовая идея, а не готовая песня</h3>
+        <p class="tips-card__desc">
+          Melody seed помогает начать трек, но финальная песня всё равно зависит от аранжировки,
+          prompt, вокала и доработки.
+        </p>
+        <div class="tips-card__tags">
+          <span class="tips-card__tag">Melody seed</span>
+          <span class="tips-card__tag">SUNO workflow</span>
+        </div>
+        <span class="tips-card__soon">Скоро</span>
+      </article>
+
+      <article class="tips-card">
+        <p class="tips-card__meta">Слои</p>
+        <h3 class="tips-card__title">Как использовать Chord Layer и Bass Layer</h3>
+        <p class="tips-card__desc">
+          Коротко о том, как аккорды и бас помогают SUNO или DAW лучше почувствовать направление
+          будущего трека.
+        </p>
+        <div class="tips-card__tags">
+          <span class="tips-card__tag">Chord Layer</span>
+          <span class="tips-card__tag">Bass Layer</span>
+        </div>
+        <a href="/instructions" class="tips-card__link">Открыть</a>
+      </article>
+
+      <article class="tips-card tips-card--soon">
+        <p class="tips-card__meta">AI workflow</p>
+        <h3 class="tips-card__title">Почему SUNO может переосмыслить ваш seed</h3>
+        <p class="tips-card__desc">
+          AI-music tools не всегда повторяют seed буквально: они могут использовать его как
+          настроение, контур или стартовую подсказку.
+        </p>
+        <div class="tips-card__tags">
+          <span class="tips-card__tag">SUNO</span>
+          <span class="tips-card__tag">Prompt</span>
+        </div>
+        <span class="tips-card__soon">Скоро</span>
+      </article>
+    </section>
+
+    <section class="tips-cta">
+      <h2>Начните с собственного seed</h2>
+      <p>
+        Сначала сгенерируйте короткую музыкальную идею в генераторе, а затем используйте материалы
+        из этой ленты, чтобы выстроить полноценный SUNO workflow: экспорт, prompt и доработку в DAW.
+      </p>
+      <a href="/generator" class="button-link primary">Сгенерировать seed</a>
     </section>
   </main>
 </BaseLayout>
