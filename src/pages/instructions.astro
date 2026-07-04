@@ -19,6 +19,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </p>
     </header>
 
+    <div class="instr-layout">
+      <article class="instr-main">
     <section class="instr-section" id="quick-start">
       <h2>Быстрый старт</h2>
       <ol class="instr-steps">
@@ -389,5 +391,39 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </p>
       <a href="/generator" class="button-link primary">Открыть генератор</a>
     </section>
+      </article>
+
+      <aside class="instr-toc" aria-label="Содержание инструкции">
+        <h2 class="instr-toc__title">Содержание</h2>
+
+        <div class="instr-toc__group">
+          <p class="instr-toc__group-title">Основы</p>
+          <div class="instr-toc__links">
+            <a href="#quick-start" class="instr-toc__link">Быстрый старт</a>
+            <a href="#seed-structure" class="instr-toc__link">Как устроен seed</a>
+            <a href="#layers" class="instr-toc__link">Слои</a>
+          </div>
+        </div>
+
+        <div class="instr-toc__group">
+          <p class="instr-toc__group-title">Настройки</p>
+          <div class="instr-toc__links">
+            <a href="#melody-settings" class="instr-toc__link">Melody</a>
+            <a href="#chord-settings" class="instr-toc__link">Chord Layer</a>
+            <a href="#bass-settings" class="instr-toc__link">Bass Layer</a>
+          </div>
+        </div>
+
+        <div class="instr-toc__group">
+          <p class="instr-toc__group-title">Экспорт и workflow</p>
+          <div class="instr-toc__links">
+            <a href="#downloads" class="instr-toc__link">WAV / MIDI / Project</a>
+            <a href="#save-seed" class="instr-toc__link">Как не потерять seed</a>
+            <a href="#external-workflow" class="instr-toc__link">Suno, Udio и DAW</a>
+            <a href="#beta" class="instr-toc__link">Beta-версия</a>
+          </div>
+        </div>
+      </aside>
+    </div>
   </main>
 </BaseLayout>
