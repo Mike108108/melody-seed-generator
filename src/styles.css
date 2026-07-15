@@ -1680,8 +1680,8 @@ select:focus {
   content: '';
   position: absolute;
   top: -7rem;
-  right: -6rem;
-  width: 15rem;
+  right: 0;
+  width: min(15rem, 56%);
   height: 15rem;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 98, 51, 0.16), transparent 68%);
@@ -1887,7 +1887,7 @@ button.primary.generate-button:hover:not(:disabled) {
   position: absolute;
   top: -12rem;
   left: 8%;
-  width: 34rem;
+  width: min(34rem, 90%);
   height: 20rem;
   border-radius: 50%;
   background: radial-gradient(ellipse, rgba(255, 89, 39, 0.13), transparent 68%);
@@ -2258,6 +2258,290 @@ button.primary.generate-button:hover:not(:disabled) {
 
   .chord-layer-performance-control select,
   .bass-layer-control select {
+    width: min(10rem, 58%);
+  }
+}
+
+/* Custom hardware-style select */
+.create-melody-panel,
+.current-melody-panel {
+  overflow: visible;
+}
+
+.instrument-select {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.instrument-select.is-open {
+  z-index: 80;
+}
+
+.instrument-select__trigger {
+  display: flex;
+  width: 100%;
+  min-height: 2.45rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  border: 1px solid rgba(217, 226, 239, 0.13);
+  border-radius: var(--radius-control);
+  padding: 0.62rem 0.72rem;
+  background:
+    linear-gradient(180deg, rgba(7, 9, 13, 0.9), rgba(16, 19, 26, 0.96));
+  color: rgba(246, 248, 251, 0.92);
+  font-size: 0.78rem;
+  font-weight: 520;
+  text-align: left;
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.36),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.025),
+    0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.instrument-select__trigger:hover:not(:disabled) {
+  transform: none;
+  border-color: rgba(255, 138, 87, 0.34);
+  background:
+    linear-gradient(180deg, rgba(10, 12, 17, 0.96), rgba(20, 23, 31, 0.98));
+}
+
+.instrument-select.is-open .instrument-select__trigger {
+  border-color: rgba(255, 116, 72, 0.72);
+  background:
+    linear-gradient(180deg, rgba(21, 17, 17, 0.98), rgba(17, 17, 23, 0.98));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 116, 72, 0.12),
+    inset 0 2px 5px rgba(0, 0, 0, 0.36),
+    0 0 0 3px rgba(255, 116, 72, 0.08),
+    0 0 18px rgba(255, 92, 43, 0.12);
+}
+
+.instrument-select__value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.instrument-select__chevron {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+  color: rgba(238, 242, 247, 0.58);
+  transition:
+    transform 0.18s ease,
+    color 0.18s ease;
+}
+
+.instrument-select.is-open .instrument-select__chevron {
+  transform: rotate(180deg);
+  color: #ff9669;
+}
+
+.instrument-select__menu {
+  position: absolute;
+  top: calc(100% + 0.42rem);
+  left: 0;
+  z-index: 100;
+  display: grid;
+  width: max(100%, 12.5rem);
+  max-height: min(20rem, 56vh);
+  gap: 0.18rem;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 133, 82, 0.34);
+  border-radius: 0.92rem;
+  padding: 0.38rem;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255, 99, 48, 0.13), transparent 9rem),
+    linear-gradient(155deg, #171b23, #0c0f15 76%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.72),
+    0 22px 48px rgba(0, 0, 0, 0.52),
+    0 0 0 1px rgba(0, 0, 0, 0.42);
+  animation: instrument-select-in 0.16s ease-out;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 116, 72, 0.42) transparent;
+}
+
+.instrument-select__menu-topline {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.48rem 0.42rem;
+  color: rgba(238, 242, 247, 0.34);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.instrument-select__menu-topline i {
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, rgba(255, 116, 72, 0.32), transparent);
+}
+
+.instrument-select__option {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 0.55rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid transparent;
+  border-radius: 0.62rem;
+  padding: 0.58rem 0.62rem;
+  background: transparent;
+  color: rgba(238, 242, 247, 0.66);
+  font-size: 0.76rem;
+  font-weight: 560;
+  line-height: 1.2;
+  text-align: left;
+  box-shadow: none;
+}
+
+.instrument-select__option:hover:not(:disabled),
+.instrument-select__option.is-active {
+  transform: none;
+  border-color: rgba(255, 255, 255, 0.055);
+  background:
+    linear-gradient(90deg, rgba(255, 116, 72, 0.13), rgba(255, 116, 72, 0.025));
+  color: #fff;
+}
+
+.instrument-select__option.is-selected {
+  border-color: rgba(255, 126, 75, 0.25);
+  background:
+    linear-gradient(90deg, rgba(255, 116, 72, 0.23), rgba(255, 116, 72, 0.055));
+  color: #fff2ec;
+}
+
+.instrument-select__option:disabled {
+  cursor: not-allowed;
+  opacity: 0.32;
+}
+
+.instrument-select__option-light {
+  width: 0.42rem;
+  height: 0.42rem;
+  border: 1px solid rgba(217, 226, 239, 0.24);
+  border-radius: 50%;
+  background: #11151d;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.58);
+}
+
+.instrument-select__option.is-selected .instrument-select__option-light {
+  border-color: #ffb28d;
+  background: var(--accent);
+  box-shadow:
+    0 0 8px rgba(255, 116, 72, 0.82),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+
+.instrument-select__option-mark {
+  color: rgba(238, 242, 247, 0.25);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.54rem;
+  font-weight: 740;
+  letter-spacing: 0.04em;
+}
+
+.instrument-select__option.is-selected .instrument-select__option-mark {
+  color: var(--cyan);
+  text-shadow: 0 0 8px rgba(79, 226, 207, 0.58);
+}
+
+.chord-layer-performance-control .instrument-select,
+.bass-layer-control .instrument-select {
+  width: 7.8rem;
+}
+
+.chord-layer-performance-control .instrument-select__trigger,
+.bass-layer-control .instrument-select__trigger {
+  min-height: 1.9rem;
+  padding: 0.28rem 0.45rem;
+  font-size: 0.72rem;
+}
+
+.chord-layer-performance-control .instrument-select__menu,
+.bass-layer-control .instrument-select__menu {
+  right: 0;
+  left: auto;
+  width: 12rem;
+}
+
+.download-control {
+  overflow: visible;
+}
+
+.download-control-action {
+  border-radius: 999px 0 0 999px;
+}
+
+.download-control-picker {
+  min-width: 2.4rem;
+}
+
+.instrument-select--caret {
+  width: 100%;
+  height: 100%;
+}
+
+.instrument-select--caret .instrument-select__trigger {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  justify-content: center;
+  border: 0;
+  border-radius: 0 999px 999px 0;
+  padding: 0 0.68rem;
+  background: transparent;
+  box-shadow: none;
+}
+
+.instrument-select--caret .instrument-select__trigger:hover:not(:disabled),
+.instrument-select--caret.is-open .instrument-select__trigger {
+  background: rgba(255, 116, 72, 0.08);
+  box-shadow: none;
+}
+
+.instrument-select--caret .instrument-select__menu {
+  right: 0;
+  left: auto;
+  width: 11.5rem;
+}
+
+@keyframes instrument-select-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.3rem) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .instrument-select__menu {
+    animation: none;
+  }
+
+  .instrument-select__chevron {
+    transition: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .instrument-select__menu {
+    width: max(100%, 11rem);
+  }
+
+  .chord-layer-performance-control .instrument-select,
+  .bass-layer-control .instrument-select {
     width: min(10rem, 58%);
   }
 }

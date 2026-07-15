@@ -5,6 +5,7 @@ import type { ChordLayerState } from '../lib/seed/chordLayerState';
 import type { GeneratedMelody, MelodyNote } from '../lib/types';
 import { downloadWav } from '../lib/audio/exportWav';
 import { downloadLayeredMidi, downloadMidi } from '../lib/midi/exportMidi';
+import { InstrumentSelect } from './InstrumentSelect';
 
 export type DownloadFormat = 'midi' | 'wav' | 'project' | 'mp3';
 
@@ -118,25 +119,19 @@ export function MelodyTransport({
             </span>
             <span>{exporting ? 'Rendering…' : selectedOption.label}</span>
           </button>
-          <label className="download-control-picker">
-            <span className="sr-only">Download format</span>
-            <select
+          <div className="download-control-picker">
+            <InstrumentSelect
               value={downloadFormat}
               disabled={disabled}
-              onChange={(event) => setDownloadFormat(event.target.value as DownloadFormat)}
-              aria-label="Download format"
-              title="Download format"
-            >
-              {DOWNLOAD_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value} disabled={option.disabled}>
-                  {option.disabled ? `${option.label} (soon)` : option.label}
-                </option>
-              ))}
-            </select>
-            <span className="download-control-caret" aria-hidden="true">
-              ▾
-            </span>
-          </label>
+              options={DOWNLOAD_OPTIONS.map((option) => ({
+                ...option,
+                label: option.disabled ? `${option.label} (soon)` : option.label
+              }))}
+              ariaLabel="Download format"
+              mode="caret"
+              onChange={(value) => setDownloadFormat(value as DownloadFormat)}
+            />
+          </div>
         </div>
       </div>
     </div>
