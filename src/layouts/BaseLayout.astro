@@ -35,7 +35,13 @@ function navClass(href: string) {
     <header class="site-header">
       <div class="site-header__inner">
         <div class="site-header__left">
-          <a href="/" class="site-header__logo">Melody Seed Generator</a>
+          <a href="/" class="site-header__logo" aria-label="Melody Seed Generator home">
+            <span class="site-header__mark" aria-hidden="true"><i></i></span>
+            <span class="site-header__wordmark">
+              <strong>Melody Seed</strong>
+              <small>Generator</small>
+            </span>
+          </a>
           <nav class="site-header__nav" aria-label="Main">
             <a href="/generator" class={navClass('/generator')}>Генератор</a>
             <a href="/instructions" class={navClass('/instructions')}>Инструкция</a>
@@ -43,6 +49,7 @@ function navClass(href: string) {
           </nav>
         </div>
         <a href="/development" class={`site-header__support ${navClass('/development')}`}>
+          <span class="site-header__support-dot" aria-hidden="true"></span>
           Развитие проекта
         </a>
       </div>
@@ -56,6 +63,6 @@ function navClass(href: string) {
   .site-header__nav a.is-active,
   .site-header__support.is-active {
     color: #fff;
-    border-color: rgba(167, 139, 250, 0.45);
+    border-color: rgba(255, 116, 72, 0.48);
   }
 </style>

@@ -381,6 +381,11 @@ export function PianoRoll({
 
   return (
     <section className="panel current-melody-panel melody-panel">
+      <div className="output-console-label" aria-hidden="true">
+        <span>02</span>
+        <strong>Output console</strong>
+        <i />
+      </div>
       <div className="current-melody-header">
         <MelodyTransport
           melody={melody}

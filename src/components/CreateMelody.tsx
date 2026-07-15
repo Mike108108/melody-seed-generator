@@ -40,13 +40,19 @@ export function CreateMelody({
 
   return (
     <section className="panel create-melody-panel" aria-label="Generate seed">
-      <div className="panel-header slim">
-        <h2>Seed Settings</h2>
+      <div className="panel-header control-deck-header">
+        <div>
+          <p className="eyebrow">Control deck</p>
+          <h2>Shape the seed</h2>
+        </div>
+        <div className="control-deck-orbit" aria-hidden="true">
+          <span>SEED</span>
+        </div>
       </div>
 
       <fieldset className="create-melody-fields">
         <div className="create-melody-section">
-        <h3 className="section-title">Hook Intent</h3>
+        <h3 className="section-title"><span>01</span> Hook Intent</h3>
         <div className="control-grid compact">
           <label>
             Melodic Language
@@ -121,7 +127,7 @@ export function CreateMelody({
       </div>
 
       <div className="create-melody-section">
-        <h3 className="section-title">Melody Settings</h3>
+        <h3 className="section-title"><span>02</span> Melody Settings</h3>
         <div className="control-grid compact">
           <label>
             Key / Tonic
@@ -234,7 +240,9 @@ export function CreateMelody({
       </fieldset>
 
       <button className="primary generate-button" onClick={onGenerate} type="button">
+        <span className="generate-button__light" aria-hidden="true" />
         {hasSeed ? 'Generate New Seed' : 'Generate Seed'}
+        <span className="generate-button__arrow" aria-hidden="true">↗</span>
       </button>
     </section>
   );
