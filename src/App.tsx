@@ -246,8 +246,23 @@ export default function App() {
   return (
     <>
       <main className="app-shell">
+        <header className="workspace-bar" aria-label="Generator workspace status">
+          <div className="workspace-bar__title">
+            <span className="workspace-bar__index">01</span>
+            <div>
+              <p className="eyebrow">Procedural composition engine</p>
+              <h1>Seed Studio</h1>
+            </div>
+          </div>
+          <div className="workspace-bar__readouts" aria-label="Engine attributes">
+            <span><i className="status-light status-light--warm" />Local generation</span>
+            <span><i className="status-light status-light--mint" />Three-layer output</span>
+            <span><i className="status-light status-light--dim" />No samples</span>
+          </div>
+        </header>
+
         <div className="layout-grid" id="generator">
-          <div className="left-column">
+          <aside className="left-column" aria-label="Seed controls">
             <ProjectControls status={projectStatus} onOpenProjectFile={handleOpenProjectFile} />
 
             <CreateMelody
@@ -258,9 +273,9 @@ export default function App() {
               onSettingsChange={setSettings}
               onGenerate={handleGenerateSeed}
             />
-          </div>
+          </aside>
 
-          <div className="right-column">
+          <section className="right-column" aria-label="Generated arrangement">
             <PianoRoll
               melody={melody}
               hasChordLayerReady={hasChordLayerReady}
@@ -283,7 +298,7 @@ export default function App() {
               onToggleBassLayerEnabled={handleToggleBassLayerEnabled}
               onDownloadProject={handleDownloadProject}
             />
-          </div>
+          </section>
         </div>
       </main>
     </>

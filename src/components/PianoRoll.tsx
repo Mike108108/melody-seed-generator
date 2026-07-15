@@ -7,6 +7,7 @@ import { playMelody, stopPlayback } from '../lib/audio/playback';
 import { midiToNoteName } from '../lib/music/notes';
 import { MelodyStatsCompact } from './MelodyStats';
 import { MelodyTransport } from './MelodyTransport';
+import { InstrumentSelect } from './InstrumentSelect';
 
 export const BAR_WIDTH_PX = 200;
 export const PITCH_ROW_HEIGHT_PX = 18;
@@ -21,6 +22,33 @@ export const PITCH_KEY_WIDTH = 52;
 const NOTE_INSET_PX = 2;
 const NOTE_HEIGHT_PX = PITCH_ROW_HEIGHT_PX - NOTE_INSET_PX * 2;
 const DEFAULT_PREVIEW_BARS = 8;
+
+const CHORD_PATTERN_OPTIONS = [
+  { value: 'sustained', label: 'Sustained' },
+  { value: 'half-bar', label: 'Half-bar' },
+  { value: 'quarter-pulse', label: 'Quarter pulse' },
+  { value: 'syncopated', label: 'Syncopated' }
+];
+
+const CHORD_LENGTH_OPTIONS = [
+  { value: 'long', label: 'Long' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'short', label: 'Short' },
+  { value: 'staccato', label: 'Staccato' }
+];
+
+const CHORD_FEEL_OPTIONS = [
+  { value: 'straight', label: 'Straight' },
+  { value: 'subtle', label: 'Subtle' },
+  { value: 'groovy', label: 'Groovy' },
+  { value: 'loose', label: 'Loose' }
+];
+
+const BASS_MODE_OPTIONS = [
+  { value: 'root-pulse', label: 'Root Pulse' },
+  { value: 'groove', label: 'Groove' },
+  { value: 'sparse', label: 'Sparse' }
+];
 
 type IconProps = {
   className?: string;
@@ -381,6 +409,11 @@ export function PianoRoll({
 
   return (
     <section className="panel current-melody-panel melody-panel">
+      <div className="output-console-label" aria-hidden="true">
+        <span>02</span>
+        <strong>Output console</strong>
+        <i />
+      </div>
       <div className="current-melody-header">
         <MelodyTransport
           melody={melody}
@@ -460,42 +493,30 @@ export function PianoRoll({
               <div className="chord-layer-performance-controls">
                 <label className="chord-layer-performance-control">
                   <span className="chord-layer-performance-label">Pattern</span>
-                  <select
+                  <InstrumentSelect
                     value={chordPattern}
-                    onChange={(event) => onChordPatternChange?.(event.target.value as ChordPattern)}
-                    aria-label="Chord pattern"
-                  >
-                    <option value="sustained">Sustained</option>
-                    <option value="half-bar">Half-bar</option>
-                    <option value="quarter-pulse">Quarter pulse</option>
-                    <option value="syncopated">Syncopated</option>
-                  </select>
+                    options={CHORD_PATTERN_OPTIONS}
+                    ariaLabel="Chord pattern"
+                    onChange={(value) => onChordPatternChange?.(value as ChordPattern)}
+                  />
                 </label>
                 <label className="chord-layer-performance-control">
                   <span className="chord-layer-performance-label">Length</span>
-                  <select
+                  <InstrumentSelect
                     value={chordLength}
-                    onChange={(event) => onChordLengthChange?.(event.target.value as ChordLength)}
-                    aria-label="Chord length"
-                  >
-                    <option value="long">Long</option>
-                    <option value="medium">Medium</option>
-                    <option value="short">Short</option>
-                    <option value="staccato">Staccato</option>
-                  </select>
+                    options={CHORD_LENGTH_OPTIONS}
+                    ariaLabel="Chord length"
+                    onChange={(value) => onChordLengthChange?.(value as ChordLength)}
+                  />
                 </label>
                 <label className="chord-layer-performance-control">
                   <span className="chord-layer-performance-label">Feel</span>
-                  <select
+                  <InstrumentSelect
                     value={chordFeel}
-                    onChange={(event) => onChordFeelChange?.(event.target.value as ChordFeel)}
-                    aria-label="Chord feel"
-                  >
-                    <option value="straight">Straight</option>
-                    <option value="subtle">Subtle</option>
-                    <option value="groovy">Groovy</option>
-                    <option value="loose">Loose</option>
-                  </select>
+                    options={CHORD_FEEL_OPTIONS}
+                    ariaLabel="Chord feel"
+                    onChange={(value) => onChordFeelChange?.(value as ChordFeel)}
+                  />
                 </label>
               </div>
             </div>
@@ -559,15 +580,12 @@ export function PianoRoll({
               <div className="bass-layer-controls">
                 <label className="bass-layer-control">
                   <span className="bass-layer-control-label">Mode</span>
-                  <select
+                  <InstrumentSelect
                     value={bassMode}
-                    onChange={(event) => onBassModeChange?.(event.target.value as BassMode)}
-                    aria-label="Bass mode"
-                  >
-                    <option value="root-pulse">Root Pulse</option>
-                    <option value="groove">Groove</option>
-                    <option value="sparse">Sparse</option>
-                  </select>
+                    options={BASS_MODE_OPTIONS}
+                    ariaLabel="Bass mode"
+                    onChange={(value) => onBassModeChange?.(value as BassMode)}
+                  />
                 </label>
               </div>
             </div>

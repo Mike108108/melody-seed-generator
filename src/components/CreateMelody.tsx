@@ -10,6 +10,7 @@ import {
 import { KEYS } from '../lib/music/notes';
 import { SCALE_OPTIONS } from '../lib/music/scales';
 import type { MelodySettings, ScaleName } from '../lib/types';
+import { InstrumentSelect } from './InstrumentSelect';
 
 type CreateMelodyProps = {
   intent: MelodyIntent;
@@ -40,112 +41,93 @@ export function CreateMelody({
 
   return (
     <section className="panel create-melody-panel" aria-label="Generate seed">
-      <div className="panel-header slim">
-        <h2>Seed Settings</h2>
+      <div className="panel-header control-deck-header">
+        <div>
+          <p className="eyebrow">Control deck</p>
+          <h2>Shape the seed</h2>
+        </div>
+        <div className="control-deck-orbit" aria-hidden="true">
+          <span>SEED</span>
+        </div>
       </div>
 
       <fieldset className="create-melody-fields">
         <div className="create-melody-section">
-        <h3 className="section-title">Hook Intent</h3>
+        <h3 className="section-title"><span>01</span> Hook Intent</h3>
         <div className="control-grid compact">
           <label>
             Melodic Language
-            <select
+            <InstrumentSelect
               value={intent.genre}
-              onChange={(event) => patchIntent('genre', event.target.value as MelodyIntent['genre'])}
-            >
-              {GENRE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              options={GENRE_OPTIONS}
+              ariaLabel="Melodic Language"
+              onChange={(value) => patchIntent('genre', value as MelodyIntent['genre'])}
+            />
           </label>
 
           <label>
             Song Part
-            <select
+            <InstrumentSelect
               value={intent.role}
-              onChange={(event) => patchIntent('role', event.target.value as MelodyIntent['role'])}
-            >
-              {ROLE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              options={ROLE_OPTIONS}
+              ariaLabel="Song Part"
+              onChange={(value) => patchIntent('role', value as MelodyIntent['role'])}
+            />
           </label>
 
           <label>
             Phrase Shape
-            <select
+            <InstrumentSelect
               value={intent.drama}
-              onChange={(event) => patchIntent('drama', event.target.value as MelodyIntent['drama'])}
-            >
-              {DRAMA_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              options={DRAMA_OPTIONS}
+              ariaLabel="Phrase Shape"
+              onChange={(value) => patchIntent('drama', value as MelodyIntent['drama'])}
+            />
           </label>
 
           <label>
             Detail
-            <select
+            <InstrumentSelect
               value={intent.complexity}
-              onChange={(event) => patchIntent('complexity', event.target.value as MelodyIntent['complexity'])}
-            >
-              {COMPLEXITY_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              options={COMPLEXITY_OPTIONS}
+              ariaLabel="Detail"
+              onChange={(value) => patchIntent('complexity', value as MelodyIntent['complexity'])}
+            />
           </label>
 
           <label className="control-grid-span">
             Hook Strength
-            <select
+            <InstrumentSelect
               value={intent.hookiness}
-              onChange={(event) => patchIntent('hookiness', event.target.value as MelodyIntent['hookiness'])}
-            >
-              {HOOKINESS_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              options={HOOKINESS_OPTIONS}
+              ariaLabel="Hook Strength"
+              onChange={(value) => patchIntent('hookiness', value as MelodyIntent['hookiness'])}
+            />
           </label>
         </div>
       </div>
 
       <div className="create-melody-section">
-        <h3 className="section-title">Melody Settings</h3>
+        <h3 className="section-title"><span>02</span> Melody Settings</h3>
         <div className="control-grid compact">
           <label>
             Key / Tonic
-            <select value={settings.key} onChange={(event) => patchSettings('key', event.target.value)}>
-              {KEYS.map((key) => (
-                <option key={key} value={key}>
-                  {key}
-                </option>
-              ))}
-            </select>
+            <InstrumentSelect
+              value={settings.key}
+              options={KEYS.map((key) => ({ value: key, label: key }))}
+              ariaLabel="Key / Tonic"
+              onChange={(value) => patchSettings('key', value)}
+            />
           </label>
 
           <label>
             Scale Mode
-            <select
+            <InstrumentSelect
               value={settings.scale}
-              onChange={(event) => patchSettings('scale', event.target.value as ScaleName)}
-            >
-              {SCALE_OPTIONS.map((scale) => (
-                <option key={scale} value={scale}>
-                  {scale}
-                </option>
-              ))}
-            </select>
+              options={SCALE_OPTIONS.map((scale) => ({ value: scale, label: scale }))}
+              ariaLabel="Scale Mode"
+              onChange={(value) => patchSettings('scale', value as ScaleName)}
+            />
           </label>
 
           <label>
@@ -234,7 +216,9 @@ export function CreateMelody({
       </fieldset>
 
       <button className="primary generate-button" onClick={onGenerate} type="button">
+        <span className="generate-button__light" aria-hidden="true" />
         {hasSeed ? 'Generate New Seed' : 'Generate Seed'}
+        <span className="generate-button__arrow" aria-hidden="true">↗</span>
       </button>
     </section>
   );
