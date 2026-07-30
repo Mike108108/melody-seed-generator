@@ -165,10 +165,9 @@ input[type='range'] {
 
 .site-header__support {
   flex-shrink: 0;
-  border: 1px solid rgba(167, 139, 250, 0.28);
-  border-radius: 999px;
+  border: 0;
   padding: 0.42rem 0.85rem;
-  background: rgba(167, 139, 250, 0.1);
+  background: transparent;
   color: rgba(244, 240, 255, 0.92);
   font-size: 0.82rem;
   font-weight: 600;
@@ -177,8 +176,6 @@ input[type='range'] {
 }
 
 .site-header__support:hover {
-  background: rgba(167, 139, 250, 0.18);
-  border-color: rgba(167, 139, 250, 0.42);
   color: #fff;
 }
 
@@ -1432,9 +1429,9 @@ select:focus {
 }
 
 .site-header__nav a {
-  border: 1px solid transparent;
-  border-radius: 999px;
+  border: 0;
   padding: 0.45rem 0.72rem;
+  background: transparent;
   color: rgba(238, 242, 247, 0.48);
   font-size: 0.76rem;
   font-weight: 580;
@@ -1442,8 +1439,6 @@ select:focus {
 
 .site-header__nav a:hover,
 .site-header__nav a.is-active {
-  border-color: rgba(217, 226, 239, 0.12);
-  background: rgba(255, 255, 255, 0.04);
   color: #fff;
 }
 
@@ -1463,18 +1458,27 @@ select:focus {
   display: inline-flex;
   align-items: center;
   gap: 0.48rem;
-  border-color: rgba(217, 226, 239, 0.14);
-  background: linear-gradient(180deg, rgba(35, 41, 53, 0.92), rgba(20, 24, 32, 0.92));
+  background: transparent;
   color: rgba(238, 242, 247, 0.7);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: none;
 }
 
 .site-header__support-dot {
+  display: none;
   width: 0.4rem;
   height: 0.4rem;
   border-radius: 50%;
   background: var(--cyan);
   box-shadow: 0 0 9px rgba(79, 226, 207, 0.72);
+}
+
+.site-header__support:hover,
+.site-header__support.is-active {
+  color: #fff;
+}
+
+.site-header__support.is-active .site-header__support-dot {
+  display: block;
 }
 
 .app-shell {
@@ -1923,10 +1927,6 @@ button.primary.generate-button:hover:not(:disabled) {
 
   .site-header__support {
     padding-inline: 0.58rem;
-  }
-
-  .site-header__support-dot {
-    display: none;
   }
 
   .create-melody-panel,
