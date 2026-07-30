@@ -5,6 +5,7 @@ import type { ChordLayerState } from '../seed/chordLayerState';
 import { createProvenanceLayers } from '../seed/layeredSeed';
 import type { GeneratedMelody, LayeredSeed, ProvenanceJson } from '../types';
 import { slugifyFilePart } from '../utils/hash';
+import { APP_VERSION } from '../version';
 
 export function exportMelodyToMidiBytes(melody: GeneratedMelody): Uint8Array {
   const midi = new Midi();
@@ -36,7 +37,7 @@ export function createProvenanceJson(
 
   return {
     createdBy: 'Melody Seed Generator',
-    generatorVersion: '0.2.0',
+    generatorVersion: APP_VERSION,
     createdAt: new Date().toISOString(),
     seed: melody.settings.seed,
     key: melody.settings.key,

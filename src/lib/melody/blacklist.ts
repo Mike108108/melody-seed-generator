@@ -3,7 +3,7 @@ import { hasExcessivePhraseRepetition, splitIntoPhraseChunks } from './phraseAna
 
 const CLICHE_PITCH_CLASS_PATTERNS = [
   '0,0,7,7,9,9,7',
-  '0,2,4,5,7,9,11,12',
+  '0,2,4,5,7,9,11,0',
   '0,11,9,7,5,4,2,0',
   '0,4,7,4,0',
   '0,7,0,7',

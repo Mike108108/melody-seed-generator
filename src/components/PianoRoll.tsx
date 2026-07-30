@@ -5,6 +5,10 @@ import type { ChordLayerState } from '../lib/seed/chordLayerState';
 import type { GeneratedMelody, MelodyNote } from '../lib/types';
 import { playMelody, stopPlayback } from '../lib/audio/playback';
 import { midiToNoteName } from '../lib/music/notes';
+import {
+  getDisplayRangeForNotes,
+  type DisplayRange
+} from '../lib/visualization/pianoRollRange';
 import { MelodyStatsCompact } from './MelodyStats';
 import { MelodyTransport } from './MelodyTransport';
 import { InstrumentSelect } from './InstrumentSelect';
@@ -76,8 +80,6 @@ function RegenerateIcon({ className = 'icon-circle-button__icon' }: IconProps) {
     </svg>
   );
 }
-
-type DisplayRange = { minMidi: number; maxMidi: number; span: number };
 
 type PianoRollProps = {
   melody: GeneratedMelody | null;
@@ -220,6 +222,7 @@ export function PianoRoll({
 }: PianoRollProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackProgress, setPlaybackProgress] = useState(0);
+  const [playbackError, setPlaybackError] = useState<string | null>(null);
 
   const playbackSessionRef = useRef(0);
   const playbackStartRef = useRef<number | null>(null);
@@ -249,6 +252,8 @@ export function PianoRoll({
     () => getBassDisplayRange(bassNotesForDisplay ?? []),
     [bassNotesForDisplay]
   );
+  const melodyRollHeight = melodyDisplayRange.span * PITCH_ROW_HEIGHT_PX;
+  const chordRollHeight = chordDisplayRange.span * PITCH_ROW_HEIGHT_PX;
   const bassRollHeight = bassDisplayRange.span * PITCH_ROW_HEIGHT_PX;
   const outputMeta = buildOutputMeta(melody);
   const timelineWidthPx = bars * BAR_WIDTH_PX;
@@ -308,13 +313,25 @@ export function PianoRoll({
     playbackStartRef.current = performance.now();
     setIsPlaying(true);
     setPlaybackProgress(0);
+    setPlaybackError(null);
     startPlaybackAnimation(session, durationMs);
 
     void playMelody(melody, chordNotesForPlayback, bassNotesForPlayback, () => {
       if (playbackSessionRef.current === session) {
         resetPlayback();
       }
-    });
+    })
+      .then((started) => {
+        if (!started && playbackSessionRef.current === session) {
+          resetPlayback();
+        }
+      })
+      .catch(() => {
+        if (playbackSessionRef.current === session) {
+          resetPlayback();
+          setPlaybackError('Playback could not be started in this browser.');
+        }
+      });
   }, [
     melody,
     chordNotesForPlayback,
@@ -377,12 +394,12 @@ export function PianoRoll({
   const showBassPlayhead = isPlaying && isBassLayerEnabled && hasBassLayerReady;
 
   const pianoRollStyle = {
-    height: PIANO_ROLL_HEIGHT,
+    height: melodyRollHeight,
     '--pitch-row-height': `${PITCH_ROW_HEIGHT_PX}px`
   } as CSSProperties;
 
   const chordRollStyle = {
-    height: CHORD_ROLL_HEIGHT,
+    height: chordRollHeight,
     '--pitch-row-height': `${PITCH_ROW_HEIGHT_PX}px`
   } as CSSProperties;
 
@@ -429,6 +446,12 @@ export function PianoRoll({
         <MelodyStatsCompact melody={melody} />
       </div>
 
+      {playbackError ? (
+        <p className="project-status project-status--error" role="status" aria-live="polite">
+          {playbackError}
+        </p>
+      ) : null}
+
       {!melody ? (
         <p className="hint current-melody-empty">Generate a seed to preview playback and export.</p>
       ) : null}
@@ -440,7 +463,7 @@ export function PianoRoll({
             {outputMeta ? (
               <p
                 className="output-meta-line piano-roll-lane-meta"
-                title={outputMeta.includes('Similarity Guard') ? 'Designed to reduce similarity risk, not to guarantee legal clearance.' : undefined}
+                title={outputMeta.includes('Local Similarity Check') ? 'Compares against this browser session and local cliche heuristics; it is not a legal clearance check.' : undefined}
               >
                 {outputMeta}
               </p>
@@ -448,7 +471,7 @@ export function PianoRoll({
           </div>
 
           <div className="piano-roll-shell piano-roll-shell--melody piano-roll-fixed" style={pianoRollStyle}>
-            <PianoRollKeys displayRange={melodyDisplayRange} height={PIANO_ROLL_HEIGHT} />
+            <PianoRollKeys displayRange={melodyDisplayRange} height={melodyRollHeight} />
 
             <div
               className="piano-roll-viewport"
@@ -460,7 +483,7 @@ export function PianoRoll({
                 displayRange={melodyDisplayRange}
                 timelineWidthPx={timelineWidthPx}
                 totalBeats={totalBeats}
-                height={PIANO_ROLL_HEIGHT}
+                height={melodyRollHeight}
                 placeholder="Piano roll preview"
                 showPlayhead={showMelodyPlayhead}
                 playbackProgress={playbackProgress}
@@ -533,7 +556,7 @@ export function PianoRoll({
                 </button>
               ) : null}
 
-              <PianoRollKeys displayRange={chordDisplayRange} height={CHORD_ROLL_HEIGHT} />
+              <PianoRollKeys displayRange={chordDisplayRange} height={chordRollHeight} />
 
               <div
                 className="piano-roll-viewport"
@@ -546,7 +569,7 @@ export function PianoRoll({
                   displayRange={chordDisplayRange}
                   timelineWidthPx={timelineWidthPx}
                   totalBeats={totalBeats}
-                  height={CHORD_ROLL_HEIGHT}
+                  height={chordRollHeight}
                   noteClassName="piano-note piano-note--chord"
                   showPlayhead={showChordPlayhead}
                   playbackProgress={playbackProgress}
@@ -648,29 +671,8 @@ function getDisplayRange(melody: GeneratedMelody | null): DisplayRange {
   return getDisplayRangeForNotes(melody.notes, VISIBLE_PITCH_ROWS);
 }
 
-function getDisplayRangeForNotes(notes: MelodyNote[], visibleRows: number): DisplayRange {
-  if (notes.length === 0) {
-    const minMidi = 60;
-    return { minMidi, maxMidi: minMidi + visibleRows - 1, span: visibleRows };
-  }
-
-  const noteMin = Math.min(...notes.map((note) => note.midi));
-  const noteMax = Math.max(...notes.map((note) => note.midi));
-  const center = (noteMin + noteMax) / 2;
-  const minMidi = Math.round(center - (visibleRows - 1) / 2);
-  return { minMidi, maxMidi: minMidi + visibleRows - 1, span: visibleRows };
-}
-
 function getBassDisplayRange(notes: MelodyNote[]): DisplayRange {
-  if (notes.length === 0) {
-    const minMidi = BASS_DEFAULT_MIN_MIDI;
-    return { minMidi, maxMidi: minMidi + BASS_VISIBLE_PITCH_ROWS - 1, span: BASS_VISIBLE_PITCH_ROWS };
-  }
-
-  const noteMin = Math.min(...notes.map((note) => note.midi));
-  const noteMax = Math.max(...notes.map((note) => note.midi));
-  const span = Math.max(BASS_VISIBLE_PITCH_ROWS, noteMax - noteMin + 1);
-  return { minMidi: noteMin, maxMidi: noteMin + span - 1, span };
+  return getDisplayRangeForNotes(notes, BASS_VISIBLE_PITCH_ROWS, BASS_DEFAULT_MIN_MIDI);
 }
 
 function buildPitchLabels(displayRange: DisplayRange) {
@@ -693,7 +695,7 @@ function buildOutputMeta(melody: GeneratedMelody | null): string | null {
   }
 
   if (saferMode) {
-    parts.push('Similarity Guard On');
+    parts.push('Local Similarity Check On');
   }
 
   return parts.length > 0 ? parts.join(' · ') : null;

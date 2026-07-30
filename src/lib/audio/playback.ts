@@ -4,15 +4,23 @@ import type { GeneratedMelody, MelodyNote } from '../types';
 let melodySynth: Tone.PolySynth | null = null;
 let chordSynth: Tone.PolySynth | null = null;
 let bassSynth: Tone.PolySynth | null = null;
+let playbackGeneration = 0;
 
 export async function playMelody(
   melody: GeneratedMelody,
   chordNotes: MelodyNote[] | null = null,
   bassNotes: MelodyNote[] | null = null,
   onPlaybackEnd?: () => void
-): Promise<void> {
+): Promise<boolean> {
+  const generation = playbackGeneration + 1;
+  playbackGeneration = generation;
   await Tone.start();
-  stopPlayback();
+
+  if (generation !== playbackGeneration) {
+    return false;
+  }
+
+  disposePlaybackResources();
 
   melodySynth = new Tone.PolySynth(Tone.Synth, {
     oscillator: { type: 'triangle' },
@@ -76,13 +84,20 @@ export async function playMelody(
 
   const endSeconds = beatsToSeconds(melody.settings.bars * 4 + 0.25, bpm);
   Tone.Transport.scheduleOnce(() => {
+    if (generation !== playbackGeneration) return;
     stopPlayback();
     onPlaybackEnd?.();
   }, endSeconds);
   Tone.Transport.start('+0.05', 0);
+  return true;
 }
 
 export function stopPlayback(): void {
+  playbackGeneration += 1;
+  disposePlaybackResources();
+}
+
+function disposePlaybackResources(): void {
   Tone.Transport.stop();
   Tone.Transport.cancel(0);
   if (melodySynth) {

@@ -1,18 +1,21 @@
 {
   "name": "melody-seed-generator",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
-  "description": "Procedural monophonic MIDI melody seed generator for AI music upload workflows.",
+  "description": "Procedural melody, chord, and bass seed generator for AI music workflows.",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "@astrojs/react": "^4.4.2",
+    "@astrojs/react": "^6.0.1",
     "@tonejs/midi": "^2.0.28",
-    "astro": "^5.16.6",
+    "astro": "^7.1.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tone": "^15.0.4"
@@ -20,6 +23,7 @@
   "devDependencies": {
     "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
   }
 }

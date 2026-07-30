@@ -1,121 +1,74 @@
 # Melody Seed Generator
 
-Browser-based procedural monophonic MIDI melody seed generator for AI music upload/cover workflows.
+Browser-based procedural melody, chord, and bass seed generator for AI music upload and cover workflows.
 
-Positioning:
+The generator uses deterministic local algorithms. It does not use samples, audio loops, copyrighted training data, or a remote generation service. Its similarity score is a local heuristic, not a legal guarantee of originality or copyright clearance.
 
-- Procedurally generated MIDI melodies
-- No samples
-- No audio loops
-- No copyrighted training data
-- Designed to reduce similarity risk for commercial workflows
-- Not a legal guarantee of uniqueness or copyright clearance
+## Current features (v0.2)
 
-## MVP v0.1 features
-
-- Generate short monophonic lead melodies
-- Play / Stop browser preview with Tone.js
-- Download `.mid`
-- Seed-based reproducible generation
-- BPM, key, scale/mode, bars, octave, range, density, rest chance, variation, randomness
-- Simple piano roll visualization
-- Commercial Safer Mode (enabled by default)
-- Quality score and simplified similarity-risk score
-- Download provenance JSON
+- Seed-based reproducible melody generation
+- Hook intent presets and manual melody controls
+- Mode-aware chord generation and regenerable bass layers
+- Browser playback with Tone.js
+- Piano-roll visualization for melody, chords, and bass
+- MIDI and offline WAV export
+- Restorable `.melody-seed.json` project files
+- Provenance JSON export
+- Local session similarity and cliche checks
+- Static Astro site with the React generator mounted on `/generator`
 
 ## Stack
 
-- Vite
-- React
-- TypeScript
-- Tone.js for playback
+- Astro 7
+- React 19 and TypeScript
+- Tone.js for playback and offline WAV rendering
 - `@tonejs/midi` for MIDI export
-- Netlify static deploy
+- Vitest for unit tests
+- Netlify-compatible static output
 
 ## Local development
 
+Node.js 24 is used in CI.
+
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-## Production build
+## Verification
 
 ```bash
+npm run typecheck
+npm test
 npm run build
-npm run preview
 ```
 
-## Netlify deploy
-
-The repository includes `netlify.toml`:
-
-```toml
-[build]
-  command = "npm run build"
-  publish = "dist"
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-```
-
-Push to GitHub, import the repo in Netlify, and use the default Vite build settings above.
+`npm run build` writes the static site to `dist/`. GitHub Actions runs all three verification commands for pushes to `main` and pull requests.
 
 ## Project structure
 
 ```txt
 src/
-  components/
-    CreateMelody.tsx
-    MelodyTransport.tsx
-    PianoRoll.tsx
-    MelodyStats.tsx
-    SeedIdChip.tsx
-
+  components/        React generator UI
+  layouts/           Astro page shell
+  pages/             Static site routes
   lib/
-    melody/
-      generateMelody.ts
-      phrase.ts
-      rhythm.ts
-      variation.ts
-      scoring.ts
-      fingerprint.ts
-      similarity.ts
-      blacklist.ts
-
-    music/
-      scales.ts
-      notes.ts
-      intervals.ts
-      theory.ts
-
-    midi/
-      exportMidi.ts
-
-    audio/
-      playback.ts
-
-    utils/
-      seededRandom.ts
-      hash.ts
-
-  App.tsx
-  main.tsx
+    audio/            Playback and WAV rendering
+    harmony/          Chord analysis, planning, and bass generation
+    melody/           Melody generation, scoring, and similarity heuristics
+    midi/             MIDI and provenance export
+    music/            Notes, scales, intervals, and theory helpers
+    project/          Project-file serialization and validation
+    seed/             Melody/chord/bass layer state
+    visualization/    Piano-roll calculations
+    utils/            Hashing and seeded randomness
+tests/                Vitest unit tests
 ```
 
-## Commercial Safer Mode in v0.1
+## Similarity and provenance limits
 
-This mode is intentionally conservative but still lightweight. It does:
+The local similarity check compares a generated melody with recent fingerprints from the current browser session and detects a small set of structural cliches. It does not search commercial catalogs, identify copyrighted works, or establish legal clearance. Provenance output documents how a seed was generated; it is not proof of copyright ownership.
 
-- seed-based generation
-- motif repetition with pitch variation
-- stable-tone phrase endings
-- interval-size limits
-- local melody fingerprint generation
-- local session similarity scoring
-- cliche pattern warnings
-- provenance JSON export
+## Deployment
 
-It does not provide a legal guarantee. It should be presented as risk reduction, not copyright clearance.
+The repository contains `netlify.toml` with `npm run build` and `dist` as the publish directory. Any static host that supports Astro's generated directory routes can serve the build.

@@ -246,7 +246,10 @@ export function createPhraseRolePlan(intent: MelodyIntent, settings: MelodySetti
   return {
     drama: intent.drama,
     phraseCount,
-    directives: template.slice(0, phraseCount)
+    directives: Array.from(
+      { length: phraseCount },
+      (_, phraseIndex) => template[phraseIndex % template.length]
+    )
   };
 }
 

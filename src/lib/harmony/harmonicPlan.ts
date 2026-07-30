@@ -94,7 +94,7 @@ function isPhraseEndingBar(barIndex: number, phraseBeats: number): boolean {
   return barIndex === phraseEndBar;
 }
 
-function computePhraseScore(
+export function computePhraseScore(
   melody: GeneratedMelody,
   barIndex: number,
   candidate: ChordCandidate
@@ -117,7 +117,7 @@ function computePhraseScore(
     }
   }
 
-  if (directive.unresolvedEnding && !atPhraseEnding && candidate.degree === 1) {
+  if (directive.unresolvedEnding && atPhraseEnding && candidate.degree === 1) {
     score += PHRASE_UNRESOLVED_TONIC_PENALTY;
   }
 
