@@ -9,7 +9,6 @@ import {
   getDisplayRangeForNotes,
   type DisplayRange
 } from '../lib/visualization/pianoRollRange';
-import { MelodyStatsCompact } from './MelodyStats';
 import { MelodyTransport } from './MelodyTransport';
 import { InstrumentSelect } from './InstrumentSelect';
 
@@ -427,7 +426,6 @@ export function PianoRoll({
   return (
     <section className="panel current-melody-panel melody-panel">
       <div className="output-console-label" aria-hidden="true">
-        <span>02</span>
         <strong>Output console</strong>
         <i />
       </div>
@@ -443,7 +441,6 @@ export function PianoRoll({
           onStop={handleStop}
           onDownloadProject={onDownloadProject}
         />
-        <MelodyStatsCompact melody={melody} />
       </div>
 
       {playbackError ? (
