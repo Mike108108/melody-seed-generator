@@ -36,11 +36,18 @@ function navClass(href: string) {
       <div class="site-header__inner">
         <div class="site-header__left">
           <a href="/" class="site-header__logo" aria-label="Melody Seed Generator home">
-            <span class="site-header__mark" aria-hidden="true"><i></i></span>
-            <span class="site-header__wordmark">
-              <strong>Melody Seed</strong>
-              <small>Generator</small>
-            </span>
+            <svg class="site-header__mark" viewBox="0 0 40 40" aria-hidden="true">
+              <defs>
+                <linearGradient id="brand-mark-gradient" x1="8" y1="14" x2="32" y2="28" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#ff8052" />
+                  <stop offset="1" stop-color="#4fe2cf" />
+                </linearGradient>
+              </defs>
+              <rect class="site-header__mark-frame" x="1.5" y="1.5" width="37" height="37" rx="10.5" />
+              <path class="site-header__mark-signal" d="M9.5 25.5V12L20 21.5L30.5 12V25.5" />
+              <circle class="site-header__mark-node site-header__mark-node--warm" cx="9.5" cy="25.5" r="2.5" />
+              <circle class="site-header__mark-node site-header__mark-node--mint" cx="30.5" cy="25.5" r="2.5" />
+            </svg>
           </a>
           <nav class="site-header__nav" aria-label="Main">
             <a href="/generator" class={navClass('/generator')}>Генератор</a>

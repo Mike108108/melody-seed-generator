@@ -46,14 +46,11 @@ export function CreateMelody({
           <p className="eyebrow">Control deck</p>
           <h2>Shape the seed</h2>
         </div>
-        <div className="control-deck-orbit" aria-hidden="true">
-          <span>SEED</span>
-        </div>
       </div>
 
       <fieldset className="create-melody-fields">
         <div className="create-melody-section">
-        <h3 className="section-title"><span>01</span> Hook Intent</h3>
+        <h3 className="section-title">Hook Intent</h3>
         <div className="control-grid compact">
           <label>
             Melodic Language
@@ -108,7 +105,7 @@ export function CreateMelody({
       </div>
 
       <div className="create-melody-section">
-        <h3 className="section-title"><span>02</span> Melody Settings</h3>
+        <h3 className="section-title">Melody Settings</h3>
         <div className="control-grid compact">
           <label>
             Key / Tonic
