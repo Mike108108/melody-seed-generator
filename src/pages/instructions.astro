@@ -137,211 +137,229 @@ const availableDownloads = DOWNLOAD_OPTIONS.filter((option) => !option.disabled)
   description="Практическая инструкция по Melody Seed Generator: первый seed, настройки, слои, сохранение проекта и экспорт WAV/MIDI."
 >
   <main class="page-content instructions-page">
-    <header class="instr-hero">
-      <h1>Инструкция</h1>
-      <p class="lead">
-        Создайте короткую музыкальную идею из мелодии, аккордов и баса — затем сохраните её или
-        продолжите работу в другом инструменте.
-      </p>
-      <p>
-        Melody Seed Generator — не DAW и не генератор готовых песен. Он помогает быстро найти отправную
-        точку: ритм, гармонию и мелодический контур.
-      </p>
-    </header>
-
-    <div class="instr-layout">
-      <nav class="instr-toc" aria-label="Содержание инструкции">
-        <h2 class="instr-toc__title">Содержание</h2>
-        <div class="instr-toc__links">
-          <a href="#quick-start" class="instr-toc__link">Первый seed</a>
-          <a href="#settings" class="instr-toc__link">Настройки</a>
-          <a href="#layers" class="instr-toc__link">Слои</a>
-          <a href="#projects" class="instr-toc__link">Project</a>
-          <a href="#export" class="instr-toc__link">Экспорт</a>
-          <a href="#limits" class="instr-toc__link">Ограничения</a>
+    <section class="instr-hero panel">
+      <div class="instr-hero__copy">
+        <p class="eyebrow instr-eyebrow"><span aria-hidden="true"></span> Quick manual</p>
+        <h1>От идеи до файла<br />за несколько минут</h1>
+        <p class="lead">
+          Выберите характер мелодии, создайте seed, настройте слои и сохраните удачный вариант.
+        </p>
+        <div class="instr-hero__actions">
+          <a href="/generator" class="instr-button instr-button--primary">Открыть генератор <span>↗</span></a>
+          <a href="#quick-start" class="instr-button instr-button--quiet">Как это работает</a>
         </div>
+      </div>
+      <div class="instr-hero__signal" aria-hidden="true">
+        <span class="instr-signal__label">SEED FLOW</span>
+        <div class="instr-signal__lane instr-signal__lane--melody"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="instr-signal__lane instr-signal__lane--chord"><i></i><i></i><i></i></div>
+        <div class="instr-signal__lane instr-signal__lane--bass"><i></i><i></i><i></i><i></i></div>
+      </div>
+      <nav class="instr-nav" aria-label="Содержание инструкции">
+        <a href="#quick-start">Быстрый старт</a>
+        <a href="#settings">Настройки</a>
+        <a href="#layers">Слои</a>
+        <a href="#projects">Project</a>
+        <a href="#export">Экспорт</a>
       </nav>
+    </section>
 
-      <article class="instr-main">
-        <section class="instr-section" id="quick-start">
-          <h2>Первый seed за минуту</h2>
-          <ol class="instr-steps">
-            <li>Откройте <a href="/generator">генератор</a>.</li>
-            <li>Сначала выберите пять параметров в Hook Intent — они задают характер идеи.</li>
-            <li>При необходимости уточните тональность, темп, длину и диапазон в Melody Settings.</li>
-            <li>Нажмите Generate Seed, затем Play.</li>
-            <li>Отключайте Chord Layer и Bass Layer, чтобы сравнить звучание со слоями и без них.</li>
-            <li>Если результат нравится, сразу скачайте Project, WAV или MIDI.</li>
-          </ol>
+    <section class="instr-panel panel" id="quick-start">
+      <header class="instr-panel__header">
+        <div>
+          <p class="eyebrow instr-eyebrow">Quick start</p>
+          <h2>Первый seed — четыре действия</h2>
+        </div>
+        <p>Seed — короткая музыкальная заготовка, не готовая песня.</p>
+      </header>
+      <ol class="instr-flow">
+        <li><span>01</span><strong>Задайте характер</strong><p>Сначала выберите параметры Hook Intent.</p></li>
+        <li><span>02</span><strong>Создайте идею</strong><p>Нажмите Generate Seed, затем Play.</p></li>
+        <li><span>03</span><strong>Сравните слои</strong><p>Включайте и отключайте аккорды и бас.</p></li>
+        <li><span>04</span><strong>Сохраните</strong><p>Скачайте Project, WAV или MIDI.</p></li>
+      </ol>
+      <div class="instr-alert instr-alert--warm">
+        <span aria-hidden="true">!</span>
+        <p><strong>Не потеряйте вариант.</strong> Generate New Seed заменяет текущий результат, а истории версий нет.</p>
+      </div>
+    </section>
 
-          <p class="instr-callout instr-callout--warning">
-            Generate New Seed заменяет текущий результат. Истории версий в генераторе нет, поэтому
-            сохраните удачный вариант как Project до следующей генерации.
+    <div class="instr-dashboard">
+      <div class="instr-dashboard__main">
+        <section class="instr-panel panel" id="settings">
+          <header class="instr-panel__header">
+            <div>
+              <p class="eyebrow instr-eyebrow">Control deck</p>
+              <h2>Сначала характер, потом детали</h2>
+            </div>
+          </header>
+          <p class="instr-panel__intro">
+            Hook Intent быстро собирает рабочий пресет. Ручные настройки нужны, только когда хочется
+            точнее контролировать результат.
           </p>
+          <div class="instr-alert">
+            <span aria-hidden="true">i</span>
+            <p>Изменение Hook Intent сбрасывает Scale Mode, Bars, Tempo, Octave, Pitch Range и Advanced tuning. Key / Tonic сохраняется.</p>
+          </div>
 
-          <dl class="instr-term-list" aria-label="Основные термины">
-            <div><dt>Seed</dt><dd>короткая музыкальная заготовка, а не готовая песня.</dd></div>
-            <div><dt>Hook Intent</dt><dd>набор пресетов, определяющий характер и роль мелодии.</dd></div>
-            <div><dt>Layer</dt><dd>отдельный музыкальный слой: мелодия, аккорды или бас.</dd></div>
-            <div><dt>DAW</dt><dd>программа для записи и редактирования музыки.</dd></div>
-          </dl>
+          <div class="instr-disclosures">
+            <details class="instr-disclosure">
+              <summary>
+                <span><strong>Hook Intent</strong><small>Пять параметров характера мелодии</small></span>
+                <i aria-hidden="true"></i>
+              </summary>
+              <div class="instr-disclosure__body instr-reference-grid">
+                {intentGroups.map((group) => (
+                  <article class="instr-reference-block">
+                    <h3>{group.title}</h3>
+                    <p>{group.description}</p>
+                    <ul>
+                      {group.options.map((option) => (
+                        <li><strong>{option.label}</strong><span>{group.details[option.value]}</span></li>
+                      ))}
+                    </ul>
+                  </article>
+                ))}
+              </div>
+            </details>
+
+            <details class="instr-disclosure">
+              <summary>
+                <span><strong>Melody Settings</strong><small>Тональность, длина, темп и диапазон</small></span>
+                <i aria-hidden="true"></i>
+              </summary>
+              <dl class="instr-disclosure__body instr-setting-list">
+                {manualSettings.map(([name, description]) => (
+                  <div><dt>{name}</dt><dd>{description}</dd></div>
+                ))}
+              </dl>
+            </details>
+
+            <details class="instr-disclosure">
+              <summary>
+                <span><strong>Advanced tuning</strong><small>Плотность, паузы, вариативность и случайность</small></span>
+                <i aria-hidden="true"></i>
+              </summary>
+              <dl class="instr-disclosure__body instr-setting-list">
+                {advancedSettings.map(([name, description]) => (
+                  <div><dt>{name}</dt><dd>{description}.</dd></div>
+                ))}
+              </dl>
+            </details>
+          </div>
         </section>
 
-        <section class="instr-section" id="settings">
-          <h2>Intent и ручные настройки</h2>
-          <p>
-            Начинайте с Hook Intent, затем переходите к ручным настройкам. Любое изменение Hook Intent
-            заново применяет пресет и перезаписывает Scale Mode, Bars, Tempo, Octave, Pitch Range и все
-            параметры Advanced tuning. Key / Tonic при этом сохраняется.
-          </p>
+        <section class="instr-panel panel" id="layers">
+          <header class="instr-panel__header">
+            <div>
+              <p class="eyebrow instr-eyebrow">Three-layer output</p>
+              <h2>Одна идея, три музыкальных слоя</h2>
+            </div>
+          </header>
 
-          <h3 class="instr-subheading">Hook Intent</h3>
-          <div class="instr-card-grid instr-card-grid--settings">
-            {intentGroups.map((group) => (
-              <article class="instr-card">
-                <h3>{group.title}</h3>
-                <p>{group.description}</p>
-                <ul class="instr-option-list">
-                  {group.options.map((option) => (
-                    <li><strong>{option.label}</strong> — {group.details[option.value]}</li>
+          <div class="instr-layer-list">
+            <article class="instr-layer instr-layer--melody">
+              <span class="instr-layer__key">M</span>
+              <div><h3>Melody</h3><p>Главная музыкальная фраза. Меняется только при генерации нового seed.</p></div>
+            </article>
+            <article class="instr-layer instr-layer--chord">
+              <span class="instr-layer__key">C</span>
+              <div><h3>Chord Layer</h3><p>Гармония. Слой можно отключить, настроить или регенерировать.</p></div>
+            </article>
+            <article class="instr-layer instr-layer--bass">
+              <span class="instr-layer__key">B</span>
+              <div><h3>Bass Layer</h3><p>Нижний голос, автоматически построенный по текущим аккордам.</p></div>
+            </article>
+          </div>
+
+          <div class="instr-alert instr-alert--mint">
+            <span aria-hidden="true">↻</span>
+            <p>Изменение или регенерация Chord Layer перестраивает Bass Layer под новые аккорды. Режим баса сохраняется.</p>
+          </div>
+
+          <details class="instr-disclosure instr-disclosure--standalone">
+            <summary>
+              <span><strong>Все режимы слоёв</strong><small>Pattern, Length, Feel и Bass Mode</small></span>
+              <i aria-hidden="true"></i>
+            </summary>
+            <div class="instr-disclosure__body instr-reference-grid">
+              {chordOptionGroups.map((group) => (
+                <article class="instr-reference-block">
+                  <h3>{group.title}</h3>
+                  <ul>
+                    {group.options.map((option) => (
+                      <li><strong>{option.label}</strong><span>{group.details[option.value]}</span></li>
+                    ))}
+                  </ul>
+                </article>
+              ))}
+              <article class="instr-reference-block">
+                <h3>Bass Mode</h3>
+                <ul>
+                  {BASS_MODE_OPTIONS.map((option) => (
+                    <li><strong>{option.label}</strong><span>{bassDetails[option.value]}</span></li>
                   ))}
                 </ul>
               </article>
-            ))}
+            </div>
+          </details>
+        </section>
+      </div>
+
+      <aside class="instr-dashboard__side">
+        <section class="instr-panel panel" id="projects">
+          <header class="instr-panel__header">
+            <div>
+              <p class="eyebrow instr-eyebrow">Save state</p>
+              <h2>Project — ваша точка возврата</h2>
+            </div>
+          </header>
+          <p class="instr-panel__intro">
+            Файл <code>.melody-seed.json</code> хранит мелодию, настройки, аккорды, бас и состояние слоёв.
+          </p>
+          <div class="instr-action-list">
+            <div><span>↓</span><p><strong>Сохранить</strong>Выберите Project в блоке Download.</p></div>
+            <div><span>↑</span><p><strong>Открыть</strong>Перетащите файл в Open Project или нажмите значок загрузки.</p></div>
           </div>
-
-          <h3 class="instr-subheading">Melody Settings</h3>
-          <dl class="instr-setting-list">
-            {manualSettings.map(([name, description]) => (
-              <div><dt>{name}</dt><dd>{description}</dd></div>
-            ))}
-          </dl>
-
-          <h3 class="instr-subheading">Advanced tuning</h3>
-          <p>Раскройте этот блок, только если хотите точнее управлять характером генерации.</p>
-          <dl class="instr-setting-list">
-            {advancedSettings.map(([name, description]) => (
-              <div><dt>{name}</dt><dd>{description}.</dd></div>
-            ))}
-          </dl>
+          <p class="instr-mini-warning">Открытие Project тоже заменяет текущий seed.</p>
         </section>
 
-        <section class="instr-section" id="layers">
-          <h2>Melody, Chord и Bass Layer</h2>
-          <div class="instr-card-grid instr-card-grid--layers">
-            <article class="instr-card instr-card--melody">
-              <h3>Melody</h3>
-              <p>Главная музыкальная фраза. Новая мелодия создаётся кнопкой Generate New Seed.</p>
-            </article>
-            <article class="instr-card instr-card--chord">
-              <h3>Chord Layer</h3>
-              <p>Гармоническая поддержка. Его можно отключить, настроить или регенерировать.</p>
-            </article>
-            <article class="instr-card instr-card--bass">
-              <h3>Bass Layer</h3>
-              <p>Нижний голос, построенный по текущим аккордам. Его можно отключить или регенерировать.</p>
-            </article>
-          </div>
-
-          <p class="instr-callout">
-            Аккорды и бас связаны: изменение Pattern, Length, Feel или регенерация Chord Layer
-            автоматически перестраивает Bass Layer под новые аккорды. Выбранный режим баса сохраняется.
-          </p>
-
-          <h3 class="instr-subheading">Настройки Chord Layer</h3>
-          <div class="instr-card-grid instr-card-grid--settings">
-            {chordOptionGroups.map((group) => (
-              <article class="instr-card">
-                <h3>{group.title}</h3>
-                <ul class="instr-option-list">
-                  {group.options.map((option) => (
-                    <li><strong>{option.label}</strong> — {group.details[option.value]}</li>
-                  ))}
-                </ul>
-              </article>
-            ))}
-          </div>
-
-          <h3 class="instr-subheading">Режим Bass Layer</h3>
-          <ul class="instr-option-list instr-option-list--standalone">
-            {BASS_MODE_OPTIONS.map((option) => (
-              <li><strong>{option.label}</strong> — {bassDetails[option.value]}</li>
-            ))}
-          </ul>
-        </section>
-
-        <section class="instr-section" id="projects">
-          <h2>Как сохранить и открыть Project</h2>
-          <p>
-            Project — файл <code>.melody-seed.json</code> с полной копией текущего состояния: мелодией,
-            настройками, аккордами, басом и состоянием слоёв. Это лучший формат для продолжения работы
-            именно в Melody Seed Generator.
-          </p>
-          <ol class="instr-steps">
-            <li>В блоке Download выберите Project и нажмите кнопку скачивания.</li>
-            <li>Чтобы вернуться к работе, перетащите файл в зону Open Project над настройками.</li>
-            <li>Либо нажмите значок загрузки в этой зоне и выберите файл вручную.</li>
-          </ol>
-          <p class="instr-callout instr-callout--warning">
-            Открытие Project заменяет текущий seed. Если текущая версия нужна, сначала скачайте её
-            отдельным Project-файлом.
-          </p>
-        </section>
-
-        <section class="instr-section" id="export">
-          <h2>WAV, MIDI и дальнейшая работа</h2>
-          <p>
-            В WAV и MIDI попадают только активные слои. Перед скачиванием включите Melody, Chord Layer и
-            Bass Layer в нужной комбинации. Project сохраняет полное состояние, включая отключённые слои.
-          </p>
-          <div class="instr-card-grid instr-card-grid--downloads">
+        <section class="instr-panel panel" id="export">
+          <header class="instr-panel__header">
+            <div>
+              <p class="eyebrow instr-eyebrow">Download</p>
+              <h2>Выберите нужный формат</h2>
+            </div>
+          </header>
+          <div class="instr-format-list">
             {availableDownloads.map((option) => (
-              <article class:list={['instr-card', { 'instr-card--highlight': option.value === 'project' }]}>
-                <h3>{option.label}</h3>
-                {option.value === 'wav' && (
-                  <p>Готовое аудио для прослушивания, отправки или использования как звуковой референс.</p>
-                )}
-                {option.value === 'midi' && (
-                  <p>Редактируемые ноты для DAW: можно менять инструменты, партии и аранжировку.</p>
-                )}
-                {option.value === 'project' && (
-                  <p>Полное состояние генератора для сохранения версии и продолжения работы позже.</p>
-                )}
+              <article class:list={['instr-format', `instr-format--${option.value}`]}>
+                <strong>{option.label}</strong>
+                {option.value === 'wav' && <p>Готовое аудио для прослушивания или AI-сервиса.</p>}
+                {option.value === 'midi' && <p>Редактируемые ноты для дальнейшей работы в DAW.</p>}
+                {option.value === 'project' && <p>Полное состояние для продолжения в генераторе.</p>}
               </article>
             ))}
           </div>
-          <p>
-            Для Suno, Udio и других AI-сервисов WAV можно использовать как музыкальное направление, а
-            текстом описать жанр, атмосферу, вокал и желаемое звучание. Возможности загрузки аудио и
-            правила сервисов меняются — проверяйте их актуальный интерфейс перед работой.
-          </p>
-          <p class="instr-callout">
-            Внешний сервис может переосмыслить исходную идею и не обязан точно повторять мелодию,
-            аккорды или бас. MP3 сейчас отображается в списке форматов, но недоступен для скачивания.
-          </p>
+          <p class="instr-panel__note">В WAV и MIDI попадают только активные слои. MP3 пока недоступен.</p>
         </section>
 
-        <section class="instr-section" id="limits">
-          <h2>Что инструмент делает — и чего не делает</h2>
-          <ul class="instr-fact-list">
-            <li>Создаёт короткую процедурную идею без сэмплов и аудиопетель.</li>
-            <li>Не редактирует отдельные ноты внутри piano roll.</li>
-            <li>Не хранит историю вариантов в браузере — важные версии нужно скачивать.</li>
-            <li>Не заменяет DAW и не создаёт законченную аранжировку.</li>
-            <li>Не гарантирует уникальность, коммерческий успех или точное повторение во внешнем сервисе.</li>
+        <section class="instr-panel panel instr-limits" id="limits">
+          <header class="instr-panel__header">
+            <div>
+              <p class="eyebrow instr-eyebrow">Good to know</p>
+              <h2>Границы инструмента</h2>
+            </div>
+          </header>
+          <ul>
+            <li>Это seed, а не готовая песня.</li>
+            <li>Редактирования отдельных нот нет.</li>
+            <li>История вариантов не сохраняется.</li>
+            <li>Генератор не заменяет DAW.</li>
+            <li>Внешний AI-сервис может переосмыслить исходную идею.</li>
           </ul>
-          <p>
-            Практичная цель генератора — быстрее начать трек и получить материал, который можно развить
-            дальше.
-          </p>
         </section>
-
-        <section class="instr-section instr-cta" id="start">
-          <h2>Создать первый seed</h2>
-          <p>Выберите Hook Intent, уточните настройки и сохраните удачный вариант до новой генерации.</p>
-          <a href="/generator" class="button-link primary">Открыть генератор</a>
-        </section>
-      </article>
+      </aside>
     </div>
   </main>
 </BaseLayout>
