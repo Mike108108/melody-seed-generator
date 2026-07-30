@@ -6,6 +6,12 @@ import type { GeneratedMelody, MelodyNote } from '../lib/types';
 import { playMelody, stopPlayback } from '../lib/audio/playback';
 import { midiToNoteName } from '../lib/music/notes';
 import {
+  BASS_MODE_OPTIONS,
+  CHORD_FEEL_OPTIONS,
+  CHORD_LENGTH_OPTIONS,
+  CHORD_PATTERN_OPTIONS
+} from '../lib/ui/controlOptions';
+import {
   getDisplayRangeForNotes,
   type DisplayRange
 } from '../lib/visualization/pianoRollRange';
@@ -25,33 +31,6 @@ export const PITCH_KEY_WIDTH = 52;
 const NOTE_INSET_PX = 2;
 const NOTE_HEIGHT_PX = PITCH_ROW_HEIGHT_PX - NOTE_INSET_PX * 2;
 const DEFAULT_PREVIEW_BARS = 8;
-
-const CHORD_PATTERN_OPTIONS = [
-  { value: 'sustained', label: 'Sustained' },
-  { value: 'half-bar', label: 'Half-bar' },
-  { value: 'quarter-pulse', label: 'Quarter pulse' },
-  { value: 'syncopated', label: 'Syncopated' }
-];
-
-const CHORD_LENGTH_OPTIONS = [
-  { value: 'long', label: 'Long' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'short', label: 'Short' },
-  { value: 'staccato', label: 'Staccato' }
-];
-
-const CHORD_FEEL_OPTIONS = [
-  { value: 'straight', label: 'Straight' },
-  { value: 'subtle', label: 'Subtle' },
-  { value: 'groovy', label: 'Groovy' },
-  { value: 'loose', label: 'Loose' }
-];
-
-const BASS_MODE_OPTIONS = [
-  { value: 'root-pulse', label: 'Root Pulse' },
-  { value: 'groove', label: 'Groove' },
-  { value: 'sparse', label: 'Sparse' }
-];
 
 type IconProps = {
   className?: string;

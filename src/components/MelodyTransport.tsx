@@ -5,15 +5,8 @@ import type { ChordLayerState } from '../lib/seed/chordLayerState';
 import type { GeneratedMelody, MelodyNote } from '../lib/types';
 import { downloadWav } from '../lib/audio/exportWav';
 import { downloadLayeredMidi, downloadMidi } from '../lib/midi/exportMidi';
+import { DOWNLOAD_OPTIONS, type DownloadFormat } from '../lib/ui/controlOptions';
 import { InstrumentSelect } from './InstrumentSelect';
-
-export type DownloadFormat = 'midi' | 'wav' | 'project' | 'mp3';
-
-type DownloadOption = {
-  value: DownloadFormat;
-  label: string;
-  disabled?: boolean;
-};
 
 type MelodyTransportProps = {
   melody: GeneratedMelody | null;
@@ -26,13 +19,6 @@ type MelodyTransportProps = {
   onStop: () => void;
   onDownloadProject?: () => void;
 };
-
-const DOWNLOAD_OPTIONS: DownloadOption[] = [
-  { value: 'midi', label: 'MIDI' },
-  { value: 'wav', label: 'WAV' },
-  { value: 'project', label: 'Project' },
-  { value: 'mp3', label: 'MP3', disabled: true }
-];
 
 export function MelodyTransport({
   melody,
