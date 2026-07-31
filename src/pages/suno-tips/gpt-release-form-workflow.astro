@@ -1,0 +1,211 @@
+---
+import SunoArticleLayout from '../../layouts/SunoArticleLayout.astro';
+
+const toc = [
+  { href: '#role', label: 'Чем поможет GPT' },
+  { href: '#context', label: 'Как дать контекст' },
+  { href: '#workflow', label: 'Порядок работы' },
+  { href: '#prompt', label: 'Готовый промт' },
+  { href: '#risks', label: 'Что проверить самому' },
+  { href: '#checklist', label: 'Чеклист' }
+];
+---
+
+<SunoArticleLayout
+  title="Как разбирать форму релиза с GPT"
+  description="Пошаговый способ разобрать сложную форму музыкального дистрибьютора с помощью скриншотов и GPT. Готовый промт и список полей для ручной проверки."
+  kicker="GPT · Дистрибуция · Рабочий процесс"
+  heading="Как разбирать форму релиза с GPT"
+  lead="Когда поле в анкете сформулировано непонятно, я отправляю скриншот в GPT, добавляю контекст релиза и прошу подготовить черновик ответа. Вот мой рабочий порядок."
+  meta={['Пошаговая инструкция', '≈ 4 минуты']}
+  {toc}
+>
+  <section slot="summary" class="article-quick-answer" aria-labelledby="quick-answer">
+    <div class="article-quick-answer__heading">
+      <p class="article-section-label">Рабочая схема</p>
+      <h2 id="quick-answer">Один экран — один понятный вопрос</h2>
+    </div>
+    <div class="article-workflow-line" aria-label="Краткий порядок работы">
+      <span>Скриншот</span>
+      <i aria-hidden="true">→</i>
+      <span>Объяснение</span>
+      <i aria-hidden="true">→</i>
+      <span>Черновик</span>
+      <i aria-hidden="true">→</i>
+      <span>Проверка</span>
+    </div>
+  </section>
+
+  <section id="role" class="article-section">
+    <h2>Чем GPT полезен при заполнении формы</h2>
+    <p>
+      В анкетах дистрибьюторов встречаются термины, которые редко используются в обычной жизни.
+      GPT может объяснить поле простыми словами, составить список нужных данных и предложить
+      черновик формулировки.
+    </p>
+    <p>
+      Я использую его как собеседника для разбора интерфейса. Финальные сведения беру из своих
+      документов и условий сервисов.
+    </p>
+  </section>
+
+  <section id="context" class="article-section">
+    <h2>Сначала дайте контекст релиза</h2>
+    <p>Перед первым скриншотом соберите короткую карточку проекта:</p>
+    <ul>
+      <li>название релиза и имя артиста;</li>
+      <li>сингл, EP или альбом;</li>
+      <li>жанр, настроение и язык;</li>
+      <li>наличие вокала;</li>
+      <li>как создавалась музыка;</li>
+      <li>ваш личный вклад;</li>
+      <li>участие SUNO и других инструментов;</li>
+      <li>вопросы, которые требуют особой осторожности.</li>
+    </ul>
+    <p>
+      Чем точнее исходные данные, тем полезнее черновик. Если информации нет, попросите GPT
+      оставить поле пустым и написать, что нужно уточнить.
+    </p>
+  </section>
+
+  <section id="workflow" class="article-section">
+    <h2>Порядок работы с каждым экраном</h2>
+    <ol class="article-steps">
+      <li>Откройте нужный шаг формы и сделайте читаемый скриншот.</li>
+      <li>Закройте на скриншоте личные данные, номера документов и платёжную информацию.</li>
+      <li>Добавьте карточку релиза и свой вопрос.</li>
+      <li>Попросите объяснить каждое видимое поле.</li>
+      <li>Получите черновик ответов только на основе переданных фактов.</li>
+      <li>Отдельно отметьте поля об авторстве, правах и использовании ИИ.</li>
+      <li>Сверьте ответы с правилами SUNO, дистрибьютора и площадок.</li>
+      <li>Перенесите проверенные данные в форму.</li>
+    </ol>
+  </section>
+
+  <section id="prompt" class="article-section">
+    <h2>Промт, который можно взять за основу</h2>
+    <p>
+      Заполните блок контекста своими данными. После этого прикрепите скриншот нужного экрана.
+    </p>
+
+    <div class="prompt-card" aria-label="Промт для GPT">
+      <div class="prompt-card__header">
+        <p>Промт для GPT</p>
+        <button
+          type="button"
+          class="prompt-card__copy"
+          data-copy-prompt
+          aria-label="Скопировать промт"
+          title="Скопировать промт"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="8" y="8" width="11" height="11" rx="2"></rect>
+            <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path>
+          </svg>
+        </button>
+      </div>
+      <pre><code>Я заполняю форму музыкального дистрибьютора и пришлю скриншот одного экрана.
+
+Помоги мне:
+
+1. Объяснить простыми словами каждое видимое поле.
+2. Перечислить данные, которые нужно подготовить.
+3. Предложить черновик ответа только на основе моего контекста.
+4. Оставить пропуски там, где информации недостаточно.
+5. Отметить поля, связанные с авторством, правами, использованием ИИ или условиями платформ.
+6. Составить короткий список того, что я должен проверить вручную.
+
+Контекст релиза:
+— название:
+— артист:
+— тип релиза:
+— жанр:
+— язык:
+— есть ли вокал:
+— как создавалась музыка:
+— мой вклад:
+— какие ИИ-инструменты использовались:
+— что мне особенно важно проверить:</code></pre>
+      <p class="prompt-card__status" data-copy-status aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section id="risks" class="article-section">
+    <h2>Что обязательно проверить самому</h2>
+    <div class="article-card-list">
+      <div>
+        <h3>Авторство</h3>
+        <p>Имена участников, роли и ваш реальный вклад в создание музыки.</p>
+      </div>
+      <div>
+        <h3>Права</h3>
+        <p>Лицензии, разрешения и актуальные условия использованных сервисов.</p>
+      </div>
+      <div>
+        <h3>Персональные данные</h3>
+        <p>Документы, адреса, платёжные данные и другая закрытая информация.</p>
+      </div>
+      <div>
+        <h3>Финальные формулировки</h3>
+        <p>Все ответы перед отправкой формы и их соответствие фактам.</p>
+      </div>
+    </div>
+    <aside class="article-note article-note--warm">
+      <strong>Сохраняйте границы</strong>
+      <p>
+        Не загружайте в чат документы, платёжные данные и другую чувствительную информацию.
+        Для объяснения поля обычно достаточно его названия и описания.
+      </p>
+    </aside>
+  </section>
+
+  <section id="checklist" class="article-section">
+    <h2>Чеклист перед переносом ответов</h2>
+    <ul class="article-checklist">
+      <li>GPT использовал только переданные факты;</li>
+      <li>неизвестные данные оставлены пустыми;</li>
+      <li>имена и названия написаны одинаково;</li>
+      <li>авторы и роли сверены;</li>
+      <li>условия сервисов проверены;</li>
+      <li>личные данные не попали в чат;</li>
+      <li>черновик перечитан вручную;</li>
+      <li>финальная версия сохранена рядом с релизом.</li>
+    </ul>
+  </section>
+
+  <footer class="article-ending">
+    <p>Личный опыт</p>
+    <h2>Посмотрите, как этот процесс сработал на двух релизах</h2>
+    <div>
+      <a class="article-button" href="/suno-tips/suno-682-release">
+        Прочитать про 682 <span aria-hidden="true">↗</span>
+      </a>
+      <a class="article-back-link" href="/suno-tips">Все материалы</a>
+    </div>
+  </footer>
+
+  <script>
+    const copyButton = document.querySelector<HTMLButtonElement>('[data-copy-prompt]');
+    const prompt = document.querySelector<HTMLElement>('.prompt-card code');
+    const status = document.querySelector<HTMLElement>('[data-copy-status]');
+
+    copyButton?.addEventListener('click', async () => {
+      if (!prompt || !status) return;
+
+      try {
+        await navigator.clipboard.writeText(prompt.innerText);
+        copyButton.classList.add('is-copied');
+        copyButton.setAttribute('aria-label', 'Промт скопирован');
+        status.textContent = 'Промт скопирован';
+
+        window.setTimeout(() => {
+          copyButton.classList.remove('is-copied');
+          copyButton.setAttribute('aria-label', 'Скопировать промт');
+          status.textContent = '';
+        }, 1800);
+      } catch {
+        status.textContent = 'Не удалось скопировать. Выделите текст вручную.';
+      }
+    });
+  </script>
+</SunoArticleLayout>
