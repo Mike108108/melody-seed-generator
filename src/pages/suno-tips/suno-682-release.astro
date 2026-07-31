@@ -4,11 +4,42 @@ import SunoArticleLayout from '../../layouts/SunoArticleLayout.astro';
 const toc = [
   { href: '#why-682', label: 'Почему я выбрал 682' },
   { href: '#experience', label: 'Как прошли два релиза' },
+  { href: '#releases', label: 'Что в итоге вышло' },
   { href: '#form', label: 'Что оказалось сложным' },
   { href: '#prepare', label: 'Что подготовить' },
   { href: '#workflow', label: 'Мой порядок работы' },
   { href: '#fit', label: 'Когда идти к дистрибьютору' },
   { href: '#final', label: 'Главный вывод' }
+];
+
+const releases = [
+  {
+    title: 'За рекою',
+    type: 'Сингл',
+    date: '28 апреля 2026',
+    datetime: '2026-04-28',
+    details: '1 трек',
+    links: [
+      { label: 'Яндекс Музыка', href: 'https://music.yandex.ru/album/41648096' },
+      { label: 'Звук', href: 'https://zvuk.com/track/178599206' },
+      { label: 'Amazon Music', href: 'https://music.amazon.co.uk/albums/B0GZBWSJFR' },
+      { label: 'YouTube', href: 'https://www.youtube.com/watch?v=Un1RKCj8Gpk' },
+      { label: 'YouTube Music', href: 'https://music.youtube.com/watch?v=Un1RKCj8Gpk' },
+      { label: 'Anghami', href: 'https://play.anghami.com/song/1273453211' }
+    ]
+  },
+  {
+    title: 'Moods of Tara',
+    type: 'Альбом',
+    date: '29 мая 2026',
+    datetime: '2026-05-29',
+    details: '5 треков',
+    links: [
+      { label: 'Яндекс Музыка', href: 'https://music.yandex.ru/album/42284399' },
+      { label: 'Amazon Music', href: 'https://music.amazon.co.uk/albums/B0H3K77CP6' },
+      { label: 'Anghami', href: 'https://play.anghami.com/album/1091799694' }
+    ]
+  }
 ];
 ---
 
@@ -30,7 +61,7 @@ const toc = [
       <div>
         <span>Результат</span>
         <h3>Два релиза</h3>
-        <p>Один самостоятельный трек и один небольшой альбом.</p>
+        <p>Сингл «За рекою» и альбом Moods of Tara.</p>
       </div>
       <div>
         <span>Главная сложность</span>
@@ -74,6 +105,47 @@ const toc = [
     <blockquote>
       Хорошо подготовленный релиз начинается с папки и таблицы, а уже потом — с формы дистрибьютора.
     </blockquote>
+  </section>
+
+  <section id="releases" class="article-section">
+    <h2>Что в итоге вышло</h2>
+    <p>
+      Через 682 я выпустил сингл «За рекою» и альбом Moods of Tara. Ниже оставляю прямые
+      ссылки на релизы в музыкальных сервисах.
+    </p>
+    <div class="article-note article-note--warm">
+      <strong>Важно о хронологии</strong>
+      <p>
+        Оба релиза появились ещё до запуска моего генератора мелодий. При их создании я им
+        не пользовался — здесь они приведены как результат прохождения дистрибуции через 682.
+      </p>
+    </div>
+    <div class="article-release-list">
+      {releases.map((release) => (
+        <article class="article-release">
+          <div class="article-release__heading">
+            <div>
+              <p>{release.type} · {release.details}</p>
+              <h3>{release.title}</h3>
+            </div>
+            <time datetime={release.datetime}>{release.date}</time>
+          </div>
+          <nav class="article-release__links" aria-label={`Слушать ${release.title}`}>
+            {release.links.map((link) => (
+              <a href={link.href} target="_blank" rel="noopener noreferrer">
+                {link.label} <span aria-hidden="true">↗</span>
+              </a>
+            ))}
+          </nav>
+        </article>
+      ))}
+    </div>
+    <p class="article-release-follow">
+      Новые релизы и заметки о музыке публикую
+      <a href="https://vk.ru/mr_madhu" target="_blank" rel="noopener noreferrer">
+        в группе mr_Madhu во ВКонтакте
+      </a>.
+    </p>
   </section>
 
   <section id="form" class="article-section">

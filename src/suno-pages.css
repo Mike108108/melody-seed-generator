@@ -787,6 +787,100 @@
   line-height: 1.6;
 }
 
+.article-release-list {
+  margin: 2.5rem 0 2rem;
+  border-top: 1px solid rgba(217, 226, 239, 0.13);
+}
+
+.article-release {
+  padding: 1.7rem 0 1.8rem;
+  border-bottom: 1px solid rgba(217, 226, 239, 0.13);
+}
+
+.article-release__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.article-release__heading p {
+  margin: 0 0 0.35rem;
+  color: rgba(255, 145, 100, 0.62);
+  font-size: 0.68rem;
+  font-weight: 680;
+  letter-spacing: 0.08em;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.article-release__heading h3 {
+  margin: 0;
+  font-size: clamp(1.35rem, 3vw, 1.7rem);
+  letter-spacing: -0.028em;
+}
+
+.article-release__heading time {
+  flex: 0 0 auto;
+  padding-top: 0.2rem;
+  color: rgba(238, 242, 247, 0.46);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.article-release__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.2rem;
+  margin-top: 1.25rem;
+}
+
+.article-release__links a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  color: rgba(238, 242, 247, 0.62);
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.5;
+  transition: color 140ms ease;
+}
+
+.article-release__links a span {
+  color: rgba(255, 145, 100, 0.7);
+  font-size: 0.78rem;
+  transition: transform 140ms ease;
+}
+
+.article-release__links a:hover {
+  color: rgba(246, 248, 251, 0.94);
+}
+
+.article-release__links a:hover span {
+  transform: translate(1px, -1px);
+}
+
+.article-release__links a:focus-visible,
+.article-release-follow a:focus-visible {
+  border-radius: 0.15rem;
+  outline: 2px solid rgba(255, 116, 72, 0.6);
+  outline-offset: 0.25rem;
+}
+
+.article-release-follow {
+  color: rgba(238, 242, 247, 0.55) !important;
+  font-size: 0.92rem !important;
+  line-height: 1.65 !important;
+}
+
+.article-release-follow a {
+  color: rgba(79, 226, 207, 0.78);
+}
+
+.article-release-follow a:hover {
+  color: #6af0dd;
+}
+
 .article-route-list {
   margin-top: 2rem;
   border-top: 1px solid rgba(217, 226, 239, 0.13);
@@ -1306,6 +1400,16 @@
   .article-card-list > div:nth-child(even) {
     padding-left: 0;
     border-left: 0;
+  }
+
+  .article-release__heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .article-release__heading time {
+    padding-top: 0;
   }
 
   .article-workflow-line {
