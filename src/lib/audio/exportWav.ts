@@ -199,5 +199,5 @@ export async function downloadWav(
   const blob = new Blob([wavArrayBuffer], { type: 'audio/wav' });
   const filename =
     hasChords || hasBass ? `${baseFileName(melody)}-wav-layers.wav` : `${baseFileName(melody)}.wav`;
-  downloadBlob(blob, filename);
+  await downloadBlob(blob, filename, { forceAttachment: true, preferMobileSave: true });
 }

@@ -332,7 +332,7 @@ const availableDownloads = DOWNLOAD_OPTIONS.filter((option) => !option.disabled)
       <section class="instr-chapter" id="projects">
         <h2>Project — точка возврата к работе</h2>
         <p>
-          Файл <code>.melody-seed.json</code> хранит полное состояние генератора: мелодию, настройки,
+          Файл <code>.melody-seed</code> хранит полное состояние генератора: мелодию, настройки,
           аккорды, бас и включённые слои. WAV и MIDI нужны для работы вне генератора, а Project — чтобы
           вернуться к тому же варианту позже.
         </p>
@@ -357,18 +357,17 @@ const availableDownloads = DOWNLOAD_OPTIONS.filter((option) => !option.disabled)
         <div class="instr-format-row">
           {availableDownloads.map((option) => (
             <article class:list={['instr-format-card', `instr-format-card--${option.value}`]}>
-              <span>{option.value === 'project' || option.value === 'provenance' ? 'JSON' : option.label}</span>
+              <span>{option.value === 'project' ? 'FILE' : option.label}</span>
               <h3>{option.label}</h3>
               {option.value === 'wav' && <p>Готовое аудио для прослушивания или использования как референса.</p>}
               {option.value === 'midi' && <p>Редактируемые ноты для работы с инструментами и аранжировкой в DAW.</p>}
               {option.value === 'project' && <p>Полное состояние для продолжения работы в генераторе.</p>}
-              {option.value === 'provenance' && <p>Технический паспорт seed: настройки, слои, хэш и ограничения проверки сходства.</p>}
             </article>
           ))}
         </div>
 
         <div class="instr-reading-column">
-          <p class="instr-caption">MP3 пока недоступен. Project сохраняет и отключённые слои, а Provenance — техническое происхождение seed.</p>
+          <p class="instr-caption">MP3 пока недоступен. Project сохраняет полное состояние, включая отключённые слои.</p>
           <p>
             WAV можно передать Suno, Udio или другому AI-сервису как музыкальное направление. Внешний
             сервис может переосмыслить исходную идею и не обязан точно повторять мелодию, аккорды или бас.

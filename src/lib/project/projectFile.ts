@@ -456,8 +456,9 @@ export function parseProjectFileText(text: string): MelodySeedProjectFile {
   return validateProjectFile(parsed);
 }
 
-export function downloadProjectFile(project: MelodySeedProjectFile): void {
+export async function downloadProjectFile(project: MelodySeedProjectFile): Promise<void> {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const filename = `melody-seed-project-${timestamp}.melody-seed.json`;
-  downloadBlob(new Blob([serializeProjectFile(project)], { type: 'application/json' }), filename);
+  const filename = `melody-seed-project-${timestamp}.melody-seed`;
+  const blob = new Blob([serializeProjectFile(project)], { type: 'application/json' });
+  await downloadBlob(blob, filename, { forceAttachment: true, preferMobileSave: true });
 }

@@ -127,7 +127,7 @@ export function downloadMidi(melody: GeneratedMelody): void {
   const arrayBuffer = new ArrayBuffer(bytes.byteLength);
   new Uint8Array(arrayBuffer).set(bytes);
   const midiBlob = new Blob([arrayBuffer], { type: 'audio/midi' });
-  downloadBlob(midiBlob, `${baseFileName(melody)}.mid`);
+  void downloadBlob(midiBlob, `${baseFileName(melody)}.mid`);
 }
 
 export function downloadLayeredMidi(melody: GeneratedMelody, layeredSeed: LayeredSeed): void {
@@ -135,7 +135,7 @@ export function downloadLayeredMidi(melody: GeneratedMelody, layeredSeed: Layere
   const arrayBuffer = new ArrayBuffer(bytes.byteLength);
   new Uint8Array(arrayBuffer).set(bytes);
   const midiBlob = new Blob([arrayBuffer], { type: 'audio/midi' });
-  downloadBlob(midiBlob, `${baseFileName(melody)}-midi-layers.mid`);
+  void downloadBlob(midiBlob, `${baseFileName(melody)}-midi-layers.mid`);
 }
 
 export function downloadProvenance(
@@ -145,7 +145,7 @@ export function downloadProvenance(
 ): void {
   const provenance = createProvenanceJson(melody, chordLayer, bassLayer);
   const blob = new Blob([JSON.stringify(provenance, null, 2)], { type: 'application/json' });
-  downloadBlob(blob, `${baseFileName(melody)}.provenance.json`);
+  void downloadBlob(blob, `${baseFileName(melody)}.provenance.json`);
 }
 
 function beatsToSeconds(beats: number, bpm: number): number {

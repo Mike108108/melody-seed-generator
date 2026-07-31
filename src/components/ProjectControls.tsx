@@ -85,7 +85,7 @@ export function ProjectControls({ status, onOpenProjectFile }: ProjectControlsPr
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <p className="hint">Drop a .melody-seed.json project file here</p>
+        <p className="hint">Drop a .melody-seed project file here</p>
         <button
           type="button"
           className="project-open-button"
@@ -100,7 +100,7 @@ export function ProjectControls({ status, onOpenProjectFile }: ProjectControlsPr
       <input
         ref={fileInputRef}
         type="file"
-        accept=".melody-seed.json,.json,application/json"
+        accept=".melody-seed,.melody-seed.json,.json,application/json"
         hidden
         onChange={handleFileChange}
       />

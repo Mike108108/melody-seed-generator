@@ -203,7 +203,7 @@ export default function App() {
   const canRegenerateChords = melody !== null && hasChordLayerReady;
   const canRegenerateBass = melody !== null && hasBassLayerReady && hasChordLayerReady;
 
-  const handleDownloadProject = () => {
+  const handleDownloadProject = async () => {
     if (!melody) return;
 
     const now = new Date().toISOString();
@@ -215,7 +215,7 @@ export default function App() {
       updatedAt: now
     });
 
-    downloadProjectFile(project);
+    await downloadProjectFile(project);
     setProjectCreatedAt(project.createdAt);
     setProjectStatus({ type: 'success', message: 'Project file downloaded.' });
   };

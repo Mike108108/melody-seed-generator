@@ -4,6 +4,7 @@ import type { GeneratedMelody, MelodyNote } from '../types';
 let melodySynth: Tone.PolySynth | null = null;
 let chordSynth: Tone.PolySynth | null = null;
 let bassSynth: Tone.PolySynth | null = null;
+let playbackEndTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
 let playbackGeneration = 0;
 
 export async function playMelody(
@@ -16,11 +17,17 @@ export async function playMelody(
   playbackGeneration = generation;
   await Tone.start();
 
-  if (generation !== playbackGeneration) {
+  const context = Tone.getContext();
+  if (context.state !== 'running') {
+    await context.resume();
+  }
+
+  if (generation !== playbackGeneration || context.state !== 'running') {
     return false;
   }
 
   disposePlaybackResources();
+  Tone.getDestination().mute = false;
 
   melodySynth = new Tone.PolySynth(Tone.Synth, {
     oscillator: { type: 'triangle' },
@@ -62,33 +69,30 @@ export async function playMelody(
   }
 
   const bpm = melody.settings.bpm;
-  Tone.Transport.bpm.value = bpm;
-  Tone.Transport.cancel(0);
-  Tone.Transport.position = 0;
+  const startTime = Tone.now() + 0.06;
 
   melody.notes.forEach((note) => {
-    scheduleNote(melodySynth!, note, bpm);
+    scheduleNote(melodySynth!, note, bpm, startTime);
   });
 
   if (hasChords) {
     chordNotes!.forEach((note) => {
-      scheduleNote(chordSynth!, note, bpm);
+      scheduleNote(chordSynth!, note, bpm, startTime);
     });
   }
 
   if (hasBass) {
     bassNotes!.forEach((note) => {
-      scheduleNote(bassSynth!, note, bpm);
+      scheduleNote(bassSynth!, note, bpm, startTime);
     });
   }
 
   const endSeconds = beatsToSeconds(melody.settings.bars * 4 + 0.25, bpm);
-  Tone.Transport.scheduleOnce(() => {
+  playbackEndTimer = globalThis.setTimeout(() => {
     if (generation !== playbackGeneration) return;
     stopPlayback();
     onPlaybackEnd?.();
-  }, endSeconds);
-  Tone.Transport.start('+0.05', 0);
+  }, (endSeconds + 0.06) * 1_000);
   return true;
 }
 
@@ -98,8 +102,10 @@ export function stopPlayback(): void {
 }
 
 function disposePlaybackResources(): void {
-  Tone.Transport.stop();
-  Tone.Transport.cancel(0);
+  if (playbackEndTimer !== null) {
+    globalThis.clearTimeout(playbackEndTimer);
+    playbackEndTimer = null;
+  }
   if (melodySynth) {
     melodySynth.releaseAll();
     melodySynth.dispose();
@@ -117,12 +123,15 @@ function disposePlaybackResources(): void {
   }
 }
 
-function scheduleNote(synth: Tone.PolySynth, note: MelodyNote, bpm: number): void {
+function scheduleNote(
+  synth: Tone.PolySynth,
+  note: MelodyNote,
+  bpm: number,
+  startTime: number
+): void {
   const startSeconds = beatsToSeconds(note.startBeats, bpm);
   const durationSeconds = beatsToSeconds(note.durationBeats * 0.92, bpm);
-  Tone.Transport.scheduleOnce((time) => {
-    synth.triggerAttackRelease(note.noteName, durationSeconds, time, note.velocity);
-  }, startSeconds);
+  synth.triggerAttackRelease(note.noteName, durationSeconds, startTime + startSeconds, note.velocity);
 }
 
 function beatsToSeconds(beats: number, bpm: number): number {

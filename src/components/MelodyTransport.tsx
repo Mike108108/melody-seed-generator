@@ -4,7 +4,7 @@ import type { BassLayerState } from '../lib/seed/bassLayerState';
 import type { ChordLayerState } from '../lib/seed/chordLayerState';
 import type { GeneratedMelody, MelodyNote } from '../lib/types';
 import { downloadWav } from '../lib/audio/exportWav';
-import { downloadLayeredMidi, downloadMidi, downloadProvenance } from '../lib/midi/exportMidi';
+import { downloadLayeredMidi, downloadMidi } from '../lib/midi/exportMidi';
 import { DOWNLOAD_OPTIONS, type DownloadFormat } from '../lib/ui/controlOptions';
 import { InstrumentSelect } from './InstrumentSelect';
 
@@ -17,7 +17,7 @@ type MelodyTransportProps = {
   isPlaying: boolean;
   onPlay: () => void;
   onStop: () => void;
-  onDownloadProject?: () => void;
+  onDownloadProject?: () => void | Promise<void>;
 };
 
 export function MelodyTransport({
@@ -51,12 +51,7 @@ export function MelodyTransport({
     }
 
     if (downloadFormat === 'project') {
-      onDownloadProject?.();
-      return;
-    }
-
-    if (downloadFormat === 'provenance') {
-      downloadProvenance(melody, chordLayer, bassLayer);
+      await onDownloadProject?.();
       return;
     }
 
