@@ -1,6 +1,7 @@
 import * as Tone from 'tone';
 import type { GeneratedMelody, MelodyNote } from '../types';
 import { slugifyFilePart } from '../utils/hash';
+import { downloadBlob } from '../utils/download';
 
 const LEAD_SYNTH_OPTIONS = {
   oscillator: { type: 'triangle' as const },
@@ -180,15 +181,6 @@ export function audioBufferToWavBytes(buffer: AudioBuffer): ArrayBuffer {
 function baseFileName(melody: GeneratedMelody): string {
   const seed = slugifyFilePart(melody.settings.seed) || 'seed';
   return `melody-${seed}-${melody.fingerprint.hash}`;
-}
-
-function downloadBlob(blob: Blob, filename: string): void {
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-  URL.revokeObjectURL(url);
 }
 
 export async function downloadWav(

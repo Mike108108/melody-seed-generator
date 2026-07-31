@@ -6,6 +6,7 @@ import { KEYS, midiToNoteName } from '../music/notes';
 import { SCALE_OPTIONS } from '../music/scales';
 import type { GeneratedMelody, GeneratedTrack, LayeredSeed, MelodyNote, MelodySettings } from '../types';
 import { APP_VERSION } from '../version';
+import { downloadBlob } from '../utils/download';
 
 export const PROJECT_FILE_SCHEMA = 'melody-seed-project';
 export const PROJECT_FILE_VERSION = 1;
@@ -455,18 +456,8 @@ export function parseProjectFileText(text: string): MelodySeedProjectFile {
   return validateProjectFile(parsed);
 }
 
-function downloadBlob(data: BlobPart, filename: string, type: string): void {
-  const blob = new Blob([data], { type });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-  URL.revokeObjectURL(url);
-}
-
 export function downloadProjectFile(project: MelodySeedProjectFile): void {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const filename = `melody-seed-project-${timestamp}.melody-seed.json`;
-  downloadBlob(serializeProjectFile(project), filename, 'application/json');
+  downloadBlob(new Blob([serializeProjectFile(project)], { type: 'application/json' }), filename);
 }

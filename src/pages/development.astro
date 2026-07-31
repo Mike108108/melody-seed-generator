@@ -33,7 +33,7 @@ const roadmap = [
   title="Развитие проекта"
   description="Поддержка и открытый план развития Melody Seed Generator — инструмента для создания мелодических идей и генерации треков в SUNO."
 >
-  <main class="development-page">
+  <main class="development-page" id="main-content">
     <section class="development-hero">
       <div class="development-hero__copy">
         <p class="development-eyebrow"><span aria-hidden="true"></span> Открытая разработка</p>
@@ -53,6 +53,8 @@ const roadmap = [
       <div class="development-hero__portrait">
         <img
           src="/images/development-portrait.jpg"
+          srcset="/images/development-portrait-600.jpg 600w, /images/development-portrait-960.jpg 960w, /images/development-portrait.jpg 1200w"
+          sizes="(max-width: 720px) calc(100vw - 24px), 42vw"
           alt="Михаил, автор Melody Seed Generator"
           width="1200"
           height="1200"
@@ -104,21 +106,32 @@ const roadmap = [
         <div class="development-payment__heading">
           <div>
             <p>CloudTips</p>
-            <h3>Цель и текущий прогресс</h3>
+            <h3>Поддержка проекта</h3>
           </div>
-          <span>Обновляется автоматически</span>
+          <span>Оплата на стороне сервиса</span>
         </div>
-        <iframe
-          src={supportUrl}
-          title="Сбор на развитие Melody Seed Generator в CloudTips"
-          loading="eager"
-          referrerpolicy="strict-origin-when-cross-origin"
-          allow="payment"
-        ></iframe>
-        <div class="development-payment__mobile">
-          <p>Цель, собранная сумма и форма поддержки откроются на защищённой странице CloudTips.</p>
+
+        <div class="development-payment__visual">
+          <img
+            src="/images/cloudtips-background.png"
+            alt=""
+            width="480"
+            height="220"
+            loading="lazy"
+            decoding="async"
+          />
+          <div class="development-payment__goal">
+            <span>Цель сбора</span>
+            <strong>75 000 ₽</strong>
+          </div>
+        </div>
+
+        <div class="development-payment__body">
+          <p>
+            Актуальный прогресс и форма поддержки откроются на защищённой странице CloudTips.
+          </p>
           <a href={supportUrl} target="_blank" rel="noopener noreferrer">
-            Открыть сбор <span aria-hidden="true">↗</span>
+            Открыть сбор в CloudTips <span aria-hidden="true">↗</span>
           </a>
         </div>
       </div>

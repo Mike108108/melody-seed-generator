@@ -19,8 +19,8 @@ interface Props {
 const { title, description, kicker, heading, lead, meta, toc } = Astro.props;
 ---
 
-<BaseLayout title={title} description={description}>
-  <main class="page-content article-page">
+<BaseLayout title={title} description={description} pageType="article">
+  <main class="page-content article-page" id="main-content">
     <article class="article-shell">
       <header class="article-hero">
         <a class="article-back" href="/suno-tips"><span aria-hidden="true">←</span> Все материалы</a>

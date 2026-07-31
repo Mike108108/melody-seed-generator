@@ -72,3 +72,7 @@ The local similarity check compares a generated melody with recent fingerprints 
 ## Deployment
 
 The repository contains `netlify.toml` with `npm run build` and `dist` as the publish directory. Any static host that supports Astro's generated directory routes can serve the build.
+
+Netlify provides its deployment URL to the build automatically. Set `SITE_URL` when a custom production domain should be used for canonical links, Open Graph metadata, `robots.txt`, and `sitemap.xml`.
+
+Before promoting a deploy preview to production, verify the roadmap vote form, the CloudTips embed, MIDI/WAV/Project/Provenance downloads, and the response headers declared in `netlify.toml`.

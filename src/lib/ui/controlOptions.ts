@@ -34,11 +34,12 @@ export const BASS_MODE_OPTIONS: ControlOption<BassMode>[] = [
   { value: 'sparse', label: 'Sparse' }
 ];
 
-export type DownloadFormat = 'midi' | 'wav' | 'project' | 'mp3';
+export type DownloadFormat = 'midi' | 'wav' | 'project' | 'provenance' | 'mp3';
 
 export const DOWNLOAD_OPTIONS: ControlOption<DownloadFormat>[] = [
   { value: 'midi', label: 'MIDI' },
   { value: 'wav', label: 'WAV' },
   { value: 'project', label: 'Project' },
+  { value: 'provenance', label: 'Provenance' },
   { value: 'mp3', label: 'MP3', disabled: true }
 ];

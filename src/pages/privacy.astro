@@ -1,0 +1,97 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Конфиденциальность"
+  description="Как Melody Seed Generator обрабатывает локальные проекты, голосование, внешние ссылки и платёжную форму."
+>
+  <main class="page-content privacy-page" id="main-content">
+    <article class="privacy-card panel">
+      <p class="eyebrow">Конфиденциальность</p>
+      <h1>Как сайт работает с данными</h1>
+      <p class="privacy-lead">
+        Генерация мелодий, воспроизведение и подготовка файлов выполняются локально в браузере.
+        Проекты не отправляются на сервер Melody Seed Generator.
+      </p>
+
+      <section>
+        <h2>Файлы проекта</h2>
+        <p>
+          Открываемые <code>.melody-seed.json</code> файлы читаются в текущей вкладке. Сайт не загружает
+          их в удалённое хранилище.
+        </p>
+      </section>
+
+      <section>
+        <h2>Голосование</h2>
+        <p>
+          При голосовании отправляется выбранное направление развития. Отметка об уже отправленном
+          голосе сохраняется в localStorage этого браузера. Обработчик формы предоставляет Netlify,
+          поэтому сервис может получать стандартные технические данные запроса согласно своим условиям.
+        </p>
+      </section>
+
+      <section>
+        <h2>CloudTips и внешние сайты</h2>
+        <p>
+          При переходе к сбору открывается страница CloudTips. Платёжные данные вводятся на стороне
+          этого сервиса и не обрабатываются кодом Melody Seed Generator. Telegram, WhatsApp,
+          ВКонтакте, GitHub и музыкальные площадки применяют собственные правила конфиденциальности.
+        </p>
+      </section>
+
+      <section>
+        <h2>Связь</h2>
+        <p>
+          По вопросам работы сайта можно написать через контакты в панели «Разработка web-приложений».
+        </p>
+      </section>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .privacy-page {
+    padding-block: clamp(2rem, 6vw, 5rem);
+  }
+
+  .privacy-card {
+    max-width: 52rem;
+    margin-inline: auto;
+    padding: clamp(1.4rem, 5vw, 3rem);
+  }
+
+  .privacy-card h1 {
+    margin: 0.65rem 0 0;
+    font-size: clamp(2.3rem, 7vw, 4.8rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+
+  .privacy-lead,
+  .privacy-card section p {
+    color: rgba(238, 242, 247, 0.72);
+    line-height: 1.7;
+  }
+
+  .privacy-lead {
+    margin-top: 1.4rem;
+    font-size: 1.05rem;
+  }
+
+  .privacy-card section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(217, 226, 239, 0.12);
+  }
+
+  .privacy-card h2 {
+    margin: 0;
+    font-size: 1.3rem;
+  }
+
+  .privacy-card code {
+    color: #7bf1df;
+  }
+</style>

@@ -1,0 +1,17 @@
+{
+  "name": "Melody Seed Generator",
+  "short_name": "Melody Seed",
+  "description": "Процедурный генератор MIDI-мелодий, аккордов и баса.",
+  "start_url": "/generator",
+  "display": "standalone",
+  "background_color": "#080a0f",
+  "theme_color": "#080a0f",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

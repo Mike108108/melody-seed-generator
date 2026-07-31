@@ -480,9 +480,9 @@ export function PianoRoll({
                   role="switch"
                   className={`layer-switch${isChordLayerEnabled ? ' is-on' : ''}`}
                   onClick={handleToggleChordLayerEnabled}
-                  aria-label={isChordLayerEnabled ? 'Disable chord layer' : 'Enable chord layer'}
+                  aria-label={isChordLayerEnabled ? 'Отключить слой аккордов' : 'Включить слой аккордов'}
                   aria-checked={isChordLayerEnabled}
-                  title={isChordLayerEnabled ? 'Disable chord layer' : 'Enable chord layer'}
+                  title={isChordLayerEnabled ? 'Отключить слой аккордов' : 'Включить слой аккордов'}
                 >
                   <span className="layer-switch__track" aria-hidden="true">
                     <span className="layer-switch__thumb" />
@@ -525,8 +525,8 @@ export function PianoRoll({
                   type="button"
                   className="icon-circle-button chord-regenerate-icon-button"
                   onClick={handleRegenerateChords}
-                  aria-label="Regenerate Chords"
-                  title="Regenerate Chords"
+                  aria-label="Создать аккорды заново"
+                  title="Создать аккорды заново"
                 >
                   <RegenerateIcon />
                 </button>
@@ -567,9 +567,9 @@ export function PianoRoll({
                   role="switch"
                   className={`layer-switch${isBassLayerEnabled ? ' is-on' : ''}`}
                   onClick={handleToggleBassLayerEnabled}
-                  aria-label={isBassLayerEnabled ? 'Disable bass layer' : 'Enable bass layer'}
+                  aria-label={isBassLayerEnabled ? 'Отключить слой баса' : 'Включить слой баса'}
                   aria-checked={isBassLayerEnabled}
-                  title={isBassLayerEnabled ? 'Disable bass layer' : 'Enable bass layer'}
+                  title={isBassLayerEnabled ? 'Отключить слой баса' : 'Включить слой баса'}
                 >
                   <span className="layer-switch__track" aria-hidden="true">
                     <span className="layer-switch__thumb" />
@@ -594,8 +594,8 @@ export function PianoRoll({
                   type="button"
                   className="icon-circle-button bass-regenerate-icon-button"
                   onClick={handleRegenerateBass}
-                  aria-label="Regenerate Bass"
-                  title="Regenerate Bass"
+                  aria-label="Создать бас заново"
+                  title="Создать бас заново"
                 >
                   <RegenerateIcon />
                 </button>

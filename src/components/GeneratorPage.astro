@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import GeneratorIsland from './GeneratorIsland';
+---
+
+<BaseLayout
+  title="Генератор"
+  description="Интерактивный Melody Seed Generator: создание seed, playback, chord/bass layers, экспорт MIDI/WAV/project."
+  canonicalPath="/"
+>
+  <GeneratorIsland client:only="react" />
+  <noscript>
+    <main class="page-content" id="main-content">
+      <section class="panel generator-noscript">
+        <h1>Melody Seed Generator</h1>
+        <p>Для работы генератора включите JavaScript в браузере и обновите страницу.</p>
+      </section>
+    </main>
+  </noscript>
+</BaseLayout>
+
+<style>
+  .generator-noscript {
+    max-width: 44rem;
+    margin: 3rem auto;
+    padding: 2rem;
+  }
+</style>

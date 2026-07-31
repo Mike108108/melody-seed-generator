@@ -5,6 +5,7 @@ import type { ChordLayerState } from '../seed/chordLayerState';
 import { createProvenanceLayers } from '../seed/layeredSeed';
 import type { GeneratedMelody, LayeredSeed, ProvenanceJson } from '../types';
 import { slugifyFilePart } from '../utils/hash';
+import { downloadBlob } from '../utils/download';
 import { APP_VERSION } from '../version';
 
 export function exportMelodyToMidiBytes(melody: GeneratedMelody): Uint8Array {
@@ -126,7 +127,7 @@ export function downloadMidi(melody: GeneratedMelody): void {
   const arrayBuffer = new ArrayBuffer(bytes.byteLength);
   new Uint8Array(arrayBuffer).set(bytes);
   const midiBlob = new Blob([arrayBuffer], { type: 'audio/midi' });
-  downloadBlob(midiBlob, `${baseFileName(melody)}.mid`, 'audio/midi');
+  downloadBlob(midiBlob, `${baseFileName(melody)}.mid`);
 }
 
 export function downloadLayeredMidi(melody: GeneratedMelody, layeredSeed: LayeredSeed): void {
@@ -134,7 +135,7 @@ export function downloadLayeredMidi(melody: GeneratedMelody, layeredSeed: Layere
   const arrayBuffer = new ArrayBuffer(bytes.byteLength);
   new Uint8Array(arrayBuffer).set(bytes);
   const midiBlob = new Blob([arrayBuffer], { type: 'audio/midi' });
-  downloadBlob(midiBlob, `${baseFileName(melody)}-midi-layers.mid`, 'audio/midi');
+  downloadBlob(midiBlob, `${baseFileName(melody)}-midi-layers.mid`);
 }
 
 export function downloadProvenance(
@@ -144,17 +145,7 @@ export function downloadProvenance(
 ): void {
   const provenance = createProvenanceJson(melody, chordLayer, bassLayer);
   const blob = new Blob([JSON.stringify(provenance, null, 2)], { type: 'application/json' });
-  downloadBlob(blob, `${baseFileName(melody)}.provenance.json`, 'application/json');
-}
-
-function downloadBlob(data: BlobPart | BlobPart[], filename: string, type: string): void {
-  const blob = data instanceof Blob ? data : new Blob(Array.isArray(data) ? data : [data], { type });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-  URL.revokeObjectURL(url);
+  downloadBlob(blob, `${baseFileName(melody)}.provenance.json`);
 }
 
 function beatsToSeconds(beats: number, bpm: number): number {

@@ -10,6 +10,7 @@ import {
 import { KEYS } from '../lib/music/notes';
 import { SCALE_OPTIONS } from '../lib/music/scales';
 import type { MelodySettings, ScaleName } from '../lib/types';
+import { validateMelodySettings } from '../lib/melody/settingsValidation';
 import { InstrumentSelect } from './InstrumentSelect';
 
 type CreateMelodyProps = {
@@ -30,6 +31,7 @@ export function CreateMelody({
   onGenerate
 }: CreateMelodyProps) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const settingsValidation = validateMelodySettings(settings);
 
   const patchIntent = <K extends keyof MelodyIntent>(key: K, value: MelodyIntent[K]) => {
     onIntentChange({ ...intent, [key]: value });
@@ -40,7 +42,14 @@ export function CreateMelody({
   };
 
   return (
-    <section className="panel create-melody-panel" aria-label="Generate seed">
+    <form
+      className="panel create-melody-panel"
+      aria-label="Создание seed"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (settingsValidation.valid) onGenerate();
+      }}
+    >
       <div className="panel-header control-deck-header">
         <div>
           <p className="eyebrow">Control deck</p>
@@ -49,6 +58,7 @@ export function CreateMelody({
       </div>
 
       <fieldset className="create-melody-fields">
+        <legend className="sr-only">Настройки генератора</legend>
         <div className="create-melody-section">
         <h3 className="section-title">Hook Intent</h3>
         <div className="control-grid compact">
@@ -134,7 +144,9 @@ export function CreateMelody({
               min={2}
               max={16}
               step={1}
+              required
               value={settings.bars}
+              aria-invalid={Boolean(settingsValidation.errors.bars)}
               onChange={(event) => patchSettings('bars', Number(event.target.value))}
             />
           </label>
@@ -145,7 +157,10 @@ export function CreateMelody({
               type="number"
               min={60}
               max={190}
+              step={1}
+              required
               value={settings.bpm}
+              aria-invalid={Boolean(settingsValidation.errors.bpm)}
               onChange={(event) => patchSettings('bpm', Number(event.target.value))}
             />
           </label>
@@ -157,7 +172,9 @@ export function CreateMelody({
               min={2}
               max={6}
               step={1}
+              required
               value={settings.octave}
+              aria-invalid={Boolean(settingsValidation.errors.octave)}
               onChange={(event) => patchSettings('octave', Number(event.target.value))}
             />
           </label>
@@ -169,7 +186,9 @@ export function CreateMelody({
               min={7}
               max={36}
               step={1}
+              required
               value={settings.range}
+              aria-invalid={Boolean(settingsValidation.errors.range)}
               onChange={(event) => patchSettings('range', Number(event.target.value))}
             />
           </label>
@@ -212,12 +231,19 @@ export function CreateMelody({
       </div>
       </fieldset>
 
-      <button className="primary generate-button" onClick={onGenerate} type="button">
-        <span className="generate-button__light" aria-hidden="true" />
-        {hasSeed ? 'Generate New Seed' : 'Generate Seed'}
+      {!settingsValidation.valid ? (
+        <p className="settings-validation-message" role="alert">
+          Проверьте числовые настройки: значения должны оставаться в указанном диапазоне.
+        </p>
+      ) : null}
+
+      <button className="primary generate-button" type="submit">
+        <span className="generate-button__label">
+          {hasSeed ? 'Generate New Seed' : 'Generate Seed'}
+        </span>
         <span className="generate-button__arrow" aria-hidden="true">↗</span>
       </button>
-    </section>
+    </form>
   );
 }
 

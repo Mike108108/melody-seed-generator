@@ -12,6 +12,7 @@ import {
   type MelodyIntent
 } from './lib/melody/intent';
 import { createPhraseRolePlan } from './lib/melody/phraseRolePlan';
+import { validateMelodySettings } from './lib/melody/settingsValidation';
 import {
   getBassNotesFromBassLayer,
   hasBassLayerNotes,
@@ -82,6 +83,10 @@ export default function App() {
     hasBassLayerReady && bassLayer.enabled ? bassNotesForDisplay : null;
 
   const handleGenerateSeed = () => {
+    if (!validateMelodySettings(settings).valid) {
+      return;
+    }
+
     const nextSettings = { ...settings, seed: makeRandomSeed('suno-idea') };
     setSettings(nextSettings);
 
@@ -245,9 +250,10 @@ export default function App() {
 
   return (
     <>
-      <main className="app-shell">
+      <main className="app-shell" id="main-content">
+        <h1 className="sr-only">Melody Seed Generator</h1>
         <div className="layout-grid" id="generator">
-          <aside className="left-column" aria-label="Seed controls">
+          <aside className="left-column" aria-label="Управление seed">
             <ProjectControls status={projectStatus} onOpenProjectFile={handleOpenProjectFile} />
 
             <CreateMelody
@@ -260,7 +266,7 @@ export default function App() {
             />
           </aside>
 
-          <section className="right-column" aria-label="Generated arrangement">
+          <section className="right-column" aria-label="Созданная аранжировка">
             <PianoRoll
               melody={melody}
               hasChordLayerReady={hasChordLayerReady}

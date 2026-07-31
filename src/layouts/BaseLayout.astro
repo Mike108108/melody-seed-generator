@@ -6,17 +6,27 @@ import '../suno-pages.css';
 interface Props {
   title: string;
   description?: string;
+  robots?: string;
+  pageType?: 'website' | 'article';
+  canonicalPath?: string;
 }
 
 const {
   title,
-  description = 'Процедурный генератор MIDI-мелодий для AI-музыкальных workflow. Без сэмплов, без аудиопетель, без copyrighted training data.'
+  description = 'Процедурный генератор MIDI-мелодий для AI-музыкальных workflow. Без сэмплов, без аудиопетель, без copyrighted training data.',
+  robots = 'index,follow',
+  pageType = 'website',
+  canonicalPath
 } = Astro.props;
 
 const pageTitle =
   title === 'Melody Seed Generator' ? title : `${title} — Melody Seed Generator`;
 
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+const canonicalUrl = new URL(canonicalPath ?? Astro.url.pathname, Astro.site ?? Astro.url);
+const socialImageUrl = new URL('/og.png', Astro.site ?? Astro.url);
+const currentYear = new Date().getFullYear();
+const isGeneratorPage = currentPath === '/' || currentPath === '/generator';
 
 function navClass(href: string) {
   const normalized = href === '/' ? '/' : href.replace(/\/$/, '');
@@ -30,13 +40,36 @@ function navClass(href: string) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
+    <meta name="theme-color" content="#080a0f" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content={pageType} />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:site_name" content="Melody Seed Generator" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={socialImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Melody Seed Generator: мелодия, аккорды и бас на piano roll" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImageUrl} />
+    <meta name="twitter:image:alt" content="Melody Seed Generator: мелодия, аккорды и бас на piano roll" />
     <title>{pageTitle}</title>
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Перейти к содержанию</a>
     <header class="site-header">
       <div class="site-header__inner">
         <div class="site-header__left">
-          <a href="/generator" class="site-header__logo" aria-label="Открыть Melody Seed Generator">
+          <a href="/" class="site-header__logo" aria-label="Открыть Melody Seed Generator">
             <svg class="site-header__mark" viewBox="0 0 40 40" aria-hidden="true">
               <defs>
                 <linearGradient id="brand-mark-gradient" x1="8" y1="14" x2="32" y2="28" gradientUnits="userSpaceOnUse">
@@ -50,8 +83,8 @@ function navClass(href: string) {
               <circle class="site-header__mark-node site-header__mark-node--mint" cx="30.5" cy="25.5" r="2.5" />
             </svg>
           </a>
-          <nav class="site-header__nav" aria-label="Main">
-            <a href="/generator" class={navClass('/generator')}>Генератор</a>
+          <nav class="site-header__nav" aria-label="Основная навигация">
+            <a href="/" class={isGeneratorPage ? 'is-active' : ''}>Генератор</a>
             <a href="/instructions" class={navClass('/instructions')}>Инструкция</a>
             <a href="/suno-tips" class={navClass('/suno-tips')}>Советы для SUNO</a>
             <a href="/development" class={navClass('/development')}>Развитие проекта</a>
@@ -71,6 +104,11 @@ function navClass(href: string) {
     </header>
 
     <slot />
+
+    <footer class="site-footer">
+      <span>© {currentYear} Melody Seed Generator</span>
+      <a href="/privacy">Конфиденциальность</a>
+    </footer>
 
     <div class="contact-drawer" id="contact-drawer" hidden data-contact-drawer>
       <div class="contact-drawer__backdrop" data-contact-close></div>
@@ -155,7 +193,24 @@ function navClass(href: string) {
   const contactCloseControls = contactDrawer?.querySelectorAll<HTMLElement>('[data-contact-close]');
   const contactPanel = contactDrawer?.querySelector<HTMLElement>('.contact-drawer__panel');
   let contactReturnFocus: HTMLElement | null = null;
+  let contactInertElements: HTMLElement[] = [];
   let contactCloseTimer: number | undefined;
+
+  function setContactBackgroundInert(inert: boolean) {
+    if (inert) {
+      contactInertElements = Array.from(
+        document.querySelectorAll<HTMLElement>('.skip-link, .site-header, main, astro-island, .site-footer')
+      );
+    }
+
+    contactInertElements.forEach((element) => {
+      element.inert = inert;
+      if (inert) element.setAttribute('aria-hidden', 'true');
+      else element.removeAttribute('aria-hidden');
+    });
+
+    if (!inert) contactInertElements = [];
+  }
 
   function openContactDrawer() {
     if (!contactDrawer || !contactOpen || !contactPanel) return;
@@ -163,6 +218,7 @@ function navClass(href: string) {
     window.clearTimeout(contactCloseTimer);
     contactReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : contactOpen;
     contactDrawer.hidden = false;
+    setContactBackgroundInert(true);
     document.body.classList.add('has-contact-drawer');
     contactOpen.setAttribute('aria-expanded', 'true');
     window.requestAnimationFrame(() => {
@@ -179,6 +235,7 @@ function navClass(href: string) {
     contactOpen.setAttribute('aria-expanded', 'false');
     contactCloseTimer = window.setTimeout(() => {
       contactDrawer.hidden = true;
+      setContactBackgroundInert(false);
       contactReturnFocus?.focus();
     }, 220);
   }

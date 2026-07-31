@@ -645,23 +645,78 @@
 
 .instr-clean-list {
   display: grid;
-  gap: 1rem;
-  margin: 2.5rem 0 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 2.7rem 0 0;
   padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(217, 226, 239, 0.12);
+  border-radius: 0.9rem;
+  background: rgba(217, 226, 239, 0.12);
   list-style: none;
 }
 
 .instr-clean-list li {
-  padding-left: 1.3rem;
-  border-left: 2px solid rgba(255, 116, 72, 0.35);
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr);
+  gap: 1rem;
+  min-height: 10rem;
+  align-content: start;
+  padding: 1.5rem;
+  background: rgba(12, 16, 23, 0.88);
   color: rgba(238, 242, 247, 0.68);
   font-size: 1.02rem;
   line-height: 1.62;
 }
 
 .instr-clean-list strong {
+  display: block;
   color: rgba(246, 248, 251, 0.92);
+  font-size: 1.16rem;
   font-weight: 620;
+  line-height: 1.28;
+}
+
+.instr-clean-list p {
+  margin: 0.75rem 0 0;
+  color: rgba(238, 242, 247, 0.62);
+}
+
+.instr-clean-list__index {
+  color: rgba(255, 145, 100, 0.76);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.instr-limits {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(2rem, 5vw, 4rem);
+  border: 1px solid rgba(255, 116, 72, 0.2);
+  border-radius: 1.2rem;
+  background:
+    radial-gradient(circle at 88% 14%, rgba(79, 226, 207, 0.1), transparent 24rem),
+    radial-gradient(circle at 8% 88%, rgba(255, 91, 43, 0.14), transparent 27rem),
+    #10141b;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.24);
+}
+
+.instr-limits__eyebrow {
+  margin: 0 0 0.8rem !important;
+  color: rgba(255, 145, 100, 0.78) !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.11em;
+  line-height: 1.2 !important;
+  text-transform: uppercase;
+}
+
+.instr-limits h2 {
+  max-width: none;
+  margin-bottom: 0;
+  font-size: clamp(3rem, 6vw, 5rem);
 }
 
 .instr-ending {
@@ -774,6 +829,25 @@
   .instr-chapter h2 {
     margin-bottom: 1.2rem;
     font-size: 2.15rem;
+  }
+
+  .instr-limits {
+    padding: 1.35rem;
+  }
+
+  .instr-limits h2 {
+    margin-bottom: 0;
+    font-size: 2.65rem;
+  }
+
+  .instr-clean-list {
+    grid-template-columns: 1fr;
+    margin-top: 2rem;
+  }
+
+  .instr-clean-list li {
+    min-height: 0;
+    padding: 1.25rem;
   }
 
   .instr-chapter > p,

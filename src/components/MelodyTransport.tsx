@@ -4,7 +4,7 @@ import type { BassLayerState } from '../lib/seed/bassLayerState';
 import type { ChordLayerState } from '../lib/seed/chordLayerState';
 import type { GeneratedMelody, MelodyNote } from '../lib/types';
 import { downloadWav } from '../lib/audio/exportWav';
-import { downloadLayeredMidi, downloadMidi } from '../lib/midi/exportMidi';
+import { downloadLayeredMidi, downloadMidi, downloadProvenance } from '../lib/midi/exportMidi';
 import { DOWNLOAD_OPTIONS, type DownloadFormat } from '../lib/ui/controlOptions';
 import { InstrumentSelect } from './InstrumentSelect';
 
@@ -55,6 +55,11 @@ export function MelodyTransport({
       return;
     }
 
+    if (downloadFormat === 'provenance') {
+      downloadProvenance(melody, chordLayer, bassLayer);
+      return;
+    }
+
     if (downloadFormat === 'wav') {
       setExporting(true);
       try {
@@ -66,16 +71,16 @@ export function MelodyTransport({
   };
 
   return (
-    <div className="melody-transport" aria-label="Melody playback and export">
+    <div className="melody-transport" aria-label="Воспроизведение и экспорт мелодии">
       <div className="melody-transport-controls">
-        <div className="segmented-control playback-control" role="group" aria-label="Playback">
+        <div className="segmented-control playback-control" role="group" aria-label="Воспроизведение">
           <button
             type="button"
             className={isPlaying ? '' : 'is-active'}
             disabled={disabled}
             onClick={onPlay}
-            aria-label="Play melody"
-            title="Play melody"
+            aria-label="Воспроизвести мелодию"
+            title="Воспроизвести мелодию"
           >
             ▶ Play
           </button>
@@ -84,8 +89,8 @@ export function MelodyTransport({
             className={isPlaying ? 'is-active' : ''}
             disabled={disabled}
             onClick={onStop}
-            aria-label="Stop playback"
-            title="Stop playback"
+            aria-label="Остановить воспроизведение"
+            title="Остановить воспроизведение"
           >
             ■ Stop
           </button>
@@ -97,8 +102,8 @@ export function MelodyTransport({
             className="download-control-action"
             disabled={disabled || exporting || downloadFormat === 'mp3'}
             onClick={() => void handleDownload()}
-            aria-label={exporting ? 'Rendering WAV audio' : `Download ${selectedOption.label}`}
-            title={exporting ? 'Rendering WAV audio…' : `Download ${selectedOption.label}`}
+            aria-label={exporting ? 'Создаётся WAV' : `Скачать ${selectedOption.label}`}
+            title={exporting ? 'Создаётся WAV…' : `Скачать ${selectedOption.label}`}
           >
             <span className="download-control-icon" aria-hidden="true">
               ⬇
@@ -113,7 +118,7 @@ export function MelodyTransport({
                 ...option,
                 label: option.disabled ? `${option.label} (soon)` : option.label
               }))}
-              ariaLabel="Download format"
+              ariaLabel="Формат скачивания"
               mode="caret"
               onChange={(value) => setDownloadFormat(value as DownloadFormat)}
             />

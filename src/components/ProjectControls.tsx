@@ -78,7 +78,7 @@ export function ProjectControls({ status, onOpenProjectFile }: ProjectControlsPr
   };
 
   return (
-    <section className="project-restore" aria-label="Open project">
+    <section className="project-restore" aria-label="Открыть проект">
       <div
         className={`project-drop-zone${isDragOver ? ' is-drag-over' : ''}`}
         onDragOver={handleDragOver}
@@ -90,8 +90,8 @@ export function ProjectControls({ status, onOpenProjectFile }: ProjectControlsPr
           type="button"
           className="project-open-button"
           onClick={handleOpenClick}
-          aria-label="Open Project"
-          title="Open Project"
+          aria-label="Открыть проект"
+          title="Открыть проект"
         >
           <OpenProjectIcon />
         </button>

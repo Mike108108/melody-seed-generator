@@ -1,11 +1,5 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import GeneratorIsland from '../components/GeneratorIsland';
+import GeneratorPage from '../components/GeneratorPage.astro';
 ---
 
-<BaseLayout
-  title="Генератор"
-  description="Интерактивный Melody Seed Generator: создание seed, playback, chord/bass layers, экспорт MIDI/WAV/project."
->
-  <GeneratorIsland client:only="react" />
-</BaseLayout>
+<GeneratorPage />
