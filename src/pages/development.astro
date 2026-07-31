@@ -6,18 +6,21 @@ const supportUrl = 'https://pay.cloudtips.ru/p/9fb52846';
 
 const roadmap = [
   {
+    value: 'melody-development',
     marker: 'Практическая польза',
     title: 'Развитие мелодической идеи',
     text: 'Продолжение, вариация, кульминация и завершение исходного seed. Отдельные связанные идеи для куплета, припева, бриджа и хука.',
     accent: 'warm'
   },
   {
+    value: 'indian-ragas',
     marker: 'Уникальное направление',
     title: 'Генератор индийских раг',
     text: 'Мелодия по правилам выбранной раги: допустимые ноты, характерные движения и опорные ступени — вместе с описанием для SUNO.',
     accent: 'mint'
   },
   {
+    value: 'seed-to-suno',
     marker: 'Быстрее до результата',
     title: 'Seed → SUNO',
     text: 'Короткое музыкальное описание на основе seed: лад, темп, диапазон, характер движения и драматургия — готовые ориентиры для генерации трека.',
@@ -47,9 +50,15 @@ const roadmap = [
           <a class="development-text-link" href="#roadmap">Посмотреть направления</a>
         </div>
       </div>
-      <div class="development-hero__signal" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span><span></span>
-        <span></span><span></span><span></span><span></span><span></span><span></span>
+      <div class="development-hero__portrait">
+        <img
+          src="/images/development-portrait.jpg"
+          alt="Михаил, автор Melody Seed Generator"
+          width="1200"
+          height="1200"
+          decoding="async"
+          fetchpriority="high"
+        />
       </div>
     </section>
 
@@ -127,18 +136,46 @@ const roadmap = [
         </div>
       </div>
 
-      <div class="development-roadmap__grid">
-        {roadmap.map((item, index) => (
-          <article class={`development-roadmap-card development-roadmap-card--${item.accent}`}>
-            <div>
-              <span>{String(index + 1).padStart(2, '0')}</span>
-              <p>{item.marker}</p>
-            </div>
-            <h3>{item.title}</h3>
-            <p>{item.text}</p>
-          </article>
-        ))}
-      </div>
+      <form
+        class="development-vote"
+        name="roadmap-vote"
+        method="POST"
+        data-netlify="true"
+        netlify-honeypot="bot-field"
+      >
+        <input type="hidden" name="form-name" value="roadmap-vote" />
+        <p class="development-vote__trap" hidden>
+          <label>Не заполняйте это поле: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
+        </p>
+
+        <fieldset>
+          <legend>Выберите самое полезное направление</legend>
+          <div class="development-roadmap__grid">
+            {roadmap.map((item, index) => (
+              <label class={`development-roadmap-card development-roadmap-card--${item.accent}`}>
+                <input type="radio" name="feature" value={item.value} required />
+                <span class="development-roadmap-card__content">
+                  <span class="development-roadmap-card__meta">
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    <span>{item.marker}</span>
+                  </span>
+                  <strong>{item.title}</strong>
+                  <span class="development-roadmap-card__text">{item.text}</span>
+                  <span class="development-roadmap-card__choice" aria-hidden="true">
+                    <span></span> Выбрать
+                  </span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <div class="development-vote__footer">
+          <p>Один ответ с устройства. Пожертвование для голосования не требуется.</p>
+          <button class="development-button" type="submit">Проголосовать</button>
+        </div>
+        <p class="development-vote__status" role="status" aria-live="polite"></p>
+      </form>
     </section>
 
     <section class="development-feedback" aria-labelledby="feedback-title">
@@ -158,3 +195,67 @@ const roadmap = [
     </section>
   </main>
 </BaseLayout>
+
+<script>
+  const voteForm = document.querySelector<HTMLFormElement>('.development-vote');
+  const voteStatus = voteForm?.querySelector<HTMLElement>('.development-vote__status');
+  const voteButton = voteForm?.querySelector<HTMLButtonElement>('button[type="submit"]');
+  const storageKey = 'melody-seed-roadmap-vote';
+
+  function showCompletedVote(value: string) {
+    if (!voteForm || !voteStatus || !voteButton) return;
+
+    const selected = voteForm.querySelector<HTMLInputElement>(`input[name="feature"][value="${value}"]`);
+    if (selected) selected.checked = true;
+
+    voteForm.querySelectorAll<HTMLInputElement>('input[name="feature"]').forEach((input) => {
+      input.disabled = true;
+    });
+    voteButton.hidden = true;
+    voteStatus.textContent = 'Спасибо! Ваш голос учтён.';
+    voteStatus.dataset.state = 'success';
+  }
+
+  try {
+    const savedVote = window.localStorage.getItem(storageKey);
+    if (savedVote) showCompletedVote(savedVote);
+  } catch {
+    // Голосование продолжит работать, даже если хранилище браузера недоступно.
+  }
+
+  voteForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!voteStatus || !voteButton) return;
+
+    const formData = new FormData(voteForm);
+    const selectedVote = formData.get('feature');
+    if (typeof selectedVote !== 'string') return;
+
+    voteButton.disabled = true;
+    voteButton.textContent = 'Отправляем…';
+    voteStatus.textContent = '';
+    delete voteStatus.dataset.state;
+
+    try {
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData as unknown as Record<string, string>).toString()
+      });
+
+      if (!response.ok) throw new Error(`Form submission failed: ${response.status}`);
+
+      try {
+        window.localStorage.setItem(storageKey, selectedVote);
+      } catch {
+        // Успешная отправка важнее локальной отметки о голосовании.
+      }
+      showCompletedVote(selectedVote);
+    } catch {
+      voteButton.disabled = false;
+      voteButton.textContent = 'Проголосовать';
+      voteStatus.textContent = 'Не удалось отправить голос. Проверьте соединение и попробуйте ещё раз.';
+      voteStatus.dataset.state = 'error';
+    }
+  });
+</script>

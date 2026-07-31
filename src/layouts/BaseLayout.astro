@@ -54,23 +54,161 @@ function navClass(href: string) {
             <a href="/generator" class={navClass('/generator')}>Генератор</a>
             <a href="/instructions" class={navClass('/instructions')}>Инструкция</a>
             <a href="/suno-tips" class={navClass('/suno-tips')}>Советы для SUNO</a>
+            <a href="/development" class={navClass('/development')}>Развитие проекта</a>
           </nav>
         </div>
-        <a href="/development" class={`site-header__support ${navClass('/development')}`}>
-          <span class="site-header__support-dot" aria-hidden="true"></span>
-          Развитие проекта
-        </a>
+        <button
+          class="site-header__services"
+          type="button"
+          aria-haspopup="dialog"
+          aria-controls="contact-drawer"
+          aria-expanded="false"
+          data-contact-open
+        >
+          Разработка web-приложений
+        </button>
       </div>
     </header>
 
     <slot />
+
+    <div class="contact-drawer" id="contact-drawer" hidden data-contact-drawer>
+      <div class="contact-drawer__backdrop" data-contact-close></div>
+      <aside
+        class="contact-drawer__panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="contact-drawer-title"
+      >
+        <button class="contact-drawer__close" type="button" aria-label="Закрыть" data-contact-close>
+          <span aria-hidden="true">×</span>
+        </button>
+
+        <div class="contact-drawer__content">
+          <p class="contact-drawer__eyebrow"><span aria-hidden="true"></span> Разработка на заказ</p>
+          <h2 id="contact-drawer-title">Делаю web-приложения под ключ</h2>
+          <p class="contact-drawer__lead">
+            Продумываю структуру, интерфейс и пользовательские сценарии, собираю и запускаю
+            рабочий продукт. Этот сайт — один из примеров моей работы.
+          </p>
+
+          <div class="contact-drawer__contacts" aria-label="Контакты Михаила">
+            <a href="https://t.me/trip_to_lila" target="_blank" rel="noopener noreferrer">
+              <span>Telegram</span>
+              <strong>@trip_to_lila</strong>
+              <i aria-hidden="true">↗</i>
+            </a>
+            <a href="https://wa.me/79201088141" target="_blank" rel="noopener noreferrer">
+              <span>WhatsApp</span>
+              <strong>+7 920 108-81-41</strong>
+              <i aria-hidden="true">↗</i>
+            </a>
+            <a href="https://vk.ru/mr.madhu" target="_blank" rel="noopener noreferrer">
+              <span>ВКонтакте</span>
+              <strong>Личная страница</strong>
+              <i aria-hidden="true">↗</i>
+            </a>
+            <a href="https://vk.ru/mr_madhu" target="_blank" rel="noopener noreferrer">
+              <span>Сообщество ВКонтакте</span>
+              <strong>Группа mr_Madhu</strong>
+              <i aria-hidden="true">↗</i>
+            </a>
+            <a href="https://github.com/Mike108108" target="_blank" rel="noopener noreferrer">
+              <span>GitHub</span>
+              <strong>Посмотреть проекты</strong>
+              <i aria-hidden="true">↗</i>
+            </a>
+          </div>
+        </div>
+
+        <p class="contact-drawer__note">Можно прийти с идеей, прототипом или уже работающим проектом.</p>
+      </aside>
+    </div>
   </body>
 </html>
 
 <style>
-  .site-header__nav a.is-active,
-  .site-header__support.is-active {
+  .site-header__nav a.is-active {
     color: #fff;
     border-color: rgba(255, 116, 72, 0.48);
   }
 </style>
+
+<script>
+  const siteNavigation = document.querySelector<HTMLElement>('.site-header__nav');
+  const activeNavigationItem = siteNavigation?.querySelector<HTMLElement>('a.is-active');
+
+  window.requestAnimationFrame(() => {
+    if (!siteNavigation || !activeNavigationItem) return;
+
+    const navigationRect = siteNavigation.getBoundingClientRect();
+    const activeItemRect = activeNavigationItem.getBoundingClientRect();
+    if (activeItemRect.right > navigationRect.right) {
+      siteNavigation.scrollLeft += activeItemRect.right - navigationRect.right + 8;
+    } else if (activeItemRect.left < navigationRect.left) {
+      siteNavigation.scrollLeft -= navigationRect.left - activeItemRect.left + 8;
+    }
+  });
+
+  const contactDrawer = document.querySelector<HTMLElement>('[data-contact-drawer]');
+  const contactOpen = document.querySelector<HTMLButtonElement>('[data-contact-open]');
+  const contactCloseControls = contactDrawer?.querySelectorAll<HTMLElement>('[data-contact-close]');
+  const contactPanel = contactDrawer?.querySelector<HTMLElement>('.contact-drawer__panel');
+  let contactReturnFocus: HTMLElement | null = null;
+  let contactCloseTimer: number | undefined;
+
+  function openContactDrawer() {
+    if (!contactDrawer || !contactOpen || !contactPanel) return;
+
+    window.clearTimeout(contactCloseTimer);
+    contactReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : contactOpen;
+    contactDrawer.hidden = false;
+    document.body.classList.add('has-contact-drawer');
+    contactOpen.setAttribute('aria-expanded', 'true');
+    window.requestAnimationFrame(() => {
+      contactDrawer.classList.add('is-open');
+      contactDrawer.querySelector<HTMLButtonElement>('.contact-drawer__close')?.focus();
+    });
+  }
+
+  function closeContactDrawer() {
+    if (!contactDrawer || !contactOpen || contactDrawer.hidden) return;
+
+    contactDrawer.classList.remove('is-open');
+    document.body.classList.remove('has-contact-drawer');
+    contactOpen.setAttribute('aria-expanded', 'false');
+    contactCloseTimer = window.setTimeout(() => {
+      contactDrawer.hidden = true;
+      contactReturnFocus?.focus();
+    }, 220);
+  }
+
+  contactOpen?.addEventListener('click', openContactDrawer);
+  contactCloseControls?.forEach((control) => control.addEventListener('click', closeContactDrawer));
+
+  document.addEventListener('keydown', (event) => {
+    if (!contactDrawer || contactDrawer.hidden || !contactPanel) return;
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeContactDrawer();
+      return;
+    }
+
+    if (event.key !== 'Tab') return;
+    const focusable = Array.from(
+      contactPanel.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')
+    );
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+</script>
