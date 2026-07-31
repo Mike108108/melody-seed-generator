@@ -3,29 +3,79 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout
-  title="Советы для SUNO"
-  description="Темы и практические заметки о SUNO, AI music workflow, melody seeds, WAV/MIDI и выпуске ИИ-музыки."
+  title="Советы для SUNO"
+  description="Темы и практические заметки о SUNO, AI music workflow, melody seeds, WAV/MIDI и выпуске ИИ-музыки."
 >
   <main class="page-content tips-page">
-    <header class="tips-header">
-      <h1>Советы для SUNO</h1>
-      <p class="tips-lead">
-        Темы и практические заметки о SUNO, Udio, melody seeds и выпуске ИИ-музыки.
-      </p>
+    <header class="tips-hero">
+      <div class="tips-hero__copy">
+        <p class="tips-eyebrow"><span aria-hidden="true"></span> Практика AI-музыки</p>
+        <h1>Советы для SUNO</h1>
+        <p>
+          Спокойные и подробные разборы о том, что происходит после генерации: как развить
+          музыкальную идею, подготовить трек и довести его до публикации.
+        </p>
+      </div>
+
+      <div class="tips-hero__signal" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
     </header>
 
-    <div class="tips-grid">
-      <a class="tips-card tips-card--link" href="/suno-tips/suno-682-release">
-        <p class="tips-card__meta">Дистрибуция</p>
-        <h2 class="tips-card__title">Куда выложить трек из SUNO: опыт релизов через 682</h2>
-        <p class="tips-card__description">
-          Личный опыт: самостоятельный трек, небольшой альбом, муторная форма релиза и рабочий
-          способ проходить её через скриншоты и GPT.
-        </p>
-        <span class="tips-card__status tips-card__status--ready">Готово</span>
-      </a>
-    </div>
+    <section class="tips-feed" aria-labelledby="tips-feed-title">
+      <div class="tips-feed__heading">
+        <p>Материалы</p>
+        <h2 id="tips-feed-title">От готового трека до релиза</h2>
+      </div>
 
-    <p class="tips-note">Новые темы будут добавляться постепенно.</p>
+      <a class="tips-feature" href="/suno-tips/suno-682-release">
+        <div class="tips-feature__visual" aria-hidden="true">
+          <div class="tips-feature__route">
+            <span>WAV</span>
+            <i></i>
+            <span>682</span>
+            <i></i>
+            <span>RELEASE</span>
+          </div>
+          <div class="tips-feature__cover">
+            <span>AI MUSIC</span>
+            <strong>→</strong>
+            <span>RELEASE</span>
+          </div>
+        </div>
+
+        <div class="tips-feature__content">
+          <div class="tips-feature__meta">
+            <span>Дистрибуция</span>
+            <span>Личный опыт</span>
+          </div>
+          <h3>Куда выложить трек из SUNO: опыт релизов через 682</h3>
+          <p>
+            Как выбрать способ публикации, подготовить материалы и разобраться с формой
+            дистрибьютора с помощью скриншотов и GPT.
+          </p>
+          <span class="tips-feature__action">
+            Читать разбор
+            <span aria-hidden="true">↗</span>
+          </span>
+        </div>
+      </a>
+    </section>
+
+    <footer class="tips-coming">
+      <p>Раздел будет расти</p>
+      <span>Следующие материалы — о подготовке seed, экспорте и работе с AI-музыкальными сервисами.</span>
+    </footer>
   </main>
 </BaseLayout>
