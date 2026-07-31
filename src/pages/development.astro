@@ -61,22 +61,22 @@ const roadmap = [
           decoding="async"
           fetchpriority="high"
         />
+        <p class="development-hero__portrait-caption">
+          <strong>Михаил Андреев</strong>
+          <span>Создатель проекта</span>
+        </p>
       </div>
     </section>
 
-    <section class="development-principle" aria-labelledby="principle-title">
-      <div class="development-heading-copy">
-        <p class="development-section-label">Принцип продукта</p>
-        <h2 id="principle-title">Мы не строим ещё одну DAW</h2>
-        <p>
-          Новая функция появляется только тогда, когда помогает придумать мелодию, даёт больше
-          контроля над её характером или сокращает путь от идеи до трека в SUNO. Сведение,
-          мастеринг и многодорожечный монтаж остаются за границами проекта.
+    <section class="development-principle" aria-label="Принцип продукта">
+      <blockquote>
+        <p class="development-principle__quote">Мы не строим ещё одну DAW</p>
+        <p class="development-principle__note">
+          В проекте появляются только функции, которые помогают придумать мелодию, точнее управлять
+          её характером и быстрее перейти от идеи к треку в SUNO. Сведение, мастеринг
+          и многодорожечный монтаж остаются за его границами.
         </p>
-      </div>
-      <div class="development-sequence-graphic development-sequence-graphic--principle" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span><span></span>
-      </div>
+      </blockquote>
     </section>
 
     <section id="support" class="development-support" aria-labelledby="support-title">
@@ -100,9 +100,6 @@ const roadmap = [
           Это добровольная поддержка развития проекта. Она не покупает доступ и не открывает
           платных функций.
         </p>
-        <a class="development-button" href={supportUrl} target="_blank" rel="noopener noreferrer">
-          Перейти к сбору <span aria-hidden="true">↗</span>
-        </a>
       </div>
 
       <div class="development-payment">
