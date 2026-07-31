@@ -9,6 +9,10 @@ interface Props {
   robots?: string;
   pageType?: 'website' | 'article';
   canonicalPath?: string;
+  socialTitle?: string;
+  socialDescription?: string;
+  socialImagePath?: string;
+  socialImageAlt?: string;
 }
 
 const {
@@ -16,7 +20,11 @@ const {
   description = 'Процедурный генератор MIDI-мелодий для AI-музыкальных workflow. Без сэмплов, без аудиопетель, без copyrighted training data.',
   robots = 'index,follow',
   pageType = 'website',
-  canonicalPath
+  canonicalPath,
+  socialTitle,
+  socialDescription,
+  socialImagePath = '/og.png',
+  socialImageAlt = 'Melody Seed Generator: мелодия, аккорды и бас на piano roll'
 } = Astro.props;
 
 const pageTitle =
@@ -24,7 +32,9 @@ const pageTitle =
 
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 const canonicalUrl = new URL(canonicalPath ?? Astro.url.pathname, Astro.site ?? Astro.url);
-const socialImageUrl = new URL('/og.png', Astro.site ?? Astro.url);
+const socialCardTitle = socialTitle ?? pageTitle;
+const socialCardDescription = socialDescription ?? description;
+const socialImageUrl = new URL(socialImagePath, Astro.site ?? Astro.url);
 const currentYear = new Date().getFullYear();
 const isGeneratorPage = currentPath === '/' || currentPath === '/generator';
 
@@ -50,18 +60,20 @@ function navClass(href: string) {
     <meta property="og:type" content={pageType} />
     <meta property="og:locale" content="ru_RU" />
     <meta property="og:site_name" content="Melody Seed Generator" />
-    <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={description} />
+    <meta property="og:title" content={socialCardTitle} />
+    <meta property="og:description" content={socialCardDescription} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content={socialImageUrl} />
+    <meta property="og:image:secure_url" content={socialImageUrl} />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Melody Seed Generator: мелодия, аккорды и бас на piano roll" />
+    <meta property="og:image:alt" content={socialImageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={pageTitle} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:title" content={socialCardTitle} />
+    <meta name="twitter:description" content={socialCardDescription} />
     <meta name="twitter:image" content={socialImageUrl} />
-    <meta name="twitter:image:alt" content="Melody Seed Generator: мелодия, аккорды и бас на piano roll" />
+    <meta name="twitter:image:alt" content={socialImageAlt} />
     <title>{pageTitle}</title>
   </head>
   <body>
