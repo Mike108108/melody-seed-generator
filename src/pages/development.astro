@@ -1,30 +1,160 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import '../development-page.css';
+
+const supportUrl = 'https://pay.cloudtips.ru/p/9fb52846';
+
+const roadmap = [
+  {
+    marker: 'Практическая польза',
+    title: 'Развитие мелодической идеи',
+    text: 'Продолжение, вариация, кульминация и завершение исходного seed. Отдельные связанные идеи для куплета, припева, бриджа и хука.',
+    accent: 'warm'
+  },
+  {
+    marker: 'Уникальное направление',
+    title: 'Генератор индийских раг',
+    text: 'Мелодия по правилам выбранной раги: допустимые ноты, характерные движения и опорные ступени — вместе с описанием для SUNO.',
+    accent: 'mint'
+  },
+  {
+    marker: 'Быстрее до результата',
+    title: 'Seed → SUNO',
+    text: 'Короткое музыкальное описание на основе seed: лад, темп, диапазон, характер движения и драматургия — готовые ориентиры для генерации трека.',
+    accent: 'neutral'
+  }
+];
 ---
 
 <BaseLayout
   title="Развитие проекта"
-  description="Roadmap, fundraising и направление развития Melody Seed Generator."
+  description="Поддержка и открытый план развития Melody Seed Generator — инструмента для создания мелодических идей и генерации треков в SUNO."
 >
-  <main class="page-content">
-    <h1>Развитие проекта</h1>
-    <p class="lead">
-      Melody Seed Generator развивается как open beta-core инструмент для музыкантов и продюсеров,
-      работающих с AI-музыкой.
-    </p>
-    <section>
-      <h2>Направления</h2>
-      <ul>
-        <li>Улучшение генератора seed, chord/bass layers и export workflow.</li>
-        <li>Контент и инструкции для SUNO и других AI-сервисов.</li>
-        <li>Сообщество, обратная связь и прозрачный roadmap.</li>
-      </ul>
+  <main class="development-page">
+    <section class="development-hero">
+      <div class="development-hero__copy">
+        <p class="development-eyebrow"><span aria-hidden="true"></span> Открытая разработка</p>
+        <h1>Помогите проекту расти</h1>
+        <p class="development-hero__lead">
+          Melody Seed Generator помогает быстро получить управляемую музыкальную идею и перейти
+          к генерации трека в SUNO. Поддержка пользователей позволит проверить, нужен ли проект
+          дальше, и выбрать действительно полезные функции.
+        </p>
+        <div class="development-actions">
+          <a class="development-button" href={supportUrl} target="_blank" rel="noopener noreferrer">
+            Поддержать проект <span aria-hidden="true">↗</span>
+          </a>
+          <a class="development-text-link" href="#roadmap">Посмотреть направления</a>
+        </div>
+      </div>
+      <div class="development-hero__signal" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
     </section>
-    <section>
-      <p>
-        Подробности roadmap, fundraising и community-каналы будут опубликованы здесь на следующих
-        этапах.
-      </p>
+
+    <section class="development-principle" aria-labelledby="principle-title">
+      <p>Принцип продукта</p>
+      <div>
+        <h2 id="principle-title">Мы не строим ещё одну DAW</h2>
+        <p>
+          Новая функция появляется только тогда, когда помогает придумать мелодию, даёт больше
+          контроля над её характером или сокращает путь от идеи до трека в SUNO. Сведение,
+          мастеринг и многодорожечный монтаж остаются за границами проекта.
+        </p>
+      </div>
+    </section>
+
+    <section id="support" class="development-support" aria-labelledby="support-title">
+      <div class="development-support__copy">
+        <p class="development-section-label">Поддержать разработку</p>
+        <h2 id="support-title">Сбор на следующий этап проекта</h2>
+        <p>
+          Текущая версия генератора остаётся доступной. Сбор поможет выделить время и ресурсы
+          на следующий рабочий прототип, проверить его вместе с пользователями и довести до
+          понятного инструмента для SUNO.
+        </p>
+
+        <div class="development-spend-list" aria-label="На что пойдёт поддержка">
+          <div><span>01</span><p>Исследование и проектирование новых мелодических режимов</p></div>
+          <div><span>02</span><p>Разработка, тестирование и адаптация под разные экраны</p></div>
+          <div><span>03</span><p>Проверка музыкальных правил и консультации специалистов</p></div>
+          <div><span>04</span><p>Хостинг, домен и техническое сопровождение проекта</p></div>
+        </div>
+
+        <p class="development-support__note">
+          Это добровольная поддержка развития проекта. Она не покупает доступ и не открывает
+          платных функций.
+        </p>
+        <a class="development-button" href={supportUrl} target="_blank" rel="noopener noreferrer">
+          Перейти к сбору <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+
+      <div class="development-payment">
+        <div class="development-payment__heading">
+          <div>
+            <p>CloudTips</p>
+            <h3>Цель и текущий прогресс</h3>
+          </div>
+          <span>Обновляется автоматически</span>
+        </div>
+        <iframe
+          src={supportUrl}
+          title="Сбор на развитие Melody Seed Generator в CloudTips"
+          loading="eager"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="payment"
+        ></iframe>
+        <div class="development-payment__mobile">
+          <p>Цель, собранная сумма и форма поддержки откроются на защищённой странице CloudTips.</p>
+          <a href={supportUrl} target="_blank" rel="noopener noreferrer">
+            Открыть сбор <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap" class="development-roadmap" aria-labelledby="roadmap-title">
+      <div class="development-section-heading">
+        <p class="development-section-label">Что делать дальше</p>
+        <div>
+          <h2 id="roadmap-title">Три направления развития</h2>
+          <p>
+            Это не обещанный список релизов. Сначала важно понять, какая задача приносит
+            пользователям больше пользы при работе с SUNO.
+          </p>
+        </div>
+      </div>
+
+      <div class="development-roadmap__grid">
+        {roadmap.map((item, index) => (
+          <article class={`development-roadmap-card development-roadmap-card--${item.accent}`}>
+            <div>
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <p>{item.marker}</p>
+            </div>
+            <h3>{item.title}</h3>
+            <p>{item.text}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="development-feedback" aria-labelledby="feedback-title">
+      <div>
+        <p class="development-section-label">Влиять можно без доната</p>
+        <h2 id="feedback-title">Расскажите, чего не хватает для работы с SUNO</h2>
+      </div>
+      <div>
+        <p>
+          Полезнее всего конкретный сценарий: что вы пытаетесь создать, где теряете контроль
+          над мелодией и какой результат хотели бы получить быстрее.
+        </p>
+        <a href="https://vk.ru/mr_madhu" target="_blank" rel="noopener noreferrer">
+          Написать в группу mr_Madhu <span aria-hidden="true">↗</span>
+        </a>
+      </div>
     </section>
   </main>
 </BaseLayout>
