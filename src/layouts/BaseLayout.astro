@@ -10,7 +10,7 @@ interface Props {
 
 const {
   title,
-  description = 'Процедурный генератор MIDI-мелодий для AI-музыкальных workflow. Без сэмплов, без аудиопетель, без copyrighted training data.'
+  description = 'Процедурный генератор MIDI-мелодий для AI-музыкальных workflow. Без сэмплов, без аудиопетель, без copyrighted training data.'
 } = Astro.props;
 
 const pageTitle =
@@ -53,7 +53,7 @@ function navClass(href: string) {
           <nav class="site-header__nav" aria-label="Main">
             <a href="/generator" class={navClass('/generator')}>Генератор</a>
             <a href="/instructions" class={navClass('/instructions')}>Инструкция</a>
-            <a href="/suno-tips" class={navClass('/suno-tips')}>Советы для SUNO</a>
+            <a href="/suno-tips" class={navClass('/suno-tips')}>Советы для SUNO</a>
           </nav>
         </div>
         <a href="/development" class={`site-header__support ${navClass('/development')}`}>
