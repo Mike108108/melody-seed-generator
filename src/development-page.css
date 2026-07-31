@@ -30,6 +30,7 @@
   font-weight: 680;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .development-eyebrow span {
@@ -153,19 +154,11 @@
 
 .development-principle {
   display: grid;
-  grid-template-columns: 9rem minmax(0, 1fr);
-  gap: clamp(2rem, 7vw, 7rem);
+  grid-template-columns: minmax(0, 1.15fr) minmax(16rem, 0.85fr);
+  gap: clamp(3rem, 8vw, 8rem);
+  align-items: center;
   padding: clamp(4rem, 8vw, 7rem) 0;
   border-bottom: 1px solid rgba(217, 226, 239, 0.12);
-}
-
-.development-principle > p {
-  margin: 0;
-  color: rgba(255, 145, 100, 0.68);
-  font-size: 0.72rem;
-  font-weight: 680;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
 }
 
 .development-principle h2,
@@ -181,7 +174,11 @@
   text-wrap: balance;
 }
 
-.development-principle div > p {
+.development-heading-copy h2 {
+  margin-top: 0.8rem;
+}
+
+.development-principle .development-heading-copy > p:last-child {
   max-width: 49rem;
   margin: 1.5rem 0 0;
   color: rgba(238, 242, 247, 0.65);
@@ -386,17 +383,84 @@
 
 .development-section-heading {
   display: grid;
-  grid-template-columns: 9rem minmax(0, 1fr);
-  gap: clamp(2rem, 7vw, 7rem);
+  grid-template-columns: minmax(0, 1.15fr) minmax(16rem, 0.85fr);
+  gap: clamp(3rem, 8vw, 8rem);
+  align-items: center;
 }
 
-.development-section-heading > div > p {
+.development-section-heading .development-heading-copy > p:last-child {
   max-width: 44rem;
   margin: 1.4rem 0 0;
   color: rgba(238, 242, 247, 0.6);
   font-size: 1rem;
   line-height: 1.72;
 }
+
+.development-sequence-graphic {
+  position: relative;
+  width: min(100%, 28rem);
+  height: 10rem;
+  justify-self: end;
+  overflow: hidden;
+  border-top: 1px solid rgba(217, 226, 239, 0.1);
+  border-bottom: 1px solid rgba(217, 226, 239, 0.08);
+  background:
+    repeating-linear-gradient(90deg, transparent 0, transparent calc(16.66% - 1px), rgba(217, 226, 239, 0.06) calc(16.66% - 1px), rgba(217, 226, 239, 0.06) 16.66%),
+    linear-gradient(90deg, rgba(255, 116, 72, 0.035), transparent 48%, rgba(79, 226, 207, 0.025));
+}
+
+.development-sequence-graphic::before {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 116, 72, 0.12), rgba(217, 226, 239, 0.16), rgba(79, 226, 207, 0.1));
+  content: '';
+}
+
+.development-sequence-graphic span {
+  position: absolute;
+  bottom: 50%;
+  width: 1px;
+  height: var(--stem-height);
+  background: linear-gradient(180deg, var(--node-color), rgba(217, 226, 239, 0.08));
+}
+
+.development-sequence-graphic span::before {
+  position: absolute;
+  top: -0.28rem;
+  left: -0.28rem;
+  width: 0.58rem;
+  height: 0.58rem;
+  border: 1px solid color-mix(in srgb, var(--node-color) 76%, transparent);
+  border-radius: 50%;
+  background: #090d13;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--node-color) 38%, transparent);
+  content: '';
+}
+
+.development-sequence-graphic span:nth-child(1) { left: 8%; --stem-height: 1.7rem; --node-color: #ff7448; }
+.development-sequence-graphic span:nth-child(2) { left: 25%; --stem-height: 3.6rem; --node-color: #ff9164; }
+.development-sequence-graphic span:nth-child(3) { left: 42%; --stem-height: 2.5rem; --node-color: #d9e2ef; }
+.development-sequence-graphic span:nth-child(4) { left: 59%; --stem-height: 4.3rem; --node-color: #4fe2cf; }
+.development-sequence-graphic span:nth-child(5) { left: 76%; --stem-height: 2.1rem; --node-color: #d9e2ef; }
+.development-sequence-graphic span:nth-child(6) { left: 93%; --stem-height: 3.2rem; --node-color: #ff7448; }
+
+.development-sequence-graphic--principle span:nth-child(2),
+.development-sequence-graphic--principle span:nth-child(5),
+.development-sequence-graphic--roadmap span:nth-child(3) {
+  bottom: auto;
+  top: 50%;
+  transform: rotate(180deg);
+}
+
+.development-sequence-graphic--roadmap span:nth-child(1),
+.development-sequence-graphic--roadmap span:nth-child(2) { --node-color: #ff7448; }
+.development-sequence-graphic--roadmap span:nth-child(3),
+.development-sequence-graphic--roadmap span:nth-child(4) { --node-color: #4fe2cf; }
+.development-sequence-graphic--roadmap span:nth-child(5),
+.development-sequence-graphic--roadmap span:nth-child(6) { --node-color: #d9e2ef; }
 
 .development-roadmap__grid {
   display: grid;
@@ -711,6 +775,10 @@
   .development-feedback {
     grid-template-columns: 1fr;
     gap: 1.3rem;
+  }
+
+  .development-sequence-graphic {
+    display: none;
   }
 
   .development-principle h2,
